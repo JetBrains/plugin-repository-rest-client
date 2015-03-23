@@ -1,14 +1,14 @@
-package org.jetbrains.intellij.pluginRepository.uploader
+package org.jetbrains.intellij.pluginRepository
 
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 import java.io.File
 import com.sampullara.cli.Argument
 import com.sampullara.cli.Args
+import kotlin.platform.platformStatic
 
 /**
  * @author nik
  */
-private class CommandLineOptions {
+public class Uploader {
     Argument(description = "Plugins repository host")
     var host = "http://plugins.jetbrains.com"
 
@@ -26,12 +26,15 @@ private class CommandLineOptions {
 
     Argument("file", required = true, description = "Path to plugin zip/jar file")
     var pluginPath: String? = null
-}
 
-fun main(args: Array<String>) {
-    val options = CommandLineOptions()
-    Args.parseOrExit(options, args)
+    class object {
+        platformStatic
+        fun main(args: Array<String>) {
+            val options = Uploader()
+            Args.parseOrExit(options, args)
 
-    val pluginRepository = PluginRepositoryInstance(options.host, options.username!!, options.password!!)
-    pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), options.channel)
+            val pluginRepository = PluginRepositoryInstance(options.host, options.username!!, options.password!!)
+            pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), options.channel)
+        }
+    }
 }
