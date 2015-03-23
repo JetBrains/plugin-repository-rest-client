@@ -17,6 +17,8 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = '1.6'
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:0.10.195"
     compile "commons-codec:commons-codec:1.10"
