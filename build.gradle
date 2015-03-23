@@ -21,6 +21,16 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:0.10.195"
     compile "commons-codec:commons-codec:1.10"
     compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.github.spullara.cli-parser:cli-parser:1.1.2'
+}
+
+apply plugin: 'application'
+mainClassName = 'org.jetbrains.intellij.pluginRepository.uploader.UploaderPackage'
+run {
+    systemProperties System.getProperties()
+    if (project.hasProperty("args")) {
+        args splitArguments(project.args)
+    }
 }
 
 group = 'org.jetbrains.intellij'
@@ -59,3 +69,14 @@ if (hasProperty("bintrayUser")) {
         }
     }
 }
+
+// split 'args' by spaces honoring quotes
+def String[] splitArguments(String args) {
+    def matcher = args =~ /(?:([^"]\S*)|"([^"]*)")\s*/
+    def result = new ArrayList<String>()
+    while (matcher.find()) {
+        result.add(matcher.group(1) ?: matcher.group(2))
+    }
+    return result.toArray(new String[result.size()])
+}
+
