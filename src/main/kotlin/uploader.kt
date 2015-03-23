@@ -34,7 +34,8 @@ public class Uploader {
             Args.parseOrExit(options, args)
 
             val pluginRepository = PluginRepositoryInstance(options.host, options.username!!, options.password!!)
-            pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), options.channel)
+            val channel = if (options.channel.isNotEmpty()) options.channel else null
+            pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), channel)
         }
     }
 }
