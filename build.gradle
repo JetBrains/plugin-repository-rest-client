@@ -28,7 +28,6 @@ task fatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Uploader'
     }
-    baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
