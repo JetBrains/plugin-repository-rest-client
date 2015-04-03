@@ -25,7 +25,6 @@ public class PluginRepositoryInstance(val siteUrl: String, private val username:
                     connection.setInstanceFollowRedirects(false)
                     val timeout = 10 * 60 * 1000
                     connection.setReadTimeout(timeout)
-                    logLine("Read timeout set to ${timeout}ms")
                     return connection
                 }
             }})
