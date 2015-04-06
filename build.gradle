@@ -1,9 +1,11 @@
 buildscript {
+    ext.kotlin_version = '0.11.91.1'
+
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 plugins {
@@ -20,7 +22,7 @@ repositories {
 sourceCompatibility = '1.6'
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.github.spullara.cli-parser:cli-parser:1.1.2'
 }
