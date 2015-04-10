@@ -19,7 +19,7 @@ import retrofit.RetrofitError
 public class PluginRepositoryInstance(val siteUrl: String, private val username: String, private val password: String) {
     private val service = RestAdapter.Builder()
             .setEndpoint(siteUrl)
-            .setClient({() -> object: UrlConnectionClient() {
+            .setClient({ -> object: UrlConnectionClient() {
                 override fun openConnection(request: Request?): HttpURLConnection {
                     val connection = super.openConnection(request)
                     connection.setInstanceFollowRedirects(false)
@@ -40,7 +40,7 @@ public class PluginRepositoryInstance(val siteUrl: String, private val username:
         }
         catch(e: RetrofitError) {
             if (e.getResponse()?.getStatus() == 302) {
-                logLine("Uploaded sucessfully")
+                logLine("Uploaded successfully")
                 return
             }
             throw e;
