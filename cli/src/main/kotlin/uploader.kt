@@ -27,7 +27,7 @@ public class Uploader {
     Argument("file", required = true, description = "Path to plugin zip/jar file")
     var pluginPath: String? = null
 
-    class object {
+    companion object {
         platformStatic
         fun main(args: Array<String>) {
             val options = Uploader()

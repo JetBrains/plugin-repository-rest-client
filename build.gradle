@@ -1,77 +1,88 @@
 buildscript {
-    ext.kotlin_version = '0.11.91.1'
+  ext.kotlin_version = '0.11.91.1'
 
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
 }
 plugins {
-    id "com.jfrog.bintray" version "1.0"
+  id "com.jfrog.bintray" version "1.0"
 }
 
-apply plugin: 'java'
-apply plugin: 'kotlin'
+allprojects {
+  apply plugin: 'java'
+}
 
-repositories {
+subprojects {
+  apply plugin: 'kotlin'
+
+  repositories {
     mavenCentral()
-}
+  }
 
-sourceCompatibility = '1.6'
-
-dependencies {
+  sourceCompatibility = '1.6'
+  dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'com.github.spullara.cli-parser:cli-parser:1.1.2'
+    compile 'org.slf4j:slf4j-api:1.7.12'
+  }
 }
 
 task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Uploader'
-    }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  subprojects {
+    dependsOn it.classes
+  }
+  manifest {
+    attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Uploader'
+  }
+  subprojects { project ->
+    from { project.configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+  }
 }
 
 group = 'org.jetbrains.intellij'
 if (hasProperty("buildNumber")) {
-    version = "0.1.$buildNumber"
+  version = "0.1.$buildNumber"
 }
 apply plugin: 'maven-publish'
+
 task sourceJar(type: Jar) {
-    from sourceSets.main.kotlin
+  subprojects {
+    from it.sourceSets.main.kotlin
+  }
 }
 artifacts {
-    archives sourceJar, fatJar
+  archives sourceJar, fatJar
 }
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourceJar {
-                classifier "sources"
-            }
-            artifact fatJar {
-                classifier "all"
-            }
-        }
+  publications {
+    mavenJava(MavenPublication) {
+      from project(':rest').components.java
+      artifact sourceJar {
+        classifier "sources"
+      }
+      artifact fatJar {
+        classifier "all"
+      }
     }
+  }
 }
 if (hasProperty("bintrayUser")) {
-    bintray {
-        user = bintrayUser
-        key = bintrayApiKey
-        publish = true
-        publications = ['mavenJava']
-        pkg {
-            userOrg = "jetbrains"
-            repo = "plugin-repository-rest-client"
-            name = "plugin-repository-rest-client"
-            version {
-                name = "0.1.$buildNumber"
-            }
-        }
+  bintray {
+    user = bintrayUser
+    key = bintrayApiKey
+    publish = true
+    publications = ['mavenJava']
+    pkg {
+      userOrg = "jetbrains"
+      repo = "plugin-repository-rest-client"
+      name = "plugin-repository-rest-client"
+      version {
+        name = "0.1.$buildNumber"
+      }
     }
+  }
 }

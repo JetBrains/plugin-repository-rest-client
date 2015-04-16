@@ -1,17 +1,18 @@
 package org.jetbrains.intellij.pluginRepository
 
+import org.slf4j.LoggerFactory
 import retrofit.RestAdapter
-import java.io.File
-import retrofit.http.POST
-import retrofit.mime.TypedString
+import retrofit.RetrofitError
+import retrofit.client.Request
 import retrofit.client.Response
+import retrofit.client.UrlConnectionClient
 import retrofit.http.Multipart
+import retrofit.http.POST
 import retrofit.http.Part
 import retrofit.mime.TypedFile
-import retrofit.client.UrlConnectionClient
-import retrofit.client.Request
+import retrofit.mime.TypedString
+import java.io.File
 import java.net.HttpURLConnection
-import retrofit.RetrofitError
 
 /**
  * @author nik
@@ -33,14 +34,14 @@ public class PluginRepositoryInstance(val siteUrl: String, private val username:
 
     fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
         try {
-            logLine("Uploading plugin $pluginId from ${file.getAbsolutePath()} to $siteUrl")
+            LOG.info("Uploading plugin $pluginId from ${file.getAbsolutePath()} to $siteUrl")
             service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
                     channel?.let { TypedString(it) },
                     TypedFile("application/octet-stream", file))
         }
         catch(e: RetrofitError) {
             if (e.getResponse()?.getStatus() == 302) {
-                logLine("Uploaded successfully")
+                LOG.info("Uploaded successfully")
                 return
             }
             throw e;
@@ -48,9 +49,7 @@ public class PluginRepositoryInstance(val siteUrl: String, private val username:
     }
 }
 
-private fun logLine(s: String) {
-    println(s)
-}
+private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 private trait PluginRepositoryService {
     Multipart

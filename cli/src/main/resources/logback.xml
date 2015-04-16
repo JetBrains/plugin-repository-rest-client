@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="log.pattern"
+            value="%d{&quot;yyyy-MM-dd'T'HH:mm:ss,SSS&quot;} [%thread] %-5level %logger{36} - %msg%n"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <appender name="FILE-DEBUG" class="ch.qos.logback.core.FileAppender">
+    <file>logs/plugin-repository/debug.log</file>
+    <append>false</append>
+
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
+    </filter>
+
+    <encoder>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE-INFO" class="ch.qos.logback.core.FileAppender">
+    <file>logs/plugin-repository/info.log</file>
+    <append>false</append>
+
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+
+    <encoder>
+      <pattern>${log.pattern}</pattern>
+    </encoder>
+  </appender>
+
+  <root>
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE-DEBUG"/>
+    <appender-ref ref="FILE-INFO"/>
+  </root>
+
+  <logger name="org.apache.http.wire" level="ERROR"/>
+
+</configuration>
