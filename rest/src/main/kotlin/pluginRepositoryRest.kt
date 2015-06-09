@@ -51,7 +51,7 @@ public class PluginRepositoryInstance(val siteUrl: String, private val username:
 
 private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
 
-private trait PluginRepositoryService {
+private interface PluginRepositoryService {
     Multipart
     POST("/plugin/uploadPlugin")
     fun upload(Part("userName") username: TypedString, Part("password") password: TypedString,
