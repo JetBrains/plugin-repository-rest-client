@@ -8,22 +8,22 @@ import com.sampullara.cli.Args
  * @author nik
  */
 public class Uploader {
-    @Argument(description = "Plugins repository host")
+    @set:Argument(description = "Plugins repository host")
     var host = "http://plugins.jetbrains.com"
 
-    @Argument(description = "Plugin channel")
+    @set:Argument(description = "Plugin channel")
     var channel: String? = null
 
-    @Argument(required = true)
+    @set:Argument(required = true)
     var username: String? = null
 
-    @Argument(required = true)
+    @set:Argument(required = true)
     var password: String? = null
 
-    @Argument("plugin", required = true, description = "Plugin ID in the plugins repository")
+    @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository")
     var pluginId: Int? = null
 
-    @Argument("file", required = true, description = "Path to plugin zip/jar file")
+    @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
     var pluginPath: String? = null
 
     companion object {
