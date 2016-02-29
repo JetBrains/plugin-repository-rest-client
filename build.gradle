@@ -30,12 +30,12 @@ subprojects {
   }
 }
 
-task fatJar(type: Jar) {
+task fatJar(type: Jar, group: 'build') {
   subprojects {
     dependsOn it.classes
   }
   manifest {
-    attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Uploader'
+    attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Client'
   }
   subprojects { project ->
     from { project.configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -45,7 +45,7 @@ task fatJar(type: Jar) {
 
 group = 'org.jetbrains.intellij'
 if (hasProperty("buildNumber")) {
-  version = "0.1.$buildNumber"
+  version = "0.2.$buildNumber"
 }
 apply plugin: 'maven-publish'
 
@@ -81,7 +81,7 @@ if (hasProperty("bintrayUser")) {
       repo = "plugin-repository-rest-client"
       name = "plugin-repository-rest-client"
       version {
-        name = "0.1.$buildNumber"
+        name = "0.2.$buildNumber"
       }
     }
   }
