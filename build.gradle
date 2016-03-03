@@ -78,7 +78,7 @@ if (hasProperty("bintrayUser")) {
     publications = ['mavenJava']
     pkg {
       userOrg = "jetbrains"
-      repo = "plugin-repository-rest-client"
+      repo = "intellij-plugin-service"
       name = "plugin-repository-rest-client"
       version {
         name = "0.2.$buildNumber"
