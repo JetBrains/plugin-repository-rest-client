@@ -95,14 +95,11 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                         if (mimeType == "application/zip" || mimeType == "application/java-archive") {
                             var targetFile = File(targetPath)
                             if (targetFile.isDirectory) {
-                                val index = fileLocation.lastIndexOf('/')
-                                val fileName = if (index > 0) fileLocation.substring(index) else fileLocation
-                                targetFile = File(targetFile, fileName)
+                                targetFile = File(targetFile, fileLocation.substringAfterLast('/'))
                             }
                             if (!targetFile.createNewFile()) {
                                 throw RuntimeException("Cannot create ${targetFile.absolutePath}")
                             }
-
                             downloadResponse.body.`in`().copyTo(targetFile.outputStream())
                             LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
                             return targetFile
