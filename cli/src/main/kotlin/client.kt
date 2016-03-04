@@ -4,8 +4,6 @@ import com.sampullara.cli.Args
 import com.sampullara.cli.Argument
 import java.io.File
 
-const val DEFAULT_PLUGIN_REPO_HOST = "http://plugins.jetbrains.com"
-
 class Client {
     companion object {
         @JvmStatic
@@ -32,7 +30,7 @@ class Client {
             Args.parseOrExit(options, args)
 
             if (options.version.isNullOrBlank() && options.ideBuild.isNullOrBlank()) {
-                System.err.print("`version` or `ide` must be specified")
+                System.err.print("`version` or `ide-build` must be specified")
                 System.exit(1)
             }
 
@@ -55,12 +53,10 @@ class Client {
             pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), parseChannel(options.channel))
         }
 
-        private fun parseChannel(channel: String?): String? {
-            return if (!channel.isNullOrEmpty() && channel != "_default_") channel else null
-        }
+        private fun parseChannel(channel: String?) = if (!channel.isNullOrEmpty() && channel != "_default_") channel else null
     }
 
-    class UploadOptions {
+    class UploadOptions : BaseOptions() {
         @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository")
         var pluginId: Int? = null
 
@@ -72,31 +68,27 @@ class Client {
 
         @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
         var pluginPath: String? = null
-
-        @set:Argument(description = "Plugins repository host")
-        var host = DEFAULT_PLUGIN_REPO_HOST
-
-        @set:Argument(description = "Plugin channel")
-        var channel: String? = null
     }
 
-    class DownloadOptions {
+    class DownloadOptions : BaseOptions() {
         @set:Argument("plugin", required = true, description = "Plugin ID defined in plugin.xml")
         var pluginId: String? = null
-
-        @set:Argument(description = "Plugins repository host")
-        var host = DEFAULT_PLUGIN_REPO_HOST
 
         @set:Argument("version", description = "Plugin version to download")
         var version: String? = null
 
-        @set:Argument("ide", description = "IDE build number to download plugin compatible with")
+        @set:Argument("ide-build", description = "IDE build number with product code to download plugin compatible with (e.g. IC-145.184)")
         var ideBuild: String? = null
-
-        @set:Argument(description = "Plugin channel")
-        var channel: String? = null
 
         @set:Argument("to", description = "Target filepath")
         var destination: String = "."
+    }
+
+    open class BaseOptions {
+        @set:Argument(description = "Plugins repository host")
+        var host = "http://plugins.jetbrains.com"
+
+        @set:Argument(description = "Plugin channel")
+        var channel: String? = null
     }
 }
