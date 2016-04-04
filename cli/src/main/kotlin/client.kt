@@ -48,17 +48,21 @@ class Client {
         private fun upload(args: Array<String>) {
             val options = UploadOptions()
             Args.parseOrExit(options, args)
-
             val pluginRepository = PluginRepositoryInstance(options.host, options.username!!, options.password!!)
-            pluginRepository.uploadPlugin(options.pluginId!!, File(options.pluginPath!!), parseChannel(options.channel))
+            val pluginId = options.pluginId!!
+            if (pluginId.matches(Regex("\\d+"))) {
+                pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
+            } else {
+                pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel))
+            }
         }
 
         private fun parseChannel(channel: String?) = if (!channel.isNullOrEmpty() && channel != "_default_") channel else null
     }
 
     class UploadOptions : BaseOptions() {
-        @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository")
-        var pluginId: Int? = null
+        @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository or ID defined in plugin.xml")
+        var pluginId: String? = null
 
         @set:Argument(required = true)
         var username: String? = null

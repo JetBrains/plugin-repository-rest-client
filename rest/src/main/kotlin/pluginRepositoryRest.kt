@@ -33,27 +33,46 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             .create(PluginRepositoryService::class.java)
 
     fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
-        if (username == null) throw RuntimeException("Username must be set for uploading")
-        if (password == null) throw RuntimeException("Password must be set for uploading")
-
+        ensureCredentialsAreSet()
         try {
             LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
             service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
-                    channel?.let { TypedString(it) },
-                    TypedFile("application/octet-stream", file))
+                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
         } catch(e: RetrofitError) {
-            if (e.response?.status == 302) {
-                LOG.info("Uploaded successfully")
-                return
-            }
+            handleUploadResponse(e)
             throw e;
         }
     }
 
-    fun download(pluginPackageId: String, version: String, channel: String? = null, targetPath: String): File? {
-        LOG.info("Downloading $pluginPackageId:$version")
+    fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null) {
+        ensureCredentialsAreSet()
         try {
-            service.download(pluginPackageId, version, channel)
+            LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
+            service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        } catch(e: RetrofitError) {
+            handleUploadResponse(e)
+            return
+        }
+    }
+
+    private fun handleUploadResponse(e: RetrofitError) {
+        if (e.response?.status == 302) {
+            LOG.info("Uploaded successfully")
+            return
+        }
+        throw e;
+    }
+
+    private fun ensureCredentialsAreSet() {
+        if (username == null) throw RuntimeException("Username must be set for uploading")
+        if (password == null) throw RuntimeException("Password must be set for uploading")
+    }
+
+    fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
+        LOG.info("Downloading $pluginXmlId:$version")
+        try {
+            service.download(pluginXmlId, version, channel)
         } catch(e: RetrofitError) {
             if (e.response?.status == 302) {
                 val file = downloadFile(e.response, targetPath)
@@ -62,16 +81,16 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                 }
             }
         }
-        LOG.error("Cannot find $pluginPackageId:$version")
+        LOG.error("Cannot find $pluginXmlId:$version")
         return null
 
     }
 
-    fun downloadCompatiblePlugin(pluginPackageId: String, ideBuild: String, channel: String? = null,
+    fun downloadCompatiblePlugin(pluginXmlId: String, ideBuild: String, channel: String? = null,
                                  targetPath: String): File? {
-        LOG.info("Downloading $pluginPackageId for $ideBuild build")
+        LOG.info("Downloading $pluginXmlId for $ideBuild build")
         try {
-            service.downloadCompatiblePlugin(pluginPackageId, ideBuild, channel)
+            service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel)
         } catch(e: RetrofitError) {
             if (e.response?.status == 302) {
                 val file = downloadFile(e.response, targetPath)
@@ -80,7 +99,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                 }
             }
         }
-        LOG.error("Cannot find $pluginPackageId compatible with $ideBuild build")
+        LOG.error("Cannot find $pluginXmlId compatible with $ideBuild build")
         return null
     }
 
@@ -120,6 +139,13 @@ private interface PluginRepositoryService {
     fun upload(@Part("userName") username: TypedString, @Part("password") password: TypedString,
                @Part("pluginId") pluginId: TypedString, @Part("channel") channel: TypedString?,
                @Part("file") file: TypedFile): Response
+
+    @Multipart
+    @POST("/plugin/uploadPlugin")
+    fun uploadByXmlId(@Part("userName") username: TypedString, @Part("password") password: TypedString,
+                      @Part("xmlId") pluginXmlId: TypedString, @Part("channel") channel: TypedString?,
+                      @Part("file") file: TypedFile): Response
+
 
     @GET("/plugin/download")
     fun download(@Query("pluginId") pluginId: String, @Query("version") version: String,
