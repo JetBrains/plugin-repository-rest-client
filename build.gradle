@@ -44,9 +44,8 @@ task fatJar(type: Jar, group: 'build') {
 }
 
 group = 'org.jetbrains.intellij'
-if (hasProperty("buildNumber")) {
-  version = "0.3.$buildNumber"
-}
+version = "0.3.$buildNumber"
+
 apply plugin: 'maven-publish'
 
 task sourceJar(type: Jar) {
@@ -81,7 +80,7 @@ if (hasProperty("bintrayUser")) {
       repo = "intellij-plugin-service"
       name = "plugin-repository-rest-client"
       version {
-        name = "0.2.$buildNumber"
+          name = project.version
       }
     }
   }
