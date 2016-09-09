@@ -29,6 +29,8 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                     }
                 }
             })
+            .setLog({ LOG.debug(it) })
+            .setLogLevel(RestAdapter.LogLevel.BASIC)
             .build()
             .create(PluginRepositoryService::class.java)
 
