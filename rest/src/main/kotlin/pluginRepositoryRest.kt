@@ -42,7 +42,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                     channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
         } catch(e: RetrofitError) {
             handleUploadResponse(e)
-            throw e;
+            throw e
         }
     }
 
@@ -63,7 +63,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             LOG.info("Uploaded successfully")
             return
         }
-        throw e;
+        throw e
     }
 
     private fun ensureCredentialsAreSet() {
@@ -121,7 +121,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                             if (!targetFile.createNewFile()) {
                                 throw RuntimeException("Cannot create ${targetFile.absolutePath}")
                             }
-                            downloadResponse.body.`in`().copyTo(targetFile.outputStream())
+                            targetFile.outputStream().use { downloadResponse.body.`in`().copyTo(it) }
                             LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
                             return targetFile
                         }
@@ -149,11 +149,11 @@ private interface PluginRepositoryService {
                       @Part("file") file: TypedFile): Response
 
 
-    @GET("/plugin/download")
+    @GET("/plugin/download?format=text")
     fun download(@Query("pluginId") pluginId: String, @Query("version") version: String,
                  @Query("channel") channel: String?): Response
 
-    @GET("/pluginManager?action=download")
+    @GET("/pluginManager?action=download&format=text")
     fun downloadCompatiblePlugin(@Query("id") pluginId: String, @Query("build") ideBuild: String,
                                  @Query("channel") channel: String?): Response
 }
