@@ -138,11 +138,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             val filenameMarker = "filename="
             if (header.name.equals("Content-Disposition", true)) {
                 if (header.value.contains(filenameMarker)) {
-                    val fileName = header.value.substringAfter(filenameMarker, "").substringBefore(';')
-                    if (fileName.startsWith('"') && fileName.endsWith('"')) {
-                        return fileName.substring(1, fileName.length - 1)
-                    }
-                    return fileName
+                    return header.value.substringAfter(filenameMarker, "").substringBefore(';').removeSurrounding("\"")
                 }
                 break
             }
