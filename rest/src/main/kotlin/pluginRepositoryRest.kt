@@ -116,13 +116,14 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                         if (mimeType == "application/zip" || mimeType == "application/java-archive") {
                             var targetFile = File(targetPath)
                             if (targetFile.isDirectory) {
-                                targetFile = File(targetFile, fileLocation.substringAfterLast('/'))
+                                targetFile = File(targetFile, guessFileName(downloadResponse, fileLocation))
                             }
                             if (!targetFile.createNewFile()) {
                                 throw RuntimeException("Cannot create ${targetFile.absolutePath}")
                             }
                             targetFile.outputStream().use { downloadResponse.body.`in`().copyTo(it) }
                             LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
+
                             return targetFile
                         }
                     }
@@ -130,6 +131,24 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             }
         }
         return null
+    }
+
+    private fun guessFileName(response: Response, url: String): String {
+        for (header in response.headers) {
+            val filenameMarker = "filename="
+            if (header.name.equals("Content-Disposition", true)) {
+                if (header.value.contains(filenameMarker)) {
+                    val fileName = header.value.substringAfter(filenameMarker, "").substringBefore(';')
+                    if (fileName.startsWith('"') && fileName.endsWith('"')) {
+                        return fileName.substring(1, fileName.length - 1)
+                    }
+                    return fileName
+                }
+                break
+            }
+        }
+        val fileName = url.substringAfterLast('/')
+        return if (fileName.isNotEmpty()) fileName else url
     }
 }
 
@@ -149,11 +168,11 @@ private interface PluginRepositoryService {
                       @Part("file") file: TypedFile): Response
 
 
-    @GET("/plugin/download?format=text")
+    @GET("/plugin/download")
     fun download(@Query("pluginId") pluginId: String, @Query("version") version: String,
                  @Query("channel") channel: String?): Response
 
-    @GET("/pluginManager?action=download&format=text")
+    @GET("/pluginManager?action=download")
     fun downloadCompatiblePlugin(@Query("id") pluginId: String, @Query("build") ideBuild: String,
                                  @Query("channel") channel: String?): Response
 }
