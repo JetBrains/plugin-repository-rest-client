@@ -10,6 +10,7 @@ import retrofit.http.*
 import retrofit.mime.TypedFile
 import retrofit.mime.TypedString
 import java.io.File
+import java.io.IOException
 import java.net.HttpURLConnection
 
 /**
@@ -116,7 +117,11 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                         if (mimeType == "application/zip" || mimeType == "application/java-archive") {
                             var targetFile = File(targetPath)
                             if (targetFile.isDirectory) {
-                                targetFile = File(targetFile, guessFileName(downloadResponse, fileLocation))
+                                val file = File(targetFile, guessFileName(downloadResponse, fileLocation))
+                                if (file.parentFile != targetFile) {
+                                    throw IOException("Invalid filename returned by a server")
+                                }
+                                targetFile = file
                             }
                             if (!targetFile.createNewFile()) {
                                 throw RuntimeException("Cannot create ${targetFile.absolutePath}")
