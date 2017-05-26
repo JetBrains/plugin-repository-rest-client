@@ -117,7 +117,11 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                         if (mimeType == "application/zip" || mimeType == "application/java-archive") {
                             var targetFile = File(targetPath)
                             if (targetFile.isDirectory) {
-                                val file = File(targetFile, guessFileName(downloadResponse, fileLocation))
+                                val guessFileName = guessFileName(downloadResponse, fileLocation)
+                                if (guessFileName.contains(File.separatorChar)) {
+                                    throw IOException("Invalid filename returned by a server")
+                                }
+                                val file = File(targetFile, guessFileName)
                                 if (file.parentFile != targetFile) {
                                     throw IOException("Invalid filename returned by a server")
                                 }
