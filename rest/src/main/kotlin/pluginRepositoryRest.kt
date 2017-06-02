@@ -43,7 +43,6 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                     channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
         } catch(e: RetrofitError) {
             handleUploadResponse(e)
-            throw e
         }
     }
 
@@ -55,7 +54,6 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                     channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
         } catch(e: RetrofitError) {
             handleUploadResponse(e)
-            throw e
         }
     }
 
