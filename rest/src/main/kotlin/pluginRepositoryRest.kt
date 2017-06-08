@@ -20,7 +20,7 @@ import java.net.HttpURLConnection
 
 @Root(strict = false)
 private data class RestPluginRepositoryBean(
-        @field:ElementList(entry = "category", inline = true) var categories: List<RestCategoryBean>? = null
+        @field:ElementList(entry = "category", inline = true, required = false) var categories: List<RestCategoryBean>? = null
 )
 
 @Root(strict = false)
