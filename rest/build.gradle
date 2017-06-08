@@ -1,3 +1,4 @@
 dependencies {
   compile 'com.squareup.retrofit:retrofit:1.9.0'
+  compile 'com.squareup.retrofit:converter-simplexml:1.9.0'
 }

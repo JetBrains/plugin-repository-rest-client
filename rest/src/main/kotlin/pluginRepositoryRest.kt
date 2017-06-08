@@ -1,17 +1,56 @@
 package org.jetbrains.intellij.pluginRepository
 
+import org.simpleframework.xml.Attribute
+import org.simpleframework.xml.Element
+import org.simpleframework.xml.ElementList
+import org.simpleframework.xml.Root
 import org.slf4j.LoggerFactory
 import retrofit.RestAdapter
 import retrofit.RetrofitError
 import retrofit.client.Request
 import retrofit.client.Response
 import retrofit.client.UrlConnectionClient
+import retrofit.converter.SimpleXMLConverter
 import retrofit.http.*
 import retrofit.mime.TypedFile
 import retrofit.mime.TypedString
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
+
+@Root(strict = false)
+private data class RestPluginRepositoryBean(
+        @field:ElementList(entry = "category", inline = true) var categories: List<RestCategoryBean>? = null
+)
+
+@Root(strict = false)
+private data class RestCategoryBean(
+        @field:Attribute var name: String? = null,
+        @field:ElementList(entry = "idea-plugin", inline = true) var plugins: List<RestPluginBean>? = null
+)
+
+@Root(strict = false)
+private data class RestPluginBean(
+        @param:Element(name = "name") @field:Element val name: String,
+        @param:Element(name = "id") @field:Element val id: String,
+        @param:Element(name = "version") @field:Element val version: String,
+        @param:Element(name = "idea-version") @field:Element(name = "idea-version") val ideaVersion: RestIdeaVersionBean
+)
+
+@Root(strict = false)
+private data class RestIdeaVersionBean(
+        @field:Attribute(name = "since-build", required = false) var sinceBuild: String? = null,
+        @field:Attribute(name = "until-build", required = false) var untilBuild: String? = null
+)
+
+data class PluginBean(
+        val name: String,
+        val id: String,
+        val version: String,
+        val category: String,
+        val sinceBuild: String?,
+        val untilBuild: String?
+)
 
 /**
  * @author nik
@@ -32,6 +71,7 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             })
             .setLog({ LOG.debug(it) })
             .setLogLevel(RestAdapter.LogLevel.BASIC)
+            .setConverter(SimpleXMLConverter())
             .build()
             .create(PluginRepositoryService::class.java)
 
@@ -153,6 +193,26 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
         val fileName = url.substringAfterLast('/')
         return if (fileName.isNotEmpty()) fileName else url
     }
+
+    fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
+        val response = service.listPlugins(ideBuild, channel, pluginId)
+        return response.categories?.flatMap { convertCategory(it) } ?: emptyList()
+    }
+
+    private fun convertCategory(response: RestCategoryBean): List<PluginBean> {
+        return response.plugins?.map { convertPlugin(it, response.name!!) } ?: emptyList()
+    }
+
+    private fun convertPlugin(response: RestPluginBean, category: String): PluginBean {
+        return PluginBean(
+                response.name,
+                response.id,
+                response.version,
+                category,
+                response.ideaVersion.sinceBuild,
+                response.ideaVersion.untilBuild
+        )
+    }
 }
 
 private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
@@ -178,4 +238,9 @@ private interface PluginRepositoryService {
     @GET("/pluginManager?action=download")
     fun downloadCompatiblePlugin(@Query("id") pluginId: String, @Query("build") ideBuild: String,
                                  @Query("channel") channel: String?): Response
+
+    @GET("/plugins/list/")
+    fun listPlugins(@Query("build") ideBuild: String,
+                    @Query("channel") channel: String?,
+                    @Query("pluginId") pluginId: String?): RestPluginRepositoryBean
 }
