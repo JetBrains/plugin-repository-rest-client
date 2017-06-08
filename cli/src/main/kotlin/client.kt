@@ -66,7 +66,7 @@ class Client {
             val channel = parseChannel(options.channel)
             val plugins = pluginRepository.listPlugins(options.ideBuild!!, channel, options.pluginId)
             for (plugin in plugins) {
-                println("${plugin.name} (${plugin.id} version ${plugin.version}, IDE builds ${plugin.sinceBuild} to ${plugin.untilBuild}")
+                println("${plugin.name} (${plugin.id} version ${plugin.version}, IDE builds ${plugin.sinceBuild} to ${plugin.untilBuild}, depends ${plugin.depends}")
             }
         }
 
