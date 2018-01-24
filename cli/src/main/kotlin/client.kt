@@ -14,16 +14,14 @@ class Client {
             }
             val command = args[0]
             val restParameters = args.copyOfRange(1, args.size)
-            if (command == "upload") {
-                upload(restParameters)
-
-            } else if (command == "download") {
-                System.exit(if (download(restParameters) != null) 0 else 1)
-            } else if (command == "list") {
-                list(restParameters)
-            } else {
-                System.err.println("Unknown command `$command`: `upload`, `download` or `list` commands are supported.")
-                System.exit(1)
+            when (command) {
+                "upload" -> upload(restParameters)
+                "download" -> System.exit(if (download(restParameters) != null) 0 else 1)
+                "list" -> list(restParameters)
+                else -> {
+                    System.err.println("Unknown command `$command`: `upload`, `download` or `list` commands are supported.")
+                    System.exit(1)
+                }
             }
         }
 
@@ -38,10 +36,10 @@ class Client {
 
             val pluginRepository = PluginRepositoryInstance(options.host, null, null)
             val channel = parseChannel(options.channel)
-            if (!options.version.isNullOrBlank()) {
-                return pluginRepository.download(options.pluginId!!, options.version!!, channel, options.destination)
+            return if (!options.version.isNullOrBlank()) {
+                pluginRepository.download(options.pluginId!!, options.version!!, channel, options.destination)
             } else {
-                return pluginRepository.downloadCompatiblePlugin(options.pluginId!!, options.ideBuild!!, channel,
+                pluginRepository.downloadCompatiblePlugin(options.pluginId!!, options.ideBuild!!, channel,
                         options.destination)
             }
 
@@ -111,7 +109,7 @@ class Client {
 
     open class BaseOptions {
         @set:Argument(description = "Plugins repository host")
-        var host = "http://plugins.jetbrains.com"
+        var host = "https://plugins.jetbrains.com"
 
         @set:Argument(description = "Plugin channel")
         var channel: String? = null
