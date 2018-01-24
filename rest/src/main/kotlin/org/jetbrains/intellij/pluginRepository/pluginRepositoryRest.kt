@@ -78,32 +78,16 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
 
     fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
         ensureCredentialsAreSet()
-        try {
-            LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
-            service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
-        } catch (e: RetrofitError) {
-            handleUploadResponse(e)
-        }
+        LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
+        service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
+                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
     }
 
     fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null) {
         ensureCredentialsAreSet()
-        try {
-            LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
-            service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
-        } catch (e: RetrofitError) {
-            handleUploadResponse(e)
-        }
-    }
-
-    private fun handleUploadResponse(e: RetrofitError) {
-        if (e.response?.status == 302) {
-            LOG.info("Uploaded successfully")
-            return
-        }
-        throw e
+        LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
+        service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
     }
 
     private fun ensureCredentialsAreSet() {
