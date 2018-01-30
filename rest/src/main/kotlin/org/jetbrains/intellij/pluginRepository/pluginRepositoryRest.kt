@@ -183,17 +183,16 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
     }
 
     private fun guessFileName(response: Response, url: String): String {
-        for (header in response.headers) {
-            val filenameMarker = "filename="
-            if (header.name.equals("Content-Disposition", true)) {
-                if (header.value.contains(filenameMarker)) {
-                    return header.value.substringAfter(filenameMarker, "").substringBefore(';').removeSurrounding("\"")
-                }
-                break
-            }
+        val filenameMarker = "filename="
+        val contentDispositionHeader = response.headers.find { it.name.equals("Content-Disposition", true) }
+        if (contentDispositionHeader == null || !contentDispositionHeader.value.contains(filenameMarker)) {
+            val fileName = url.substringAfterLast('/')
+            return if (fileName.isNotEmpty()) fileName else url
         }
-        val fileName = url.substringAfterLast('/')
-        return if (fileName.isNotEmpty()) fileName else url
+        return contentDispositionHeader.value
+                .substringAfter(filenameMarker, "")
+                .substringBefore(';')
+                .removeSurrounding("\"")
     }
 
     fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
