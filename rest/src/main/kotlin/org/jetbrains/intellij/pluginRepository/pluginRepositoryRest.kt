@@ -64,7 +64,6 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                 object : UrlConnectionClient() {
                     override fun openConnection(request: Request?): HttpURLConnection {
                         val connection = super.openConnection(request)
-                        connection.instanceFollowRedirects = false
                         val timeout = 10 * 60 * 1000
                         connection.readTimeout = timeout
                         return connection
@@ -79,32 +78,16 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
 
     fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
         ensureCredentialsAreSet()
-        try {
-            LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
-            service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
-        } catch(e: RetrofitError) {
-            handleUploadResponse(e)
-        }
+        LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
+        service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
+                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
     }
 
     fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null) {
         ensureCredentialsAreSet()
-        try {
-            LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
-            service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
-        } catch(e: RetrofitError) {
-            handleUploadResponse(e)
-        }
-    }
-
-    private fun handleUploadResponse(e: RetrofitError) {
-        if (e.response?.status == 302) {
-            LOG.info("Uploaded successfully")
-            return
-        }
-        throw e
+        LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
+        service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
     }
 
     private fun ensureCredentialsAreSet() {
@@ -114,72 +97,56 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
 
     fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
         LOG.info("Downloading $pluginXmlId:$version")
-        try {
-            service.download(pluginXmlId, version, channel)
-        } catch(e: RetrofitError) {
-            if (e.response?.status == 302) {
-                val file = downloadFile(e.response, targetPath)
-                if (file != null) {
-                    return file
-                }
+        return try {
+            downloadFile(service.download(pluginXmlId, version, channel), targetPath)
+        } catch (e: RetrofitError) {
+            if (e.response.status == HttpURLConnection.HTTP_NOT_FOUND) {
+                LOG.error("Cannot find $pluginXmlId:$version")
+            } else {
+                LOG.error("Can't download plugin. Response from server: ${e.response.status}")
             }
+            null
         }
-        LOG.error("Cannot find $pluginXmlId:$version")
-        return null
-
     }
 
     fun downloadCompatiblePlugin(pluginXmlId: String, ideBuild: String, channel: String? = null,
                                  targetPath: String): File? {
         LOG.info("Downloading $pluginXmlId for $ideBuild build")
-        try {
-            service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel)
-        } catch(e: RetrofitError) {
-            if (e.response?.status == 302) {
-                val file = downloadFile(e.response, targetPath)
-                if (file != null) {
-                    return file
-                }
+        return try {
+            downloadFile(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
+        } catch (e: RetrofitError) {
+            if (e.response.status == HttpURLConnection.HTTP_NOT_FOUND) {
+                LOG.error("Cannot find $pluginXmlId compatible with $ideBuild build")
+            } else {
+                LOG.error("Can't download plugin. Response from server: ${e.response.status}")
             }
+            null
         }
-        LOG.error("Cannot find $pluginXmlId compatible with $ideBuild build")
-        return null
     }
 
     private fun downloadFile(response: Response, targetPath: String): File? {
-        for (header in response.headers) {
-            if (header.name.equals("location", true)) {
-                val fileLocation = header.value
-                if (!fileLocation.isNullOrBlank()) {
-                    val downloadResponse = UrlConnectionClient().execute(Request("GET", fileLocation, listOf(), null))
-                    if (downloadResponse.status == 200) {
-                        val mimeType = downloadResponse.body.mimeType()
-                        if (mimeType == "application/zip" || mimeType == "application/java-archive") {
-                            var targetFile = File(targetPath)
-                            if (targetFile.isDirectory) {
-                                val guessFileName = guessFileName(downloadResponse, fileLocation)
-                                if (guessFileName.contains(File.separatorChar)) {
-                                    throw IOException("Invalid filename returned by a server")
-                                }
-                                val file = File(targetFile, guessFileName)
-                                if (file.parentFile != targetFile) {
-                                    throw IOException("Invalid filename returned by a server")
-                                }
-                                targetFile = file
-                            }
-                            if (!targetFile.createNewFile()) {
-                                throw RuntimeException("Cannot create ${targetFile.absolutePath}")
-                            }
-                            targetFile.outputStream().use { downloadResponse.body.`in`().copyTo(it) }
-                            LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
+        val mimeType = response.body.mimeType()
+        if (mimeType != "application/zip" && mimeType != "application/java-archive") return null
 
-                            return targetFile
-                        }
-                    }
-                }
+        var targetFile = File(targetPath)
+        if (targetFile.isDirectory) {
+            val guessFileName = guessFileName(response, response.url)
+            if (guessFileName.contains(File.separatorChar)) {
+                throw IOException("Invalid filename returned by a server")
             }
+            val file = File(targetFile, guessFileName)
+            if (file.parentFile != targetFile) {
+                throw IOException("Invalid filename returned by a server")
+            }
+            targetFile = file
         }
-        return null
+        if (!targetFile.createNewFile()) {
+            throw RuntimeException("Cannot create ${targetFile.absolutePath}")
+        }
+        targetFile.outputStream().use { response.body.`in`().copyTo(it) }
+        LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
+
+        return targetFile
     }
 
     private fun guessFileName(response: Response, url: String): String {
