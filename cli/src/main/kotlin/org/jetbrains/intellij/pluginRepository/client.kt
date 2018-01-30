@@ -111,7 +111,7 @@ class Client {
 
     open class BaseOptions {
         @set:Argument(description = "Plugins repository host")
-        var host = "http://plugins.jetbrains.com"
+        var host = "https://plugins.jetbrains.com"
 
         @set:Argument(description = "Plugin channel")
         var channel: String? = null
