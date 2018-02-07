@@ -188,12 +188,14 @@ private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 private interface PluginRepositoryService {
     @Multipart
+    @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
     fun upload(@Part("userName") username: TypedString, @Part("password") password: TypedString,
                @Part("pluginId") pluginId: TypedString, @Part("channel") channel: TypedString?,
                @Part("file") file: TypedFile): Response
 
     @Multipart
+    @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
     fun uploadByXmlId(@Part("userName") username: TypedString, @Part("password") password: TypedString,
                       @Part("xmlId") pluginXmlId: TypedString, @Part("channel") channel: TypedString?,
