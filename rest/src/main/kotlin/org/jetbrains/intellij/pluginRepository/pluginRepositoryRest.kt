@@ -77,17 +77,23 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
             .create(PluginRepositoryService::class.java)
 
     fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
-        ensureCredentialsAreSet()
-        LOG.info("Uploading plugin $pluginId from ${file.absolutePath} to $siteUrl")
-        service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
-                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        uploadPluginInternal(file, pluginId = pluginId, channel = channel)
     }
 
     fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null) {
+        uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel)
+    }
+
+    private fun uploadPluginInternal(file: File, pluginId: Int? = null, pluginXmlId: String? = null, channel: String? = null) {
         ensureCredentialsAreSet()
         LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
-        service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
-                channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        if (pluginXmlId != null) {
+            service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        } else if(pluginId != null) {
+            service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
+                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        }
     }
 
     private fun ensureCredentialsAreSet() {
