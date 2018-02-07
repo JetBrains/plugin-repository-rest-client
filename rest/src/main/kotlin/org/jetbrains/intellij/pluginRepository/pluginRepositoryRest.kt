@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
+import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.simpleframework.xml.Attribute
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.ElementList
@@ -86,13 +87,20 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
 
     private fun uploadPluginInternal(file: File, pluginId: Int? = null, pluginXmlId: String? = null, channel: String? = null) {
         ensureCredentialsAreSet()
-        LOG.info("Uploading plugin $pluginXmlId from ${file.absolutePath} to $siteUrl")
-        if (pluginXmlId != null) {
-            service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
-        } else if(pluginId != null) {
-            service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
-                    channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+        try {
+            LOG.info("Uploading plugin ${pluginXmlId ?: pluginId} from ${file.absolutePath} to $siteUrl")
+            val response = if (pluginXmlId != null) {
+                service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                        channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+            } else {
+                service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
+                        channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+            }
+            LOG.info("Done: " + response.text)
+        } catch (e: RetrofitError) {
+            val message = if (e.response != null) e.response.text else e.message
+            LOG.error("Failed to upload plugin: " + message)
+            throw UploadFailedException(message)
         }
     }
 
@@ -219,3 +227,7 @@ private interface PluginRepositoryService {
                     @Query("channel") channel: String?,
                     @Query("pluginId") pluginId: String?): RestPluginRepositoryBean
 }
+
+
+val Response.text
+    get() = this.body.`in`().reader().readText()
