@@ -58,7 +58,24 @@ data class PluginBean(
 /**
  * @author nik
  */
-class PluginRepositoryInstance(val siteUrl: String, private val username: String?, private val password: String?) {
+class PluginRepositoryInstance private constructor(
+        private val siteUrl: String,
+        private val token: String?,
+        username: String?,
+        password: String?
+) {
+    @Deprecated("Use hub permanent tokens to authorize your requests")
+    constructor(siteUrl: String, username: String?, password: String?) : this(siteUrl, null, username, password)
+
+    /**
+     * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
+     * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
+     */
+    constructor(siteUrl: String, token: String? = null) : this(siteUrl, token, null, null)
+
+    private val username = if (username != null) TypedString(username) else null
+    private val password = if (password != null) TypedString(password) else null
+
     private val service = RestAdapter.Builder()
             .setEndpoint(siteUrl)
             .setClient({ ->
@@ -70,6 +87,9 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
                         return connection
                     }
                 }
+            })
+            .setRequestInterceptor({ request ->
+                if (token != null) request.addHeader("Authorization", "Bearer $token")
             })
             .setLog({ LOG.debug(it) })
             .setLogLevel(RestAdapter.LogLevel.BASIC)
@@ -90,21 +110,22 @@ class PluginRepositoryInstance(val siteUrl: String, private val username: String
         try {
             LOG.info("Uploading plugin ${pluginXmlId ?: pluginId} from ${file.absolutePath} to $siteUrl")
             val response = if (pluginXmlId != null) {
-                service.uploadByXmlId(TypedString(username), TypedString(password), TypedString(pluginXmlId),
+                service.uploadByXmlId(username, password, TypedString(pluginXmlId),
                         channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
             } else {
-                service.upload(TypedString(username), TypedString(password), TypedString(pluginId.toString()),
+                service.upload(username, password, TypedString(pluginId.toString()),
                         channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
             val message = if (e.response != null) e.response.text else e.message
-            LOG.error("Failed to upload plugin: " + message)
+            LOG.error("Failed to upload plugin: $message")
             throw UploadFailedException(message)
         }
     }
 
     private fun ensureCredentialsAreSet() {
+        if (token != null) return
         if (username == null) throw RuntimeException("Username must be set for uploading")
         if (password == null) throw RuntimeException("Password must be set for uploading")
     }
@@ -204,14 +225,14 @@ private interface PluginRepositoryService {
     @Multipart
     @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
-    fun upload(@Part("userName") username: TypedString, @Part("password") password: TypedString,
+    fun upload(@Part("userName") username: TypedString?, @Part("password") password: TypedString?,
                @Part("pluginId") pluginId: TypedString, @Part("channel") channel: TypedString?,
                @Part("file") file: TypedFile): Response
 
     @Multipart
     @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
-    fun uploadByXmlId(@Part("userName") username: TypedString, @Part("password") password: TypedString,
+    fun uploadByXmlId(@Part("userName") username: TypedString?, @Part("password") password: TypedString?,
                       @Part("xmlId") pluginXmlId: TypedString, @Part("channel") channel: TypedString?,
                       @Part("file") file: TypedFile): Response
 

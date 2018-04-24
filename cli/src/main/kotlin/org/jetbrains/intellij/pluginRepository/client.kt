@@ -34,7 +34,7 @@ class Client {
                 System.exit(1)
             }
 
-            val pluginRepository = PluginRepositoryInstance(options.host, null, null)
+            val pluginRepository = PluginRepositoryInstance(options.host)
             val channel = parseChannel(options.channel)
             return if (!options.version.isNullOrBlank()) {
                 pluginRepository.download(options.pluginId!!, options.version!!, channel, options.destination)
@@ -48,7 +48,12 @@ class Client {
         private fun upload(args: Array<String>) {
             val options = UploadOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = PluginRepositoryInstance(options.host, options.username!!, options.password!!)
+            val pluginRepository = if (options.token != null) {
+                PluginRepositoryInstance(options.host, options.token)
+            } else {
+                System.out.println("Username password authentication is deprecated, use hub permanent token instead")
+                PluginRepositoryInstance(options.host, options.username, options.password)
+            }
             val pluginId = options.pluginId!!
             if (pluginId.matches(Regex("\\d+"))) {
                 pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
@@ -60,7 +65,7 @@ class Client {
         private fun list(args: Array<String>) {
             val options = ListOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = PluginRepositoryInstance(options.host, null, null)
+            val pluginRepository = PluginRepositoryInstance(options.host)
             val channel = parseChannel(options.channel)
             val plugins = pluginRepository.listPlugins(options.ideBuild!!, channel, options.pluginId)
             for (plugin in plugins) {
@@ -75,10 +80,13 @@ class Client {
         @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository or ID defined in plugin.xml")
         var pluginId: String? = null
 
-        @set:Argument(required = true)
+        @set:Argument(description = "Hub permanent token")
+        var token: String? = null
+
+        @set:Argument(description = "Deprecated. Use hub permanent tokens instead")
         var username: String? = null
 
-        @set:Argument(required = true)
+        @set:Argument(description = "Deprecated. Use hub permanent tokens instead")
         var password: String? = null
 
         @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
