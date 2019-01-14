@@ -118,6 +118,8 @@ class PluginRepositoryInstance private constructor(
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
+            //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
+            if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
             val message = if (e.response != null) e.response.text else e.message
             LOG.error("Failed to upload plugin: $message")
             throw UploadFailedException(message)
@@ -135,11 +137,7 @@ class PluginRepositoryInstance private constructor(
         return try {
             downloadFile(service.download(pluginXmlId, version, channel), targetPath)
         } catch (e: RetrofitError) {
-            if (e.response.status == HttpURLConnection.HTTP_NOT_FOUND) {
-                LOG.error("Cannot find $pluginXmlId:$version")
-            } else {
-                LOG.error("Can't download plugin. Response from server: ${e.response.status}")
-            }
+            processRetofitError(e, "Cannot find $pluginXmlId:$version", "Can't download plugin")
             null
         }
     }
@@ -150,12 +148,23 @@ class PluginRepositoryInstance private constructor(
         return try {
             downloadFile(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
         } catch (e: RetrofitError) {
-            if (e.response.status == HttpURLConnection.HTTP_NOT_FOUND) {
-                LOG.error("Cannot find $pluginXmlId compatible with $ideBuild build")
-            } else {
-                LOG.error("Can't download plugin. Response from server: ${e.response.status}")
-            }
+            processRetofitError(e, "Cannot find $pluginXmlId compatible with $ideBuild build", "Can't download plugin")
             null
+        }
+    }
+
+    private fun processRetofitError(e: RetrofitError, notFoundErrorMessage: String, baseErrorMessage: String) {
+        //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
+        if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
+        val response = e.response
+        if (response != null) {
+            if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
+                LOG.error(notFoundErrorMessage)
+            } else {
+                LOG.error("$baseErrorMessage. Response from server: ${response.status}")
+            }
+        } else {
+            LOG.error("$baseErrorMessage: ${e.message}", e)
         }
     }
 
