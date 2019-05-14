@@ -118,11 +118,11 @@ class PluginRepositoryInstance private constructor(
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
-            //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
-            if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
-            val message = if (e.response != null) e.response.text else e.message
-            LOG.error("Failed to upload plugin: $message")
-            throw UploadFailedException(message)
+            val notFoundErrorMessage = "Cannot find $pluginXmlId. " +
+                    "Note that you need to upload the plugin to the repository at least once manually " +
+                    "(to specify options like the license, repository URL etc.) before uploads through the client can be used."
+            val errorMessage = processRetofitError(e, notFoundErrorMessage, "Failed to upload plugin")
+            throw UploadFailedException(errorMessage, e)
         }
     }
 
@@ -153,19 +153,21 @@ class PluginRepositoryInstance private constructor(
         }
     }
 
-    private fun processRetofitError(e: RetrofitError, notFoundErrorMessage: String, baseErrorMessage: String) {
+    private fun processRetofitError(e: RetrofitError, notFoundErrorMessage: String, baseErrorMessage: String): String {
         //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
         if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
         val response = e.response
-        if (response != null) {
+        val errorMessage = if (response != null) {
             if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
-                LOG.error(notFoundErrorMessage)
+                notFoundErrorMessage
             } else {
-                LOG.error("$baseErrorMessage. Response from server: ${response.status}")
+                "$baseErrorMessage. Response from server: ${response.status}"
             }
         } else {
-            LOG.error("$baseErrorMessage: ${e.message}", e)
+            "$baseErrorMessage: ${e.message}"
         }
+        LOG.error(errorMessage, e)
+        return errorMessage
     }
 
     private fun downloadFile(response: Response, targetPath: String): File? {
