@@ -1,10 +1,10 @@
-# plugin-repository-rest-client [![JetBrains team project](http://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+# plugin-repository-rest-client [![JetBrains team project](https://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 Client and command line interface for [JetBrains Plugin Repository](https://plugins.jetbrains.com/).
 
 The code snippet below will upload a new version of a plugin to the plugins repository.
 ```kotlin
-val instance = PluginRepositoryInstance("http://plugins.jetbrains.com", "username", "password")
+val instance = PluginRepositoryInstance("https://plugins.jetbrains.com", "username", "password")
 instance.uploadPlugin(pluginId, pluginZipFile)
 ```
 
