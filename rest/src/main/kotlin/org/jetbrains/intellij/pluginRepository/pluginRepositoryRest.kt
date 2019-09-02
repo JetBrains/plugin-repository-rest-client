@@ -57,28 +57,13 @@ data class PluginBean(
 
 /**
  * @author nik
+ * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
+ * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
  */
-class PluginRepositoryInstance private constructor(
-        private val siteUrl: String,
-        private val token: String?,
-        username: String?,
-        password: String?
-) {
-    @Deprecated("Use hub permanent tokens to authorize your requests")
-    constructor(siteUrl: String, username: String?, password: String?) : this(siteUrl, null, username, password)
-
-    /**
-     * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
-     * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
-     */
-    constructor(siteUrl: String, token: String? = null) : this(siteUrl, token, null, null)
-
-    private val username = if (username != null) TypedString(username) else null
-    private val password = if (password != null) TypedString(password) else null
-
+class PluginRepositoryInstance constructor(private val siteUrl: String, private val token: String? = null) {
     private val service = RestAdapter.Builder()
             .setEndpoint(siteUrl)
-            .setClient({ ->
+            .setClient { ->
                 object : UrlConnectionClient() {
                     override fun openConnection(request: Request?): HttpURLConnection {
                         val connection = super.openConnection(request)
@@ -87,11 +72,11 @@ class PluginRepositoryInstance private constructor(
                         return connection
                     }
                 }
-            })
-            .setRequestInterceptor({ request ->
-                if (token != null) request.addHeader("Authorization", "Bearer $token")
-            })
-            .setLog({ LOG.debug(it) })
+            }
+            .setRequestInterceptor { request ->
+                request.addHeader("Authorization", "Bearer $token")
+            }
+            .setLog { LOG.debug(it) }
             .setLogLevel(RestAdapter.LogLevel.BASIC)
             .setConverter(SimpleXMLConverter())
             .build()
@@ -110,11 +95,11 @@ class PluginRepositoryInstance private constructor(
         try {
             LOG.info("Uploading plugin ${pluginXmlId ?: pluginId} from ${file.absolutePath} to $siteUrl")
             val response = if (pluginXmlId != null) {
-                service.uploadByXmlId(username, password, TypedString(pluginXmlId),
-                        channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+                service.uploadByXmlId(TypedString(pluginXmlId), channel?.let { TypedString(it) },
+                        TypedFile("application/octet-stream", file))
             } else {
-                service.upload(username, password, TypedString(pluginId.toString()),
-                        channel?.let { TypedString(it) }, TypedFile("application/octet-stream", file))
+                service.upload(TypedString(pluginId.toString()), channel?.let { TypedString(it) },
+                        TypedFile("application/octet-stream", file))
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
@@ -127,9 +112,9 @@ class PluginRepositoryInstance private constructor(
     }
 
     private fun ensureCredentialsAreSet() {
-        if (token != null) return
-        if (username == null) throw RuntimeException("Username must be set for uploading")
-        if (password == null) throw RuntimeException("Password must be set for uploading")
+        if (token == null) {
+            throw RuntimeException("Token must be set for uploading")
+        }
     }
 
     fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
@@ -236,15 +221,15 @@ private interface PluginRepositoryService {
     @Multipart
     @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
-    fun upload(@Part("userName") username: TypedString?, @Part("password") password: TypedString?,
-               @Part("pluginId") pluginId: TypedString, @Part("channel") channel: TypedString?,
+    fun upload(@Part("pluginId") pluginId: TypedString,
+               @Part("channel") channel: TypedString?,
                @Part("file") file: TypedFile): Response
 
     @Multipart
     @Headers("Accept: text/plain")
     @POST("/plugin/uploadPlugin")
-    fun uploadByXmlId(@Part("userName") username: TypedString?, @Part("password") password: TypedString?,
-                      @Part("xmlId") pluginXmlId: TypedString, @Part("channel") channel: TypedString?,
+    fun uploadByXmlId(@Part("xmlId") pluginXmlId: TypedString,
+                      @Part("channel") channel: TypedString?,
                       @Part("file") file: TypedFile): Response
 
 
