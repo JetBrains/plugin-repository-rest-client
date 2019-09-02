@@ -4,7 +4,7 @@ Client and command line interface for [JetBrains Plugin Repository](https://plug
 
 The code snippet below will upload a new version of a plugin to the plugins repository.
 ```kotlin
-val instance = PluginRepositoryInstance("https://plugins.jetbrains.com", "username", "password")
+val instance = PluginRepositoryInstance("https://plugins.jetbrains.com", "authToken")
 instance.uploadPlugin(pluginId, pluginZipFile)
 ```
 

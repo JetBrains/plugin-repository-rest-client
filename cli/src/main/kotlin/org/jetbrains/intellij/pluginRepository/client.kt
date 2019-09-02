@@ -48,12 +48,7 @@ class Client {
         private fun upload(args: Array<String>) {
             val options = UploadOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = if (options.token != null) {
-                PluginRepositoryInstance(options.host, options.token)
-            } else {
-                System.out.println("Username password authentication is deprecated, use hub permanent token instead")
-                PluginRepositoryInstance(options.host, options.username, options.password)
-            }
+            val pluginRepository = PluginRepositoryInstance(options.host, options.token)
             val pluginId = options.pluginId!!
             if (pluginId.matches(Regex("\\d+"))) {
                 pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
@@ -80,14 +75,8 @@ class Client {
         @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository or ID defined in plugin.xml")
         var pluginId: String? = null
 
-        @set:Argument(description = "Hub permanent token")
+        @set:Argument(required = true, description = "Hub permanent token")
         var token: String? = null
-
-        @set:Argument(description = "Deprecated. Use hub permanent tokens instead")
-        var username: String? = null
-
-        @set:Argument(description = "Deprecated. Use hub permanent tokens instead")
-        var password: String? = null
 
         @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
         var pluginPath: String? = null
