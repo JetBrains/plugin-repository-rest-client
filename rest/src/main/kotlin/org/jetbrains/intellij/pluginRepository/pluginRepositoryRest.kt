@@ -60,7 +60,7 @@ data class PluginBean(
  * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
  * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
  */
-class PluginRepositoryInstance constructor(private val siteUrl: String, private val token: String? = null) {
+class PluginRepositoryInstance constructor(val siteUrl: String, private val token: String? = null) {
     private val service = RestAdapter.Builder()
             .setEndpoint(siteUrl)
             .setClient { ->
