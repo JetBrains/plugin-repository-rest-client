@@ -36,6 +36,7 @@ private data class RestPluginBean(
         @param:Element(name = "id") @field:Element val id: String,
         @param:Element(name = "version") @field:Element val version: String,
         @param:Element(name = "idea-version") @field:Element(name = "idea-version") val ideaVersion: RestIdeaVersionBean,
+        @param:Element(name = "vendor") @field:Element val vendor: String,
         @param:ElementList(entry = "depends", inline = true, required = false) @field:ElementList(entry = "depends", inline = true, required = false) val depends: List<String>? = null
 )
 
@@ -52,6 +53,7 @@ data class PluginBean(
         val category: String,
         val sinceBuild: String?,
         val untilBuild: String?,
+        val vendor: String?,
         val depends: List<String>
 )
 
@@ -210,6 +212,7 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
                 category,
                 response.ideaVersion.sinceBuild,
                 response.ideaVersion.untilBuild,
+                response.vendor,
                 response.depends ?: emptyList()
         )
     }
