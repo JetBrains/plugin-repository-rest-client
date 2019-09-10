@@ -46,6 +46,8 @@ private data class RestPluginBean(
         @param:ElementList(entry = "depends", inline = true, required = false) @field:ElementList(entry = "depends", inline = true, required = false) val depends: List<String>? = null
 )
 
+data class RestError(val msg: String)
+
 data class PluginInfoBean(
         val id: String,
         val name: String,
@@ -124,16 +126,26 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
         uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel)
     }
 
+    fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
+        ensureCredentialsAreSet()
+        try {
+            LOG.info("Uploading new plugin from ${file.absolutePath}")
+            val uploadedPlugin = service.uploadNewPlugin(file.toTypedFile(), family, TypedString(licenseUrl), TypedString(categoryId.toString()))
+            LOG.info("${uploadedPlugin.name} was successfully uploaded with id ${uploadedPlugin.id}")
+            return uploadedPlugin
+        } catch (e: RetrofitError) {
+            throw UploadFailedException(processRetofitError(e, "", "Failed to upload plugin"), e)
+        }
+    }
+
     private fun uploadPluginInternal(file: File, pluginId: Int? = null, pluginXmlId: String? = null, channel: String? = null) {
         ensureCredentialsAreSet()
         try {
             LOG.info("Uploading plugin ${pluginXmlId ?: pluginId} from ${file.absolutePath} to $siteUrl")
             val response = if (pluginXmlId != null) {
-                service.uploadByXmlId(TypedString(pluginXmlId), channel?.let { TypedString(it) },
-                        TypedFile("application/octet-stream", file))
+                service.uploadByXmlId(TypedString(pluginXmlId), channel?.let { TypedString(it) }, file.toTypedFile())
             } else {
-                service.upload(TypedString(pluginId.toString()), channel?.let { TypedString(it) },
-                        TypedFile("application/octet-stream", file))
+                service.upload(TypedString(pluginId.toString()), channel?.let { TypedString(it) }, file.toTypedFile())
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
@@ -176,11 +188,14 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
         //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
         if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
         val response = e.response
-        val errorMessage = if (response != null) {
+        var errorMessage = "$baseErrorMessage. Response from server: ${response.status}"
+        if (response != null) {
             if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
-                notFoundErrorMessage
-            } else {
-                "$baseErrorMessage. Response from server: ${response.status}"
+                errorMessage = notFoundErrorMessage
+            } else if (response.status == HttpURLConnection.HTTP_BAD_REQUEST && response.body.mimeType().startsWith("application/json")) {
+                val bodyAs = e.getBodyAs(RestError::class.java)
+                errorMessage = (bodyAs as? RestError)?.msg
+                        ?: "$baseErrorMessage. Response from server: ${response.status}"
             }
         } else {
             "$baseErrorMessage: ${e.message}"
@@ -276,6 +291,13 @@ private interface PluginRepositoryService {
                       @Part("channel") channel: TypedString?,
                       @Part("file") file: TypedFile): Response
 
+    @Multipart
+    @POST("/api/plugins/{family}/upload")
+    fun uploadNewPlugin(@Part("file") file: TypedFile,
+                        @Path("family") family: String,
+                        @Part("licenseUrl") licenseUrl: TypedString,
+                        @Part("cid") category: TypedString): PluginInfoBean
+
 
     @GET("/plugin/download")
     fun download(@Query("pluginId") pluginId: String, @Query("version") version: String,
@@ -294,6 +316,7 @@ private interface PluginRepositoryService {
     fun pluginInfo(@Path("family") family: String, @Path("pluginXmlId") pluginXmlId: String): PluginInfoBean
 }
 
-
-val Response.text
+private val Response.text
     get() = this.body.`in`().reader().readText()
+
+private fun File.toTypedFile(): TypedFile = TypedFile("application/octet-stream", this)

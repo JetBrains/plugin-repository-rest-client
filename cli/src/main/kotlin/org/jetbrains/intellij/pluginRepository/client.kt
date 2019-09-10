@@ -50,11 +50,11 @@ class Client {
             val options = UploadOptions()
             Args.parseOrExit(options, args)
             val pluginRepository = PluginRepositoryInstance(options.host, options.token)
-            val pluginId = options.pluginId!!
-            if (pluginId.matches(Regex("\\d+"))) {
-                pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
-            } else {
-                pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel))
+            val pluginId = options.pluginId
+            when {
+                pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), options.family!!, 104, "https://plugins.jetbrains.com/legal/terms-of-use")
+                pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
+                else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel))
             }
         }
 
@@ -83,7 +83,7 @@ class Client {
     }
 
     class UploadOptions : BaseOptions() {
-        @set:Argument("plugin", required = true, description = "Plugin ID in the plugins repository or ID defined in plugin.xml")
+        @set:Argument("plugin", required = false, description = "Plugin ID in the plugins repository or ID defined in plugin.xml")
         var pluginId: String? = null
 
         @set:Argument(required = true, description = "Hub permanent token")
@@ -91,6 +91,9 @@ class Client {
 
         @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
         var pluginPath: String? = null
+
+        @set:Argument("family", description = "Plugin's family")
+        var family: String? = "intellij"
     }
 
     class DownloadOptions : BaseOptions() {
