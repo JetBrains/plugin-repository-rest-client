@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
+import com.google.gson.Gson
 import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.simpleframework.xml.Attribute
 import org.simpleframework.xml.Element
@@ -11,12 +12,17 @@ import retrofit.RetrofitError
 import retrofit.client.Request
 import retrofit.client.Response
 import retrofit.client.UrlConnectionClient
+import retrofit.converter.Converter
+import retrofit.converter.GsonConverter
 import retrofit.converter.SimpleXMLConverter
 import retrofit.http.*
 import retrofit.mime.TypedFile
+import retrofit.mime.TypedInput
+import retrofit.mime.TypedOutput
 import retrofit.mime.TypedString
 import java.io.File
 import java.io.IOException
+import java.lang.reflect.Type
 import java.net.HttpURLConnection
 
 @Root(strict = false)
@@ -36,8 +42,19 @@ private data class RestPluginBean(
         @param:Element(name = "id") @field:Element val id: String,
         @param:Element(name = "version") @field:Element val version: String,
         @param:Element(name = "idea-version") @field:Element(name = "idea-version") val ideaVersion: RestIdeaVersionBean,
-        @param:Element(name = "vendor") @field:Element val vendor: String,
+        @param:Element(name = "vendor", required = false) @field:Element(required = false) val vendor: String?,
         @param:ElementList(entry = "depends", inline = true, required = false) @field:ElementList(entry = "depends", inline = true, required = false) val depends: List<String>? = null
+)
+
+data class PluginInfoBean(
+        val id: String,
+        val name: String,
+        val vendor: PluginVendorBean
+)
+
+data class PluginVendorBean(
+        var name: String? = null,
+        var url: String? = null
 )
 
 @Root(strict = false)
@@ -56,6 +73,21 @@ data class PluginBean(
         val vendor: String?,
         val depends: List<String>
 )
+
+class CompositeConverter : Converter {
+    private val xmlConverter = SimpleXMLConverter()
+    private val jsonConverter = GsonConverter(Gson())
+
+    override fun fromBody(body: TypedInput, type: Type?): Any = if (body.mimeType().startsWith("text/xml")) {
+        xmlConverter.fromBody(body, type)
+    } else {
+        jsonConverter.fromBody(body, type)
+    }
+
+    override fun toBody(`object`: Any?): TypedOutput {
+        return xmlConverter.toBody(`object`)
+    }
+}
 
 /**
  * @author nik
@@ -80,7 +112,7 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
             }
             .setLog { LOG.debug(it) }
             .setLogLevel(RestAdapter.LogLevel.BASIC)
-            .setConverter(SimpleXMLConverter())
+            .setConverter(CompositeConverter())
             .build()
             .create(PluginRepositoryService::class.java)
 
@@ -200,6 +232,15 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
         return response.categories?.flatMap { convertCategory(it) } ?: emptyList()
     }
 
+    fun pluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
+        return try {
+            service.pluginInfo(family, pluginXmlId)
+        } catch (e: RetrofitError) {
+            processRetofitError(e, "Cannot find $pluginXmlId in $family family", "Can't get plugin info")
+            null
+        }
+    }
+
     private fun convertCategory(response: RestCategoryBean): List<PluginBean> {
         return response.plugins?.map { convertPlugin(it, response.name!!) } ?: emptyList()
     }
@@ -248,6 +289,9 @@ private interface PluginRepositoryService {
     fun listPlugins(@Query("build") ideBuild: String,
                     @Query("channel") channel: String?,
                     @Query("pluginId") pluginId: String?): RestPluginRepositoryBean
+
+    @GET("/api/plugins/{family}/{pluginXmlId}")
+    fun pluginInfo(@Path("family") family: String, @Path("pluginXmlId") pluginXmlId: String): PluginInfoBean
 }
 
 

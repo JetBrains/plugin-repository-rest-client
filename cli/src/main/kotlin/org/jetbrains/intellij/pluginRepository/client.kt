@@ -9,7 +9,7 @@ class Client {
         @JvmStatic
         fun main(args: Array<String>) {
             if (args.isEmpty()) {
-                System.err.println("Command is not specified: `upload`, `download` or `list` commands are supported.")
+                System.err.println("Command is not specified: `upload`, `download`, `list` or `info` commands are supported.")
                 System.exit(1)
             }
             val command = args[0]
@@ -18,8 +18,9 @@ class Client {
                 "upload" -> upload(restParameters)
                 "download" -> System.exit(if (download(restParameters) != null) 0 else 1)
                 "list" -> list(restParameters)
+                "info" -> info(restParameters)
                 else -> {
-                    System.err.println("Unknown command `$command`: `upload`, `download` or `list` commands are supported.")
+                    System.err.println("Unknown command `$command`: `upload`, `download`, `list` or `info` commands are supported.")
                     System.exit(1)
                 }
             }
@@ -68,6 +69,16 @@ class Client {
             }
         }
 
+        private fun info(args: Array<String>) {
+            val options = InfoOptions()
+            Args.parseOrExit(options, args)
+            val pluginRepository = PluginRepositoryInstance(options.host)
+            val plugin = pluginRepository.pluginInfo(options.family!!, options.pluginId!!)
+            if (plugin != null) {
+                println("${plugin.name} ${plugin.id} made by ${plugin.vendor.name}")
+            }
+        }
+
         private fun parseChannel(channel: String?) = if (!channel.isNullOrEmpty() && channel != "_default_") channel else null
     }
 
@@ -102,6 +113,14 @@ class Client {
 
         @set:Argument("plugin", description = "Plugin ID defined in plugin.xml")
         var pluginId: String? = null
+    }
+
+    class InfoOptions : BaseOptions() {
+        @set:Argument("plugin", required = true, description = "Plugin ID defined in plugin.xml")
+        var pluginId: String? = null
+
+        @set:Argument("family", description = "Plugin's family")
+        var family: String? = "intellij"
     }
 
     open class BaseOptions {
