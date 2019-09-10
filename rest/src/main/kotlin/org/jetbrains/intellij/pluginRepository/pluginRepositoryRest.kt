@@ -187,21 +187,23 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
     private fun processRetofitError(e: RetrofitError, notFoundErrorMessage: String, baseErrorMessage: String): String {
         //see `retrofit.RetrofitError.Kind.UNEXPECTED` doc
         if (e.kind == RetrofitError.Kind.UNEXPECTED) throw e.cause!!
-        val response = e.response
-        var errorMessage = "$baseErrorMessage. Response from server: ${response.status}"
-        if (response != null) {
-            if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
-                errorMessage = notFoundErrorMessage
-            } else if (response.status == HttpURLConnection.HTTP_BAD_REQUEST && response.body.mimeType().startsWith("application/json")) {
-                val bodyAs = e.getBodyAs(RestError::class.java)
-                errorMessage = (bodyAs as? RestError)?.msg
-                        ?: "$baseErrorMessage. Response from server: ${response.status}"
-            }
-        } else {
-            "$baseErrorMessage: ${e.message}"
-        }
+        val errorMessage = retrofitErrorMessage(e, baseErrorMessage, notFoundErrorMessage)
         LOG.error(errorMessage, e)
         return errorMessage
+    }
+
+    private fun retrofitErrorMessage(e: RetrofitError, baseErrorMessage: String, notFoundErrorMessage: String): String {
+        val response = e.response ?: return "$baseErrorMessage: ${e.message}"
+        if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
+            return notFoundErrorMessage
+        }
+        if (response.status == HttpURLConnection.HTTP_BAD_REQUEST && response.body.mimeType().startsWith("application/json")) {
+            val bodyAs = e.getBodyAs(RestError::class.java)
+            if (bodyAs is RestError) {
+                return bodyAs.msg
+            }
+        }
+        return "$baseErrorMessage. Response from server: ${response.status}"
     }
 
     private fun downloadFile(response: Response, targetPath: String): File? {
