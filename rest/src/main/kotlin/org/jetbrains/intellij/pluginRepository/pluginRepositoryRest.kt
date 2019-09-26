@@ -118,11 +118,11 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
             .build()
             .create(PluginRepositoryService::class.java)
 
-    fun uploadPlugin(pluginId: Int, file: File, channel: String? = null, notes: String? = null) {
+    @JvmOverloads fun uploadPlugin(pluginId: Int, file: File, channel: String? = null, notes: String? = null) {
         uploadPluginInternal(file, pluginId = pluginId, channel = channel, notes = notes)
     }
 
-    fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null, notes: String? = null) {
+    @JvmOverloads fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null, notes: String? = null) {
         uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
     }
 
