@@ -95,7 +95,7 @@ class Client {
         @set:Argument("family", description = "Plugin's family")
         var family: String? = "intellij"
 
-        @set:Argument(description = "Update's notes")
+        @set:Argument(description = "Change notes (may include HTML tags). The argument is ignored when uploading updates for IntelliJ-based IDEs")
         var notes: String? = null
     }
 
