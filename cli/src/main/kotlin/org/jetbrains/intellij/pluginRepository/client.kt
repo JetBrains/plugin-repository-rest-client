@@ -53,8 +53,8 @@ class Client {
             val pluginId = options.pluginId
             when {
                 pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), options.family!!, 104, "https://plugins.jetbrains.com/legal/terms-of-use")
-                pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel))
-                else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel))
+                pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
+                else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
             }
         }
 
@@ -94,6 +94,9 @@ class Client {
 
         @set:Argument("family", description = "Plugin's family")
         var family: String? = "intellij"
+
+        @set:Argument(description = "Change notes (may include HTML tags). The argument is ignored when uploading updates for IntelliJ-based IDEs")
+        var notes: String? = null
     }
 
     class DownloadOptions : BaseOptions() {

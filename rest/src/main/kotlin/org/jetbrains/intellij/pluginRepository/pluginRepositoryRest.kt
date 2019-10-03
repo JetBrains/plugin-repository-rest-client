@@ -118,12 +118,12 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
             .build()
             .create(PluginRepositoryService::class.java)
 
-    fun uploadPlugin(pluginId: Int, file: File, channel: String? = null) {
-        uploadPluginInternal(file, pluginId = pluginId, channel = channel)
+    @JvmOverloads fun uploadPlugin(pluginId: Int, file: File, channel: String? = null, notes: String? = null) {
+        uploadPluginInternal(file, pluginId = pluginId, channel = channel, notes = notes)
     }
 
-    fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null) {
-        uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel)
+    @JvmOverloads fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null, notes: String? = null) {
+        uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
     }
 
     fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
@@ -138,14 +138,14 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
         }
     }
 
-    private fun uploadPluginInternal(file: File, pluginId: Int? = null, pluginXmlId: String? = null, channel: String? = null) {
+    private fun uploadPluginInternal(file: File, pluginId: Int? = null, pluginXmlId: String? = null, channel: String? = null, notes: String? = null) {
         ensureCredentialsAreSet()
         try {
             LOG.info("Uploading plugin ${pluginXmlId ?: pluginId} from ${file.absolutePath} to $siteUrl")
             val response = if (pluginXmlId != null) {
-                service.uploadByXmlId(TypedString(pluginXmlId), channel?.let { TypedString(it) }, file.toTypedFile())
+                service.uploadByXmlId(TypedString(pluginXmlId), channel?.let { TypedString(it) }, notes?.let { TypedString(it) }, file.toTypedFile())
             } else {
-                service.upload(TypedString(pluginId.toString()), channel?.let { TypedString(it) }, file.toTypedFile())
+                service.upload(TypedString(pluginId.toString()), channel?.let { TypedString(it) }, notes?.let { TypedString(it) }, file.toTypedFile())
             }
             LOG.info("Done: " + response.text)
         } catch (e: RetrofitError) {
@@ -284,6 +284,7 @@ private interface PluginRepositoryService {
     @POST("/plugin/uploadPlugin")
     fun upload(@Part("pluginId") pluginId: TypedString,
                @Part("channel") channel: TypedString?,
+               @Part("notes") notes: TypedString?,
                @Part("file") file: TypedFile): Response
 
     @Multipart
@@ -291,6 +292,7 @@ private interface PluginRepositoryService {
     @POST("/plugin/uploadPlugin")
     fun uploadByXmlId(@Part("xmlId") pluginXmlId: TypedString,
                       @Part("channel") channel: TypedString?,
+                      @Part("notes") notes: TypedString?,
                       @Part("file") file: TypedFile): Response
 
     @Multipart
