@@ -24,6 +24,7 @@ import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
 import java.net.HttpURLConnection
+import java.nio.file.Files
 
 @Root(strict = false)
 private data class RestPluginRepositoryBean(
@@ -224,10 +225,7 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
             }
             targetFile = file
         }
-        if (!targetFile.createNewFile()) {
-            throw RuntimeException("Cannot create ${targetFile.absolutePath}")
-        }
-        targetFile.outputStream().use { response.body.`in`().copyTo(it) }
+        Files.copy(response.body.`in`(), targetFile.toPath())
         LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
 
         return targetFile
