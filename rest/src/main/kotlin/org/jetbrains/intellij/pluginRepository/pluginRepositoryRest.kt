@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.pluginRepository
 
 import com.google.gson.Gson
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.simpleframework.xml.Attribute
 import org.simpleframework.xml.Element
@@ -81,10 +82,18 @@ class CompositeConverter : Converter {
     private val xmlConverter = SimpleXMLConverter()
     private val jsonConverter = GsonConverter(Gson())
 
-    override fun fromBody(body: TypedInput, type: Type?): Any = if (body.mimeType().startsWith("text/xml")) {
-        xmlConverter.fromBody(body, type)
-    } else {
-        jsonConverter.fromBody(body, type)
+    override fun fromBody(body: TypedInput, type: Type?): Any = when {
+        body.mimeType().startsWith("text/xml") -> {
+            xmlConverter.fromBody(body, type)
+        }
+        body.mimeType().startsWith("application/json") -> {
+            jsonConverter.fromBody(body, type)
+        }
+        else -> {
+            val outputStream = ByteOutputStream()
+            body.`in`().copyTo(outputStream)
+            outputStream.toString()
+        }
     }
 
     override fun toBody(`object`: Any?): TypedOutput {
@@ -200,11 +209,14 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
         if (response.status == HttpURLConnection.HTTP_NOT_FOUND) {
             return notFoundErrorMessage
         }
-        if (response.status == HttpURLConnection.HTTP_BAD_REQUEST && response.body.mimeType().startsWith("application/json")) {
+        if (response.body.mimeType().startsWith("application/json")) {
             val bodyAs = e.getBodyAs(RestError::class.java)
             if (bodyAs is RestError) {
                 return bodyAs.msg
             }
+        }
+        if (response.body.mimeType().startsWith("text/plain")) {
+            return e.body.toString()
         }
         return "$baseErrorMessage. Response from server: ${response.status}"
     }
