@@ -120,7 +120,9 @@ class PluginRepositoryInstance constructor(val siteUrl: String, private val toke
                 }
             }
             .setRequestInterceptor { request ->
-                request.addHeader("Authorization", "Bearer $token")
+                if (token != null) {
+                    request.addHeader("Authorization", "Bearer $token")
+                }
             }
             .setLog { LOG.debug(it) }
             .setLogLevel(RestAdapter.LogLevel.BASIC)
