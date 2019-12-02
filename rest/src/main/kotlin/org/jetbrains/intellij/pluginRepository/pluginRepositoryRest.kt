@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
 import com.google.gson.Gson
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.simpleframework.xml.Attribute
 import org.simpleframework.xml.Element
@@ -21,6 +20,7 @@ import retrofit.mime.TypedFile
 import retrofit.mime.TypedInput
 import retrofit.mime.TypedOutput
 import retrofit.mime.TypedString
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
@@ -90,7 +90,7 @@ class CompositeConverter : Converter {
             jsonConverter.fromBody(body, type)
         }
         else -> {
-            val outputStream = ByteOutputStream()
+            val outputStream = ByteArrayOutputStream()
             body.`in`().copyTo(outputStream)
             outputStream.toString()
         }
