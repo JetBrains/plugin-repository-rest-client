@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.MediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import org.jetbrains.intellij.pluginRepository.exceptions.restException
@@ -73,7 +74,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
     ensureCredentialsAreSet()
     LOG.info("Uploading new plugin from ${file.absolutePath}")
-    val plugin = uploadOrFail(service.uploadNewPlugin(file, family, licenseUrl, categoryId))
+    val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family, licenseUrl, categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
     return plugin
   }
@@ -97,20 +98,20 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   ) {
     ensureCredentialsAreSet()
     val message = when {
-      pluginXmlId != null -> uploadOrFail(service.uploadByXmlId(pluginXmlId, channel, notes, file.toRequestBody()), pluginXmlId)
-      pluginId != null -> {
-        val id = pluginId.toString()
-        uploadOrFail(service.uploadByXmlId(id, channel, notes, file.toRequestBody()), id)
-      }
+      pluginXmlId != null -> uploadOrFail(service.uploadByXmlId(pluginXmlId, channel, notes, file.toMultipartBody()), pluginXmlId)
+      pluginId != null -> uploadOrFail(service.upload(pluginId, channel, notes, file.toMultipartBody()), pluginId.toString())
       else -> restException(Messages.MISSING_PLUGINS_PARAMETERS)
     }
-    LOG.info("Done: $message")
+    LOG.info("Done: ${message.string()}")
   }
 
   private fun ensureCredentialsAreSet() {
     if (token == null) throw RuntimeException(Messages.MISSION_TOKEN)
   }
 
-  private fun File.toRequestBody() = RequestBody.create(MediaType.get("application/octet-stream"), this)
+  private fun File.toMultipartBody(): MultipartBody.Part {
+    val body = RequestBody.create(MediaType.get("application/octet-stream"), this)
+    return MultipartBody.Part.createFormData("file", this.name, body)
+  }
 
 }
