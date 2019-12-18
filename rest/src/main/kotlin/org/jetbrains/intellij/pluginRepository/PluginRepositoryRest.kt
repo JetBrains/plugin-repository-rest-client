@@ -73,7 +73,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
     ensureCredentialsAreSet()
     LOG.info("Uploading new plugin from ${file.absolutePath}")
-    val plugin = uploadOrFail(service.uploadNewPlugin(file, family, licenseUrl, categoryId.toString()))
+    val plugin = uploadOrFail(service.uploadNewPlugin(file, family, licenseUrl, categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
     return plugin
   }
