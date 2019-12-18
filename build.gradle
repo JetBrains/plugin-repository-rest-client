@@ -26,7 +26,7 @@ task fatJar(type: Jar, group: 'build') {
     dependsOn it.classes
   }
   manifest {
-    attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Client'
+    attributes 'Main-Class': 'org.jetbrains.intellij.PluginRepository.Client'
   }
   subprojects { project ->
     from { project.configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
