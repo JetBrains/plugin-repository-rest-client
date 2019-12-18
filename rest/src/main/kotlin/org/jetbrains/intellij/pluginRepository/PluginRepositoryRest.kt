@@ -10,6 +10,7 @@ import org.jetbrains.intellij.pluginRepository.exceptions.restException
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
+import org.jetbrains.intellij.pluginRepository.utils.Messages
 import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.Response
@@ -106,15 +107,13 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         val id = pluginId.toString()
         uploadOrFail(service.uploadByXmlId(id, channel, notes, file.toRequestBody()), id)
       }
-      else -> restException("pluginId or XML id of plugin should be specified")
+      else -> restException(Messages.MISSING_PLUGINS_PARAMETERS)
     }
     LOG.info("Done: $message")
   }
 
   private fun ensureCredentialsAreSet() {
-    if (token == null) {
-      throw RuntimeException("Token must be set for uploading")
-    }
+    if (token == null) throw RuntimeException(Messages.MISSION_TOKEN)
   }
 
   private fun downloadFile(executed: Response<ResponseBody>, targetPath: String): File? {
@@ -126,11 +125,11 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     if (targetFile.isDirectory) {
       val guessFileName = guessFileName(executed.raw(), url)
       if (guessFileName.contains(File.separatorChar)) {
-        throw IOException("Invalid filename returned by a server")
+        throw IOException(Messages.INVALID_FILENAME)
       }
       val file = File(targetFile, guessFileName)
       if (file.parentFile != targetFile) {
-        throw IOException("Invalid filename returned by a server")
+        throw IOException(Messages.INVALID_FILENAME)
       }
       targetFile = file
     }
@@ -142,7 +141,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   private fun guessFileName(response: okhttp3.Response, url: String): String {
     val filenameMarker = "filename="
     val contentDisposition = response.headers().names().find { it.equals("Content-Disposition", ignoreCase = true) }
-                             ?: throw IOException("Content-Disposition header should be set")
+                             ?: throw IOException(Messages.MISSING_CONTENT_DISPOSITION)
     val contentDispositionHeader = response.headers().get(contentDisposition)
     if (contentDispositionHeader == null || !contentDispositionHeader.contains(filenameMarker)) {
       val fileName = url.substringAfterLast('/')
@@ -169,7 +168,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   private fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
     return try {
       val executed = callable.execute()
-      if (executed.isSuccessful) executed.body() ?: restException("Failed to upload plugin.")
+      if (executed.isSuccessful) executed.body() ?: restException(Messages.FAILED_UPLOAD)
       else {
         val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
         restException(message)
@@ -182,15 +181,15 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   }
 
   private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
-    val error = errorBody ?: return "Failed to upload plugin"
-    if (code == HttpURLConnection.HTTP_NOT_FOUND) return notFoundMessage(pluginName)
+    val error = errorBody ?: return Messages.FAILED_UPLOAD
+    if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.notFoundMessage(pluginName)
     val contextType = error.contentType()?.toString()
     return when {
       contextType?.startsWith("text/plain") == true -> error.string()
       contextType?.startsWith("application/json") == true -> {
         jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java).msg
       }
-      else -> "Failed to upload plugin. ${error.string()}"
+      else -> "${Messages.FAILED_UPLOAD} ${error.string()}"
     }
   }
 
@@ -205,10 +204,6 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
       restException(e.message, e)
     }
   }
-
-  private fun notFoundMessage(plugin: String?) = "Cannot find ${plugin ?: "plugin"}. " +
-                                                 "Note that you need to upload the plugin to the repository at least once manually " +
-                                                 "(to specify options like the license, repository URL etc.) before uploads through the client can be used."
 
 }
 
