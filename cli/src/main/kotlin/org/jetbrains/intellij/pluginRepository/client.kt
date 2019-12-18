@@ -75,7 +75,7 @@ class Client {
             val pluginRepository = PluginRepositoryInstance(options.host)
             val plugin = pluginRepository.pluginInfo(options.family!!, options.pluginId!!)
             if (plugin != null) {
-                println("${plugin.name} ${plugin.id} made by ${plugin.vendor.name}")
+                println("${plugin.name} ${plugin.id} made by ${plugin.vendor?.name}")
             }
         }
 
