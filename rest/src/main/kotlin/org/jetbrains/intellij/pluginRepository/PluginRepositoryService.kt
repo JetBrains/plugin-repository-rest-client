@@ -1,23 +1,22 @@
 package org.jetbrains.intellij.pluginRepository
 
-import okhttp3.RequestBody
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginRepositoryBean
 import retrofit2.Call
 import retrofit2.http.*
-import java.io.File
 
 interface PluginRepositoryService {
   @Multipart
   @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
   fun upload(
-    @Part("pluginId") pluginId: String,
+    @Part("pluginId") pluginId: Int,
     @Part("channel") channel: String?,
     @Part("notes") notes: String?,
-    @Part("file") file: RequestBody
-  ): Call<String>
+    @Part file: MultipartBody.Part
+  ): Call<ResponseBody>
 
   @Multipart
   @Headers("Accept: text/plain")
@@ -26,15 +25,15 @@ interface PluginRepositoryService {
     @Part("xmlId") pluginXmlId: String,
     @Part("channel") channel: String?,
     @Part("notes") notes: String?,
-    @Part("file") file: RequestBody
-  ): Call<String>
+    @Part file: MultipartBody.Part
+  ): Call<ResponseBody>
 
   @Multipart
   @POST("/api/plugins/{family}/upload")
   fun uploadNewPlugin(
-    @Part("file") file: File,
+    @Part file: MultipartBody.Part,
     @Path("family") family: String,
-    @Part("licenseUrl") licenseUrl: String,
+    @Query("licenseUrl") licenseUrl: String,
     @Part("cid") category: Int
   ): Call<PluginInfoBean>
 
