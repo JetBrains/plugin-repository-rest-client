@@ -1,29 +1,24 @@
 package org.jetbrains.intellij.pluginRepository
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.exceptions.PluginUploadRestError
 import org.jetbrains.intellij.pluginRepository.exceptions.restException
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
 import org.jetbrains.intellij.pluginRepository.utils.Messages
+import org.jetbrains.intellij.pluginRepository.utils.getFileOrNull
+import org.jetbrains.intellij.pluginRepository.utils.getResponseOrNull
+import org.jetbrains.intellij.pluginRepository.utils.uploadOrFail
 import org.slf4j.LoggerFactory
-import retrofit2.Call
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import retrofit2.converter.jaxb.JaxbConverterFactory
 import java.io.File
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.nio.file.Files
 import java.time.Duration
 
-private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
+internal val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 /**
  * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
@@ -116,95 +111,6 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     if (token == null) throw RuntimeException(Messages.MISSION_TOKEN)
   }
 
-  private fun downloadFile(executed: Response<ResponseBody>, targetPath: String): File? {
-    val url = executed.raw().request().url().url().toExternalForm()
-    val response = executed.body() ?: return null
-    val mimeType = response.contentType()?.toString()
-    if (mimeType != "application/zip" && mimeType != "application/java-archive") return null
-    var targetFile = File(targetPath)
-    if (targetFile.isDirectory) {
-      val guessFileName = guessFileName(executed.raw(), url)
-      if (guessFileName.contains(File.separatorChar)) {
-        throw IOException(Messages.INVALID_FILENAME)
-      }
-      val file = File(targetFile, guessFileName)
-      if (file.parentFile != targetFile) {
-        throw IOException(Messages.INVALID_FILENAME)
-      }
-      targetFile = file
-    }
-    Files.copy(response.byteStream(), targetFile.toPath())
-    LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
-    return targetFile
-  }
-
-  private fun guessFileName(response: okhttp3.Response, url: String): String {
-    val filenameMarker = "filename="
-    val contentDisposition = response.headers().names().find { it.equals("Content-Disposition", ignoreCase = true) }
-                             ?: throw IOException(Messages.MISSING_CONTENT_DISPOSITION)
-    val contentDispositionHeader = response.headers().get(contentDisposition)
-    if (contentDispositionHeader == null || !contentDispositionHeader.contains(filenameMarker)) {
-      val fileName = url.substringAfterLast('/')
-      return if (fileName.isNotEmpty()) fileName else url
-    }
-    return contentDispositionHeader
-      .substringAfter(filenameMarker, "")
-      .substringBefore(';')
-      .removeSurrounding("\"")
-  }
-
-  private fun <T> getResponseOrNull(callable: Call<T>): T? {
-    return try {
-      val executed = callable.execute()
-      if (executed.isSuccessful) executed.body()
-      else null
-    }
-    catch (e: Exception) {
-      LOG.error(e.message, e)
-      restException(e.message, e)
-    }
-  }
-
-  private fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
-    return try {
-      val executed = callable.execute()
-      if (executed.isSuccessful) executed.body() ?: restException(Messages.FAILED_UPLOAD)
-      else {
-        val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
-        restException(message)
-      }
-    }
-    catch (e: Exception) {
-      LOG.error(e.message, e)
-      restException(e.message)
-    }
-  }
-
-  private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
-    val error = errorBody ?: return Messages.FAILED_UPLOAD
-    if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.notFoundMessage(pluginName)
-    val contextType = error.contentType()?.toString()
-    return when {
-      contextType?.startsWith("text/plain") == true -> error.string()
-      contextType?.startsWith("application/json") == true -> {
-        jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java).msg
-      }
-      else -> "${Messages.FAILED_UPLOAD} ${error.string()}"
-    }
-  }
-
-  private fun getFileOrNull(callable: Call<ResponseBody>, targetPath: String): File? {
-    return try {
-      val executed = callable.execute()
-      if (executed.isSuccessful) downloadFile(executed, targetPath) ?: return null
-      else null
-    }
-    catch (e: Exception) {
-      LOG.error(e.message, e)
-      restException(e.message, e)
-    }
-  }
+  private fun File.toRequestBody() = RequestBody.create(MediaType.get("application/octet-stream"), this)
 
 }
-
-private fun File.toRequestBody() = RequestBody.create(MediaType.get("application/octet-stream"), this)
