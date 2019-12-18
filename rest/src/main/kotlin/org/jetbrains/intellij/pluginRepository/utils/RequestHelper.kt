@@ -24,7 +24,7 @@ internal fun <T> getResponseOrNull(callable: Call<T>): T? {
 internal fun getFileOrNull(callable: Call<ResponseBody>, targetPath: String): File? {
   return try {
     val executed = callable.execute()
-    if (executed.isSuccessful) downloadFile(executed, targetPath) ?: return null
+    if (executed.isSuccessful) downloadFile(executed, targetPath)
     else null
   }
   catch (e: Exception) {
