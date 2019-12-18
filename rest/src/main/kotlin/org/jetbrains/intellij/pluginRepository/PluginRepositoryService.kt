@@ -35,7 +35,7 @@ interface PluginRepositoryService {
     @Part("file") file: File,
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: String,
-    @Part("cid") category: String
+    @Part("cid") category: Int
   ): Call<PluginInfoBean>
 
 
