@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginRepositoryBean
@@ -33,7 +34,7 @@ interface PluginRepositoryService {
   fun uploadNewPlugin(
     @Part file: MultipartBody.Part,
     @Path("family") family: String,
-    @Query("licenseUrl") licenseUrl: String,
+    @Part("licenseUrl") licenseUrl: RequestBody,
     @Part("cid") category: Int
   ): Call<PluginInfoBean>
 
