@@ -23,7 +23,7 @@ interface PluginRepositoryService {
   @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
   fun uploadByXmlId(
-    @Part("xmlId") pluginXmlId: String,
+    @Part("xmlId") pluginXmlId: RequestBody,
     @Part("channel") channel: String?,
     @Part("notes") notes: String?,
     @Part file: MultipartBody.Part

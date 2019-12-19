@@ -98,7 +98,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   ) {
     ensureCredentialsAreSet()
     val message = when {
-      pluginXmlId != null -> uploadOrFail(service.uploadByXmlId(pluginXmlId, channel, notes, file.toMultipartBody()), pluginXmlId)
+      pluginXmlId != null -> uploadOrFail(service.uploadByXmlId(pluginXmlId.toRequestBody(), channel, notes, file.toMultipartBody()), pluginXmlId)
       pluginId != null -> uploadOrFail(service.upload(pluginId, channel, notes, file.toMultipartBody()), pluginId.toString())
       else -> restException(Messages.MISSING_PLUGINS_PARAMETERS)
     }
