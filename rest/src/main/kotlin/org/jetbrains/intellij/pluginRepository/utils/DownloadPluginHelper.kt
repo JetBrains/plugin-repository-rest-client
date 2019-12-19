@@ -32,7 +32,6 @@ internal fun downloadFile(executed: Response<ResponseBody>, targetPath: String):
 private fun guessFileName(response: okhttp3.Response, url: String): String {
   val filenameMarker = "filename="
   val contentDisposition = response.headers().names().find { it.equals("Content-Disposition", ignoreCase = true) }
-                           ?: throw IOException(Messages.MISSING_CONTENT_DISPOSITION)
   val contentDispositionHeader = response.headers().get(contentDisposition)
   if (contentDispositionHeader == null || !contentDispositionHeader.contains(filenameMarker)) {
     val fileName = url.substringAfterLast('/')
