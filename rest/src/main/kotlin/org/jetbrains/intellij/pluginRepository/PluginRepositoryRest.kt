@@ -74,7 +74,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
     ensureCredentialsAreSet()
     LOG.info("Uploading new plugin from ${file.absolutePath}")
-    val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family, licenseUrl, categoryId))
+    val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family, licenseUrl.toRequestBody(), categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
     return plugin
   }
@@ -113,5 +113,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     val body = RequestBody.create(MediaType.get("application/octet-stream"), this)
     return MultipartBody.Part.createFormData("file", this.name, body)
   }
+
+  private fun String.toRequestBody() = RequestBody.create(MediaType.get("text/plain"), this)
 
 }
