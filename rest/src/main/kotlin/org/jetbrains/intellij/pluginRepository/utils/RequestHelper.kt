@@ -5,6 +5,7 @@ import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.LOG
 import org.jetbrains.intellij.pluginRepository.exceptions.PluginUploadRestError
 import org.jetbrains.intellij.pluginRepository.exceptions.restException
+import org.jetbrains.intellij.pluginRepository.exceptions.uploadException
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
@@ -22,12 +23,12 @@ internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
     if (executed.isSuccessful) executed.body() ?: restException(Messages.FAILED_UPLOAD)
     else {
       val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
-      restException(message)
+      uploadException(message)
     }
   }
   catch (e: Exception) {
     LOG.error(e.message, e)
-    restException(e.message)
+    uploadException(e.message)
   }
 }
 

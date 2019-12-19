@@ -4,7 +4,7 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import org.jetbrains.intellij.pluginRepository.exceptions.restException
+import org.jetbrains.intellij.pluginRepository.exceptions.uploadException
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
@@ -105,7 +105,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile), pluginXmlId)
       pluginId != null -> uploadOrFail(
         service.upload(pluginId, channelAsRequestBody, notesAsRequestBody, multipartFile), pluginId.toString())
-      else -> restException(Messages.MISSING_PLUGINS_PARAMETERS)
+      else -> uploadException(Messages.MISSING_PLUGINS_PARAMETERS)
     }
     LOG.info("Done: ${message.string()}")
   }
