@@ -97,9 +97,14 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     notes: String? = null
   ) {
     ensureCredentialsAreSet()
+    val channelAsRequestBody = channel?.toRequestBody()
+    val notesAsRequestBody = notes?.toRequestBody()
+    val multipartFile = file.toMultipartBody()
     val message = when {
-      pluginXmlId != null -> uploadOrFail(service.uploadByXmlId(pluginXmlId.toRequestBody(), channel, notes, file.toMultipartBody()), pluginXmlId)
-      pluginId != null -> uploadOrFail(service.upload(pluginId, channel, notes, file.toMultipartBody()), pluginId.toString())
+      pluginXmlId != null -> uploadOrFail(
+        service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile), pluginXmlId)
+      pluginId != null -> uploadOrFail(
+        service.upload(pluginId, channelAsRequestBody, notesAsRequestBody, multipartFile), pluginId.toString())
       else -> restException(Messages.MISSING_PLUGINS_PARAMETERS)
     }
     LOG.info("Done: ${message.string()}")

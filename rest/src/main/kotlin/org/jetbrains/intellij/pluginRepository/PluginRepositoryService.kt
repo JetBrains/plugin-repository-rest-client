@@ -14,8 +14,8 @@ interface PluginRepositoryService {
   @POST("/plugin/uploadPlugin")
   fun upload(
     @Part("pluginId") pluginId: Int,
-    @Part("channel") channel: String?,
-    @Part("notes") notes: String?,
+    @Part("channel") channel: RequestBody?,
+    @Part("notes") notes: RequestBody?,
     @Part file: MultipartBody.Part
   ): Call<ResponseBody>
 
@@ -24,8 +24,8 @@ interface PluginRepositoryService {
   @POST("/plugin/uploadPlugin")
   fun uploadByXmlId(
     @Part("xmlId") pluginXmlId: RequestBody,
-    @Part("channel") channel: String?,
-    @Part("notes") notes: String?,
+    @Part("channel") channel: RequestBody?,
+    @Part("notes") notes: RequestBody?,
     @Part file: MultipartBody.Part
   ): Call<ResponseBody>
 
