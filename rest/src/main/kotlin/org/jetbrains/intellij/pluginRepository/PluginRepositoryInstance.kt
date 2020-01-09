@@ -1,25 +1,18 @@
 package org.jetbrains.intellij.pluginRepository
 
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody
-import org.jetbrains.intellij.pluginRepository.exceptions.uploadException
+import okhttp3.*
+import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
-import org.jetbrains.intellij.pluginRepository.utils.Messages
-import org.jetbrains.intellij.pluginRepository.utils.getFileOrNull
-import org.jetbrains.intellij.pluginRepository.utils.getResponseOrNull
-import org.jetbrains.intellij.pluginRepository.utils.uploadOrFail
+import org.jetbrains.intellij.pluginRepository.utils.*
 import org.slf4j.LoggerFactory
+import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import retrofit2.converter.jaxb.JaxbConverterFactory
 import java.io.File
 import java.time.Duration
-
-internal val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 /**
  * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
@@ -58,7 +51,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
 
   fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
     LOG.info("Downloading $pluginXmlId:$version")
-    return getFileOrNull(service.download(pluginXmlId, version, channel), targetPath)
+    return downloadPluginInternal(service.download(pluginXmlId, version, channel), targetPath)
   }
 
   fun downloadCompatiblePlugin(
@@ -68,7 +61,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     targetPath: String
   ): File? {
     LOG.info("Downloading $pluginXmlId for $ideBuild build")
-    return getFileOrNull(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
+    return downloadPluginInternal(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
   }
 
   fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
@@ -89,6 +82,12 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
   }
 
+  private fun downloadPluginInternal(callable: Call<ResponseBody>, targetPath: String): File? = executeAndCall(callable) {
+    val file = downloadFile(it, targetPath)
+    LOG.info("Downloaded successfully to $targetPath")
+    file
+  }
+
   private fun uploadPluginInternal(
     file: File,
     pluginId: Int? = null,
@@ -105,7 +104,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile), pluginXmlId)
       pluginId != null -> uploadOrFail(
         service.upload(pluginId, channelAsRequestBody, notesAsRequestBody, multipartFile), pluginId.toString())
-      else -> uploadException(Messages.MISSING_PLUGINS_PARAMETERS)
+      else -> throw UploadFailedException(Messages.MISSING_PLUGINS_PARAMETERS, null)
     }
     LOG.info("Done: ${message.string()}")
   }
@@ -121,4 +120,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
 
   private fun String.toRequestBody() = RequestBody.create(MediaType.get("text/plain"), this)
 
+  private companion object {
+    private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
+  }
 }

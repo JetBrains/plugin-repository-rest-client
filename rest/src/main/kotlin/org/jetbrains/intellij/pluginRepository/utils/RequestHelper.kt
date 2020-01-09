@@ -1,49 +1,47 @@
 package org.jetbrains.intellij.pluginRepository.utils
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.LOG
-import org.jetbrains.intellij.pluginRepository.exceptions.PluginUploadRestError
-import org.jetbrains.intellij.pluginRepository.exceptions.restException
-import org.jetbrains.intellij.pluginRepository.exceptions.uploadException
+import org.jetbrains.intellij.pluginRepository.exceptions.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import retrofit2.Call
 import retrofit2.Response
-import java.io.File
 import java.net.HttpURLConnection
 
 internal fun <T> getResponseOrNull(callable: Call<T>): T? = executeAndCall(callable) { it.body() }
 
-internal fun getFileOrNull(callable: Call<ResponseBody>, targetPath: String): File? = executeAndCall(callable) {
-  downloadFile(it, targetPath)
-}
-
 internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
   return try {
     val executed = callable.execute()
-    if (executed.isSuccessful) executed.body() ?: restException(Messages.FAILED_UPLOAD)
+    if (executed.isSuccessful) executed.body() ?: throw UploadFailedException(Messages.FAILED_UPLOAD, null)
     else {
       val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
-      uploadException(message)
+      throw UploadFailedException(message, null)
     }
   }
   catch (e: Exception) {
-    LOG.error(e.message, e)
-    uploadException(e.message)
+    throw UploadFailedException(e.message, e)
   }
 }
 
-private fun <T, R> executeAndCall(callable: Call<T>, block: (response: Response<T>) -> R): R? {
+internal fun <T, R> executeAndCall(callable: Call<T>, block: (response: Response<T>) -> R): R? {
   return try {
     val executed = callable.execute()
     if (executed.isSuccessful) block(executed)
     else null
   }
   catch (e: Exception) {
-    LOG.error(e.message, e)
-    restException(e.message, e)
+    throw PluginRepositoryException(e.message, e)
   }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class PluginUploadRestError(
+    @Deprecated("No longer support in Marketplace REST API", replaceWith = ReplaceWith("message"), level = DeprecationLevel.WARNING)
+    val msg: String? = null,
+    val message: String? = null
+)
 
 private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
   val error = errorBody ?: return Messages.FAILED_UPLOAD

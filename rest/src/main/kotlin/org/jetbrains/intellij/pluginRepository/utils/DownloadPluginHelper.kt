@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.utils
 
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.LOG
 import retrofit2.Response
 import java.io.File
 import java.io.IOException
@@ -25,7 +24,6 @@ internal fun downloadFile(executed: Response<ResponseBody>, targetPath: String):
     targetFile = file
   }
   Files.copy(response.byteStream(), targetFile.toPath())
-  LOG.info("Downloaded successfully to ${targetFile.absolutePath}")
   return targetFile
 }
 
