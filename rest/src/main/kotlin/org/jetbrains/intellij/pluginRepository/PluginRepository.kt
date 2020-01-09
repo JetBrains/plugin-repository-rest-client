@@ -9,9 +9,9 @@ interface PluginRepository {
 
   fun fetchPluginInfo(family: String, pluginXmlId: String): PluginInfoBean?
 
-  fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File?
+  fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: File): File?
 
-  fun downloadCompatiblePlugin(pluginXmlId: String, ideBuild: String, channel: String? = null, targetPath: String): File?
+  fun downloadCompatiblePlugin(pluginXmlId: String, ideBuild: String, channel: String? = null, targetPath: File): File?
 
   fun uploadPlugin(pluginId: Int, file: File, channel: String? = null, notes: String? = null)
 

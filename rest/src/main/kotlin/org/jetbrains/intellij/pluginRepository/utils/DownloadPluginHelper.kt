@@ -8,7 +8,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: String): File? {
+internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val (response, error) = executeWithInterruptionCheck(callable)
   if (error != null) {
     throw error
@@ -24,12 +24,12 @@ internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: String): F
   throw PluginRepositoryException(Messages.getMessage("downloading.failed") + message)
 }
 
-private fun downloadFile(executed: Response<ResponseBody>, targetPath: String): File? {
+private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): File? {
   val url = executed.raw().request().url().url().toExternalForm()
   val response = executed.body() ?: return null
   val mimeType = response.contentType()?.toString()
   if (mimeType != "application/zip" && mimeType != "application/java-archive") return null
-  var targetFile = File(targetPath)
+  var targetFile = targetPath
   if (targetFile.isDirectory) {
     val guessFileName = guessFileName(executed.raw(), url)
     if (guessFileName.contains(File.separatorChar)) {

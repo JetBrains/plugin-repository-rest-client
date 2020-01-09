@@ -48,7 +48,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     return executeAndParseBody(service.pluginInfo(family, pluginXmlId))
   }
 
-  override fun download(pluginXmlId: String, version: String, channel: String?, targetPath: String): File? {
+  override fun download(pluginXmlId: String, version: String, channel: String?, targetPath: File): File? {
     LOG.info("Downloading $pluginXmlId:$version")
     return doDownloadPlugin(service.download(pluginXmlId, version, channel), targetPath)
   }
@@ -57,7 +57,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     pluginXmlId: String,
     ideBuild: String,
     channel: String?,
-    targetPath: String
+    targetPath: File
   ): File? {
     LOG.info("Downloading $pluginXmlId for $ideBuild build")
     return doDownloadPlugin(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
@@ -79,7 +79,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
   }
 
-  private fun doDownloadPlugin(callable: Call<ResponseBody>, targetPath: String): File? {
+  private fun doDownloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
     val file = downloadPlugin(callable, targetPath)
     LOG.info("Downloaded successfully to $targetPath")
     return file

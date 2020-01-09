@@ -38,10 +38,10 @@ class Client {
             val pluginRepository = PluginRepositoryInstance(options.host)
             val channel = parseChannel(options.channel)
             return if (!options.version.isNullOrBlank()) {
-                pluginRepository.download(options.pluginId!!, options.version!!, channel, options.destination)
+                pluginRepository.download(options.pluginId!!, options.version!!, channel, File(options.destination))
             } else {
                 pluginRepository.downloadCompatiblePlugin(options.pluginId!!, options.ideBuild!!, channel,
-                        options.destination)
+                        File(options.destination))
             }
 
         }
