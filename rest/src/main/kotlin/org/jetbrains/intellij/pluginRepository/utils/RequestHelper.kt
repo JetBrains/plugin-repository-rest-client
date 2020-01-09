@@ -53,6 +53,7 @@ private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginN
     contextType?.startsWith("text/plain") == true -> error.string()
     contextType?.startsWith("application/json") == true -> {
       val restError = jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java)
+      @Suppress("DEPRECATION")
       if (restError.msg != null) return restError.msg else restError.message ?: Messages.FAILED_UPLOAD
     }
     else -> "${Messages.FAILED_UPLOAD} ${error.string()}"
