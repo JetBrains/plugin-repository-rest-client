@@ -1,59 +1,60 @@
 package org.jetbrains.intellij.pluginRepository.utils
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.exceptions.PluginRepositoryException
-import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
-import java.net.HttpURLConnection
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
-internal fun <T> getResponseOrNull(callable: Call<T>): T? = executeAndCall(callable) { it.body() }
-
-internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
-  return try {
-    val executed = callable.execute()
-    if (executed.isSuccessful) executed.body() ?: throw UploadFailedException(Messages.getMessage("failed.upload"), null)
-    else {
-      val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
-      throw UploadFailedException(message, null)
-    }
+internal fun <T> executeAndParseBody(callable: Call<T>): T? {
+  val (response, error) = executeWithInterruptionCheck(callable)
+  if (error != null) {
+    throw error
   }
-  catch (e: Exception) {
-    throw UploadFailedException(e.message, e)
+  if (response!!.isSuccessful) {
+    return response.body()
   }
+  val message = response.errorBody()?.string() ?: response.message() ?: "Failed request"
+  throw PluginRepositoryException(message)
 }
 
-internal fun <T, R> executeAndCall(callable: Call<T>, block: (response: Response<T>) -> R): R? {
-  return try {
-    val executed = callable.execute()
-    if (executed.isSuccessful) block(executed)
-    else null
-  }
-  catch (e: Exception) {
-    throw PluginRepositoryException(e.message, e)
-  }
-}
+internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<T>?, Throwable?> {
+  val responseRef = AtomicReference<Response<T>?>()
+  val errorRef = AtomicReference<Throwable?>()
+  val finished = AtomicBoolean()
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-private data class PluginUploadRestError(
-    @Deprecated("No longer support in Marketplace REST API", replaceWith = ReplaceWith("message"), level = DeprecationLevel.WARNING)
-    val msg: String? = null,
-    val message: String? = null
-)
-
-private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
-  val error = errorBody ?: return Messages.getMessage("failed.upload")
-  if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.getMessage("not.found", pluginName ?: "plugin")
-  val contextType = error.contentType()?.toString()
-  return when {
-    contextType?.startsWith("text/plain") == true -> error.string()
-    contextType?.startsWith("application/json") == true -> {
-      val restError = jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java)
-      @Suppress("DEPRECATION")
-      if (restError.msg != null) return restError.msg else restError.message ?: Messages.getMessage("failed.upload")
+  callable.enqueue(object : Callback<T> {
+    override fun onResponse(call: Call<T>, response: Response<T>) {
+      responseRef.set(response)
+      finished.set(true)
     }
-    else -> "${Messages.getMessage("failed.upload")} ${error.string()}"
+
+    override fun onFailure(call: Call<T>, error: Throwable) {
+      errorRef.set(error)
+      finished.set(true)
+    }
+  })
+
+  while (!finished.get()) {
+    if (Thread.interrupted()) {
+      callable.cancel()
+      throw InterruptedException()
+    }
+
+    try {
+      Thread.sleep(100)
+    } catch (ie: InterruptedException) {
+      callable.cancel()
+      throw ie
+    }
   }
+
+  if (callable.isCanceled || Thread.interrupted()) {
+    throw InterruptedException()
+  }
+
+  val response = responseRef.get()
+  val error = errorRef.get()
+  return response to error
 }

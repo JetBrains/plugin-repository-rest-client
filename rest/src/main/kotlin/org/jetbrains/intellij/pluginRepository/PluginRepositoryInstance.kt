@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.*
-import org.jetbrains.intellij.pluginRepository.exceptions.UploadFailedException
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
@@ -41,17 +40,17 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
 
 
   fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
-    val response = getResponseOrNull(service.listPlugins(ideBuild, channel, pluginId))
+    val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId))
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
   fun pluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
-    return getResponseOrNull(service.pluginInfo(family, pluginXmlId))
+    return executeAndParseBody(service.pluginInfo(family, pluginXmlId))
   }
 
   fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
     LOG.info("Downloading $pluginXmlId:$version")
-    return downloadPluginInternal(service.download(pluginXmlId, version, channel), targetPath)
+    return doDownloadPlugin(service.download(pluginXmlId, version, channel), targetPath)
   }
 
   fun downloadCompatiblePlugin(
@@ -61,7 +60,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     targetPath: String
   ): File? {
     LOG.info("Downloading $pluginXmlId for $ideBuild build")
-    return downloadPluginInternal(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
+    return doDownloadPlugin(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
   }
 
   fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
@@ -82,10 +81,10 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
   }
 
-  private fun downloadPluginInternal(callable: Call<ResponseBody>, targetPath: String): File? = executeAndCall(callable) {
-    val file = downloadFile(it, targetPath)
+  private fun doDownloadPlugin(callable: Call<ResponseBody>, targetPath: String): File? {
+    val file = downloadPlugin(callable, targetPath)
     LOG.info("Downloaded successfully to $targetPath")
-    file
+    return file
   }
 
   private fun uploadPluginInternal(
@@ -95,18 +94,25 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     channel: String? = null,
     notes: String? = null
   ) {
+    if (pluginXmlId == null && pluginId == null) {
+      throw IllegalArgumentException(Messages.getMessage("missing.plugins.parameters"))
+    }
     ensureCredentialsAreSet()
     val channelAsRequestBody = channel?.toRequestBody()
     val notesAsRequestBody = notes?.toRequestBody()
     val multipartFile = file.toMultipartBody()
-    val message = when {
-      pluginXmlId != null -> uploadOrFail(
-        service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile), pluginXmlId)
-      pluginId != null -> uploadOrFail(
-        service.upload(pluginId, channelAsRequestBody, notesAsRequestBody, multipartFile), pluginId.toString())
-      else -> throw UploadFailedException(Messages.getMessage("missing.plugins.parameters"), null)
+    val message = if (pluginXmlId != null) {
+      uploadOrFail(
+        service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile),
+        pluginXmlId
+      )
+    } else {
+      uploadOrFail(
+        service.upload(pluginId!!, channelAsRequestBody, notesAsRequestBody, multipartFile),
+        pluginId.toString()
+      )
     }
-    LOG.info("Done: ${message.string()}")
+    LOG.info("Uploading of plugin is done: ${message.string()}")
   }
 
   private fun ensureCredentialsAreSet() {

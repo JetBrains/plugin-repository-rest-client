@@ -1,12 +1,30 @@
 package org.jetbrains.intellij.pluginRepository.utils
 
 import okhttp3.ResponseBody
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import retrofit2.Call
 import retrofit2.Response
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-internal fun downloadFile(executed: Response<ResponseBody>, targetPath: String): File? {
+internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: String): File? {
+  val (response, error) = executeWithInterruptionCheck(callable)
+  if (error != null) {
+    throw error
+  }
+  if (response!!.isSuccessful) {
+    return try {
+      downloadFile(response, targetPath)
+    } catch (e: Exception) {
+      throw PluginRepositoryException(Messages.getMessage("downloading.failed"), e)
+    }
+  }
+  val message = (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
+  throw PluginRepositoryException(Messages.getMessage("downloading.failed") + message)
+}
+
+private fun downloadFile(executed: Response<ResponseBody>, targetPath: String): File? {
   val url = executed.raw().request().url().url().toExternalForm()
   val response = executed.body() ?: return null
   val mimeType = response.contentType()?.toString()
