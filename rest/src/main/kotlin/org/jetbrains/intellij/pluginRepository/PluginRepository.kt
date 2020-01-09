@@ -5,7 +5,7 @@ import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import java.io.File
 
 interface PluginRepository {
-  fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean>
+  fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginBean>
 
   fun fetchPluginInfo(family: String, pluginXmlId: String): PluginInfoBean?
 
