@@ -17,7 +17,7 @@ import java.time.Duration
  * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
  * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
  */
-class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) {
+class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
 
   private val service = Retrofit.Builder()
     .baseUrl(siteUrl)
@@ -39,31 +39,31 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     .create(PluginRepositoryService::class.java)
 
 
-  fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
+  override fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
     val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId))
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
-  fun pluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
+  override fun fetchPluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
     return executeAndParseBody(service.pluginInfo(family, pluginXmlId))
   }
 
-  fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: String): File? {
+  override fun download(pluginXmlId: String, version: String, channel: String?, targetPath: String): File? {
     LOG.info("Downloading $pluginXmlId:$version")
     return doDownloadPlugin(service.download(pluginXmlId, version, channel), targetPath)
   }
 
-  fun downloadCompatiblePlugin(
+  override fun downloadCompatiblePlugin(
     pluginXmlId: String,
     ideBuild: String,
-    channel: String? = null,
+    channel: String?,
     targetPath: String
   ): File? {
     LOG.info("Downloading $pluginXmlId for $ideBuild build")
     return doDownloadPlugin(service.downloadCompatiblePlugin(pluginXmlId, ideBuild, channel), targetPath)
   }
 
-  fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
+  override fun uploadNewPlugin(file: File, family: String, categoryId: Int, licenseUrl: String): PluginInfoBean {
     ensureCredentialsAreSet()
     LOG.info("Uploading new plugin from ${file.absolutePath}")
     val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family, licenseUrl.toRequestBody(), categoryId))
@@ -71,13 +71,11 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     return plugin
   }
 
-  @JvmOverloads
-  fun uploadPlugin(pluginId: Int, file: File, channel: String? = null, notes: String? = null) {
+  override fun uploadPlugin(pluginId: Int, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginId = pluginId, channel = channel, notes = notes)
   }
 
-  @JvmOverloads
-  fun uploadPlugin(pluginXmlId: String, file: File, channel: String? = null, notes: String? = null) {
+  override fun uploadPlugin(pluginXmlId: String, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginXmlId = pluginXmlId, channel = channel, notes = notes)
   }
 
