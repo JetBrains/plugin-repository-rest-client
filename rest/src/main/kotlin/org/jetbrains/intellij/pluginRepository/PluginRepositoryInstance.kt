@@ -11,7 +11,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import retrofit2.converter.jaxb.JaxbConverterFactory
 import java.io.File
-import java.time.Duration
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
@@ -24,7 +27,10 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     .client(
       OkHttpClient()
         .newBuilder()
-        .connectTimeout(Duration.ofMillis(10 * 60 * 1000))
+        .dispatcher(Dispatcher(Executors.newCachedThreadPool(DaemonThreadFactory("retrofit-thread"))))
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
+        .writeTimeout(5, TimeUnit.SECONDS)
         .addInterceptor { interceptor ->
           val request = if (token != null) interceptor.request()
             .newBuilder().addHeader("Authorization", "Bearer $token").build()
@@ -37,7 +43,6 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     .addConverterFactory(JacksonConverterFactory.create())
     .build()
     .create(PluginRepositoryService::class.java)
-
 
   override fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
     val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId))
@@ -126,5 +131,19 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
 
   private companion object {
     private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
+  }
+
+  private class DaemonThreadFactory(private val threadNamePrefix: String) : ThreadFactory {
+
+    private val defaultThreadFactory = Executors.defaultThreadFactory()
+
+    private val nameCount = AtomicLong()
+
+    override fun newThread(r: Runnable): Thread {
+      val thread = defaultThreadFactory.newThread(r)
+      thread.name = "$threadNamePrefix-${nameCount.getAndIncrement()}"
+      thread.isDaemon = true
+      return thread
+    }
   }
 }
