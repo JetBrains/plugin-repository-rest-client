@@ -1,14 +1,18 @@
 package org.jetbrains.intellij.pluginRepository.utils
 
+import org.jetbrains.annotations.PropertyKey
+import java.text.MessageFormat
+import java.util.*
+
 internal object Messages {
-  fun notFoundMessage(plugin: String?) = """
-        Cannot find ${plugin ?: "plugin"}
-        Note that you need to upload the plugin to the repository at least once manually 
-        (to specify options like the license, repository URL etc.) before uploads through the client can be used. 
-        """
-  const val FAILED_UPLOAD = "Failed to upload plugin"
-  const val MISSION_TOKEN = "Token must be set for uploading"
-  const val MISSING_PLUGINS_PARAMETERS = "pluginId or XML id of plugin should be specified"
-  const val INVALID_FILENAME = "Invalid filename returned by a server"
+
+  private val messages by lazy {
+    val properties = Properties()
+    properties.load(this::class.java.getResourceAsStream("/messages.properties"))
+    properties
+  }
+
+  fun getMessage(@PropertyKey(resourceBundle = "messages") key: String, vararg args: Any): String =
+      MessageFormat.format(messages.getProperty(key), *args)
 
 }

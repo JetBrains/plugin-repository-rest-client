@@ -15,11 +15,11 @@ internal fun downloadFile(executed: Response<ResponseBody>, targetPath: String):
   if (targetFile.isDirectory) {
     val guessFileName = guessFileName(executed.raw(), url)
     if (guessFileName.contains(File.separatorChar)) {
-      throw IOException(Messages.INVALID_FILENAME)
+      throw IOException(Messages.getMessage("invalid.filename"))
     }
     val file = File(targetFile, guessFileName)
     if (file.parentFile != targetFile) {
-      throw IOException(Messages.INVALID_FILENAME)
+      throw IOException(Messages.getMessage("invalid.filename"))
     }
     targetFile = file
   }

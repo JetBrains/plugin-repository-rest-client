@@ -104,13 +104,13 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile), pluginXmlId)
       pluginId != null -> uploadOrFail(
         service.upload(pluginId, channelAsRequestBody, notesAsRequestBody, multipartFile), pluginId.toString())
-      else -> throw UploadFailedException(Messages.MISSING_PLUGINS_PARAMETERS, null)
+      else -> throw UploadFailedException(Messages.getMessage("missing.plugins.parameters"), null)
     }
     LOG.info("Done: ${message.string()}")
   }
 
   private fun ensureCredentialsAreSet() {
-    if (token == null) throw RuntimeException(Messages.MISSION_TOKEN)
+    if (token == null) throw RuntimeException(Messages.getMessage("missing.token"))
   }
 
   private fun File.toMultipartBody(): MultipartBody.Part {

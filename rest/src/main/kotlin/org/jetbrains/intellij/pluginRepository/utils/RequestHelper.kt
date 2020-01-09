@@ -14,7 +14,7 @@ internal fun <T> getResponseOrNull(callable: Call<T>): T? = executeAndCall(calla
 internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
   return try {
     val executed = callable.execute()
-    if (executed.isSuccessful) executed.body() ?: throw UploadFailedException(Messages.FAILED_UPLOAD, null)
+    if (executed.isSuccessful) executed.body() ?: throw UploadFailedException(Messages.getMessage("failed.upload"), null)
     else {
       val message = parseUploadErrorMessage(executed.errorBody(), executed.code(), plugin)
       throw UploadFailedException(message, null)
@@ -44,16 +44,16 @@ private data class PluginUploadRestError(
 )
 
 private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
-  val error = errorBody ?: return Messages.FAILED_UPLOAD
-  if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.notFoundMessage(pluginName)
+  val error = errorBody ?: return Messages.getMessage("failed.upload")
+  if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.getMessage("not.found", pluginName ?: "plugin")
   val contextType = error.contentType()?.toString()
   return when {
     contextType?.startsWith("text/plain") == true -> error.string()
     contextType?.startsWith("application/json") == true -> {
       val restError = jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java)
       @Suppress("DEPRECATION")
-      if (restError.msg != null) return restError.msg else restError.message ?: Messages.FAILED_UPLOAD
+      if (restError.msg != null) return restError.msg else restError.message ?: Messages.getMessage("failed.upload")
     }
-    else -> "${Messages.FAILED_UPLOAD} ${error.string()}"
+    else -> "${Messages.getMessage("failed.upload")} ${error.string()}"
   }
 }
