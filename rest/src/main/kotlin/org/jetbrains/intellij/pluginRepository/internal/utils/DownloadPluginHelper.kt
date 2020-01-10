@@ -23,7 +23,7 @@ internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): Fil
 }
 
 private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): File? {
-  val url = executed.raw().request().url().url().toExternalForm()
+  val url = executed.raw().request.url.toUrl().toExternalForm()
   val response = executed.body() ?: return null
   val mimeType = response.contentType()?.toString()
   if (mimeType != "application/zip" && mimeType != "application/java-archive") return null
@@ -45,8 +45,8 @@ private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): Fi
 
 private fun guessFileName(response: okhttp3.Response, url: String): String {
   val filenameMarker = "filename="
-  val contentDisposition = response.headers().names().find { it.equals("Content-Disposition", ignoreCase = true) }
-  val contentDispositionHeader = contentDisposition?.let { response.headers().get(contentDisposition) }
+  val contentDisposition = response.headers.names().find { it.equals("Content-Disposition", ignoreCase = true) }
+  val contentDispositionHeader = contentDisposition?.let { response.headers[contentDisposition] }
   if (contentDispositionHeader == null || !contentDispositionHeader.contains(filenameMarker)) {
     val fileName = url.substringAfterLast('/')
     return if (fileName.isNotEmpty()) fileName else url

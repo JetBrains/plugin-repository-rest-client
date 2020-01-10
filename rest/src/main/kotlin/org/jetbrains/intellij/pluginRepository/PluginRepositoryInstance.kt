@@ -1,12 +1,17 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
+import org.jetbrains.intellij.pluginRepository.internal.utils.downloadPlugin
+import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
+import org.jetbrains.intellij.pluginRepository.internal.utils.uploadOrFail
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
-import org.jetbrains.intellij.pluginRepository.internal.utils.*
 import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -33,14 +38,17 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(5, TimeUnit.SECONDS)
         .writeTimeout(5, TimeUnit.SECONDS)
-        .addInterceptor { interceptor ->
-          val request = if (token != null) interceptor.request()
-            .newBuilder().addHeader("Authorization", "Bearer $token").build()
-          else interceptor.request()
-          interceptor.proceed(request)
-        }
-        .build()
-    )
+        .addInterceptor(object : Interceptor {
+          override fun intercept(chain: Interceptor.Chain): Response {
+            val request = if (token != null) {
+              chain.request().newBuilder().addHeader("Authorization", "Bearer $token").build()
+            } else {
+              chain.request()
+            }
+            return chain.proceed(request)
+          }
+        })
+        .build())
     .addConverterFactory(JaxbConverterFactory.create())
     .addConverterFactory(JacksonConverterFactory.create())
     .build()
@@ -125,11 +133,11 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
   }
 
   private fun File.toMultipartBody(): MultipartBody.Part {
-    val body = RequestBody.create(MediaType.get("application/octet-stream"), this)
+    val body = this.asRequestBody("application/octet-stream".toMediaType())
     return MultipartBody.Part.createFormData("file", this.name, body)
   }
 
-  private fun String.toRequestBody() = RequestBody.create(MediaType.get("text/plain"), this)
+  private fun String.toRequestBody() = this.toRequestBody("text/plain".toMediaType())
 
   private companion object {
     private val LOG = LoggerFactory.getLogger("plugin-repository-rest-client")
