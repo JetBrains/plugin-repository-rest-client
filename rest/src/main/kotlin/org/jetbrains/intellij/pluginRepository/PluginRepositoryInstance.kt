@@ -1,10 +1,12 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.*
+import org.jetbrains.intellij.pluginRepository.internal.Messages
+import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
-import org.jetbrains.intellij.pluginRepository.utils.*
+import org.jetbrains.intellij.pluginRepository.internal.utils.*
 import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.Retrofit

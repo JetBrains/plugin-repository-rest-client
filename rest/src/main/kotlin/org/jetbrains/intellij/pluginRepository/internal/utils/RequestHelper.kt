@@ -1,6 +1,7 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.internal.utils
 
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

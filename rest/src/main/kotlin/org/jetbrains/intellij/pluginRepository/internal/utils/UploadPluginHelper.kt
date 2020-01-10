@@ -1,9 +1,10 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.internal.utils
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import java.net.HttpURLConnection
 

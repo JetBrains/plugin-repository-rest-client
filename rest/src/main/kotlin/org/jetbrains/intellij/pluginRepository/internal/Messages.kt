@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.internal
 
 import org.jetbrains.annotations.PropertyKey
 import java.text.MessageFormat

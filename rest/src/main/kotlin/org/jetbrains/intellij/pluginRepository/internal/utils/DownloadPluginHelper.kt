@@ -1,7 +1,8 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.internal.utils
 
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
