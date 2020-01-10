@@ -3,6 +3,7 @@ package org.jetbrains.intellij.pluginRepository
 import com.sampullara.cli.Args
 import com.sampullara.cli.Argument
 import java.io.File
+import kotlin.system.exitProcess
 
 class Client {
     companion object {
@@ -10,18 +11,18 @@ class Client {
         fun main(args: Array<String>) {
             if (args.isEmpty()) {
                 System.err.println("Command is not specified: `upload`, `download`, `list` or `info` commands are supported.")
-                System.exit(1)
+                exitProcess(1)
             }
             val command = args[0]
             val restParameters = args.copyOfRange(1, args.size)
             when (command) {
                 "upload" -> upload(restParameters)
-                "download" -> System.exit(if (download(restParameters) != null) 0 else 1)
+                "download" -> exitProcess(if (download(restParameters) != null) 0 else 1)
                 "list" -> list(restParameters)
                 "info" -> info(restParameters)
                 else -> {
                     System.err.println("Unknown command `$command`: `upload`, `download`, `list` or `info` commands are supported.")
-                    System.exit(1)
+                    exitProcess(1)
                 }
             }
         }
@@ -32,7 +33,7 @@ class Client {
 
             if (options.version.isNullOrBlank() && options.ideBuild.isNullOrBlank()) {
                 System.err.print("`version` or `ide-build` must be specified")
-                System.exit(1)
+                exitProcess(1)
             }
 
             val pluginRepository = PluginRepositoryInstance(options.host)
