@@ -8,12 +8,9 @@ import retrofit2.Call
 import java.net.HttpURLConnection
 
 internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
-  val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
-    return response.body() ?: throw PluginRepositoryException("Server didn't provide any upload response")
+  val response = executeExceptionally(callable)
+  if (response.isSuccessful) {
+    return response.body() ?: throw PluginRepositoryException(Messages.getMessage("no.response.from.server"))
   }
   val message = parseUploadErrorMessage(response.errorBody(), response.code(), plugin)
   throw PluginRepositoryException("Upload failed: $message")

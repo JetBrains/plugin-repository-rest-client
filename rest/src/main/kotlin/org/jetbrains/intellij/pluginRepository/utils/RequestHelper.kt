@@ -8,18 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 internal fun <T> executeAndParseBody(callable: Call<T>): T? {
-  val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
+  val response = executeExceptionally(callable)
+  if (response.isSuccessful) {
     return response.body()
   }
-  val message = response.errorBody()?.string() ?: response.message() ?: "Failed request"
+  val message = response.errorBody()?.string() ?: response.message() ?: Messages.getMessage("failed.request.status.code", response.code())
   throw PluginRepositoryException(message)
 }
 
-internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<T>?, Throwable?> {
+internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
   val responseRef = AtomicReference<Response<T>?>()
   val errorRef = AtomicReference<Throwable?>()
   val finished = AtomicBoolean()
@@ -54,7 +51,9 @@ internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<
     throw InterruptedException()
   }
 
-  val response = responseRef.get()
   val error = errorRef.get()
-  return response to error
+  if (error != null) {
+    throw error
+  }
+  return responseRef.get()!!
 }

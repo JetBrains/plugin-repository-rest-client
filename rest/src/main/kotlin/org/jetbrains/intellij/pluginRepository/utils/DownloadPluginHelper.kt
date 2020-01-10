@@ -9,11 +9,8 @@ import java.io.IOException
 import java.nio.file.Files
 
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
-  val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
+  val response = executeExceptionally(callable)
+  if (response.isSuccessful) {
     return try {
       downloadFile(response, targetPath)
     } catch (e: Exception) {
