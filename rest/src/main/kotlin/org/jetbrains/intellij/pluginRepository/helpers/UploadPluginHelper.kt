@@ -1,22 +1,16 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.helpers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.exceptions.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.utils.Messages
 import retrofit2.Call
 import java.net.HttpURLConnection
 
-internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T {
-  val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
-    return response.body() ?: throw PluginRepositoryException("Server didn't provide any upload response")
-  }
-  val message = parseUploadErrorMessage(response.errorBody(), response.code(), plugin)
-  throw PluginRepositoryException("Upload failed: $message")
+internal fun <T> uploadOrFail(callable: Call<T>, plugin: String? = null): T = getBodyOrThrow(callable) { response ->
+    val message = parseUploadErrorMessage(response.errorBody(), response.code(), plugin)
+    throw PluginRepositoryException("Upload failed: $message")
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,7 +29,8 @@ private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginN
     contextType?.startsWith("application/json") == true -> {
       val restError = jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java)
       @Suppress("DEPRECATION")
-      if (restError.msg != null) return restError.msg else restError.message ?: Messages.getMessage("failed.upload")
+      if (restError.msg != null) return restError.msg
+      else restError.message ?: Messages.getMessage("failed.upload")
     }
     else -> "${Messages.getMessage("failed.upload")} ${error.string()}"
   }

@@ -1,10 +1,14 @@
 package org.jetbrains.intellij.pluginRepository
 
 import okhttp3.*
+import org.jetbrains.intellij.pluginRepository.api.PluginRepositoryService
+import org.jetbrains.intellij.pluginRepository.helpers.downloadPlugin
+import org.jetbrains.intellij.pluginRepository.helpers.executeAndParseBody
+import org.jetbrains.intellij.pluginRepository.helpers.uploadOrFail
 import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
 import org.jetbrains.intellij.pluginRepository.model.xml.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
-import org.jetbrains.intellij.pluginRepository.utils.*
+import org.jetbrains.intellij.pluginRepository.utils.Messages
 import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -45,8 +49,9 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     .create(PluginRepositoryService::class.java)
 
   override fun listPlugins(ideBuild: String, channel: String?, pluginId: String?): List<PluginBean> {
-    val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId))
-    return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
+    val response = executeAndParseBody(
+      service.listPlugins(ideBuild, channel, pluginId))
+    return response.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
   override fun fetchPluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {

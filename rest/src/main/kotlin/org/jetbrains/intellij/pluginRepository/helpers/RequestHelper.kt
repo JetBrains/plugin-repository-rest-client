@@ -1,25 +1,28 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.helpers
 
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.exceptions.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.utils.Messages
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-internal fun <T> executeAndParseBody(callable: Call<T>): T? {
-  val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
-    return response.body()
-  }
+internal fun <T> executeAndParseBody(callable: Call<T>): T = getBodyOrThrow(callable) { response ->
   val message = response.errorBody()?.string() ?: response.message() ?: "Failed request"
   throw PluginRepositoryException(message)
 }
 
-internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<T>?, Throwable?> {
+internal fun <T> getBodyOrThrow(callable: Call<T>, throwable: (response: Response<T>) -> T): T {
+  val (response, error) = executeWithInterruptionCheck(callable)
+  if (error != null) throw error
+  if (response.isSuccessful) {
+    return response.body() ?: throw PluginRepositoryException(Messages.getMessage("not.response.provided"))
+  }
+  return throwable(response)
+}
+
+internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<T>, Throwable?> {
   val responseRef = AtomicReference<Response<T>?>()
   val errorRef = AtomicReference<Throwable?>()
   val finished = AtomicBoolean()
@@ -44,7 +47,8 @@ internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<
 
     try {
       Thread.sleep(100)
-    } catch (ie: InterruptedException) {
+    }
+    catch (ie: InterruptedException) {
       callable.cancel()
       throw ie
     }
@@ -54,7 +58,7 @@ internal fun <T> executeWithInterruptionCheck(callable: Call<T>): Pair<Response<
     throw InterruptedException()
   }
 
-  val response = responseRef.get()
+  val response = responseRef.get() ?: throw PluginRepositoryException(Messages.getMessage("not.response.provided"))
   val error = errorRef.get()
   return response to error
 }

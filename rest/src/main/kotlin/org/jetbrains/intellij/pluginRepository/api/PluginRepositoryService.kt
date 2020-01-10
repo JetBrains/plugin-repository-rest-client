@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.api
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody

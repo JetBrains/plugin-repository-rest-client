@@ -1,7 +1,8 @@
-package org.jetbrains.intellij.pluginRepository.utils
+package org.jetbrains.intellij.pluginRepository.helpers
 
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.exceptions.PluginRepositoryException
+import org.jetbrains.intellij.pluginRepository.utils.Messages
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
@@ -10,18 +11,19 @@ import java.nio.file.Files
 
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val (response, error) = executeWithInterruptionCheck(callable)
-  if (error != null) {
-    throw error
-  }
-  if (response!!.isSuccessful) {
+  if (error != null) throw error
+  if (response.isSuccessful) {
     return try {
       downloadFile(response, targetPath)
-    } catch (e: Exception) {
-      throw PluginRepositoryException(Messages.getMessage("downloading.failed"), e)
+    }
+    catch (e: Exception) {
+      throw PluginRepositoryException(
+        Messages.getMessage("downloading.failed"), e)
     }
   }
   val message = (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
-  throw PluginRepositoryException(Messages.getMessage("downloading.failed") + message)
+  throw PluginRepositoryException(
+    Messages.getMessage("downloading.failed") + message)
 }
 
 private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): File? {
