@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -50,7 +51,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
         })
         .build())
     .addConverterFactory(JaxbConverterFactory.create())
-    .addConverterFactory(JacksonConverterFactory.create())
+    .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
     .build()
     .create(PluginRepositoryService::class.java)
 
