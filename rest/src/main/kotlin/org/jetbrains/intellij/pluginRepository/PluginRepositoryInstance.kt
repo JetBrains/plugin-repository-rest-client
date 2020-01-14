@@ -60,7 +60,7 @@ class PluginRepositoryInstance(private val siteUrl: String, private val token: S
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
-  override fun fetchPluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
+  override fun pluginInfo(family: String, pluginXmlId: String): PluginInfoBean? {
     return executeAndParseBody(service.pluginInfo(family, pluginXmlId))
   }
 
