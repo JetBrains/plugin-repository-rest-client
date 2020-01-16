@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository
+package org.jetbrains.intellij.pluginRepository.internal.api
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -8,7 +8,7 @@ import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginRepositoryBean
 import retrofit2.Call
 import retrofit2.http.*
 
-interface PluginRepositoryService {
+internal interface PluginRepositoryService {
   @Multipart
   @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
