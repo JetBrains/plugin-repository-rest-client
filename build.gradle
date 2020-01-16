@@ -35,7 +35,7 @@ task fatJar(type: Jar, group: 'build') {
 }
 
 group = 'org.jetbrains.intellij'
-version = "1.0.$buildNumber"
+version = "1.1.$buildNumber"
 
 apply plugin: 'maven-publish'
 
