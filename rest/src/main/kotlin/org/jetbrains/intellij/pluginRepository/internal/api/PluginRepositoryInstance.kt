@@ -73,11 +73,9 @@ internal class PluginRepositoryInstance(private val siteUrl: String, private val
 
     private val nameCount = AtomicLong()
 
-    override fun newThread(r: Runnable): Thread {
-      val thread = defaultThreadFactory.newThread(r)
-      thread.name = "$threadNamePrefix-${nameCount.getAndIncrement()}"
-      thread.isDaemon = true
-      return thread
+    override fun newThread(r: Runnable): Thread = defaultThreadFactory.newThread(r).apply {
+      name = "$threadNamePrefix-${nameCount.getAndIncrement()}"
+      isDaemon = true
     }
   }
 }
