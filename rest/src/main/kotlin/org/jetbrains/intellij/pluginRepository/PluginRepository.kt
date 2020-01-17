@@ -36,8 +36,21 @@ interface PluginUpdateManager {
 }
 
 interface PluginDownloader {
-  fun download(pluginXmlId: String, version: String, channel: String? = null, targetPath: File): File?
-  fun downloadCompatiblePlugin(pluginXmlId: String, ideBuild: String, channel: String? = null, targetPath: File): File?
+  /**
+   * Download [ProductFamily.INTELLIJ] plugin by plugin XML id.
+   * @param xmlId   - plugin XML id. Example: "org.jetbrains.kotlin" for Kotlin plugin.
+   * @param version - version of the plugin. Example: "1.3.61-release-IJ2019.3-1" for Kotlin plugin.
+   * @param channel - plugin channel. Default value is "stable" plugin channel.
+   */
+  fun download(xmlId: String, version: String, channel: String? = null, targetPath: File): File?
+
+  /**
+   * Download latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
+   * @param xmlId    - plugin XML id.
+   * @param ideBuild - IDE version. Example: "IC-145.184"
+   * @param channel  - plugin channel. Default value is "stable" plugin channel.
+   */
+  fun downloadLatestCompatiblePlugin(xmlId: String, ideBuild: String, channel: String? = null, targetPath: File): File?
 }
 
 interface PluginUploader {

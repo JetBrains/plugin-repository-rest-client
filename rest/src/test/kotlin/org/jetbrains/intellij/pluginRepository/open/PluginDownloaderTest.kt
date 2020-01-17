@@ -19,7 +19,7 @@ class PluginDownloaderTest : BaseTest() {
   @Test
   fun `download compatible plugin`() {
     val plugin = TestPlugins.KOTLIN
-    val file = downloader.downloadCompatiblePlugin(plugin.xmlId, "IC-145.184", "", File("."))
+    val file = downloader.downloadLatestCompatiblePlugin(plugin.xmlId, "IC-145.184", "", File("."))
     validate(file)
   }
 

@@ -42,8 +42,8 @@ class Client {
             return if (!options.version.isNullOrBlank()) {
                 pluginRepository.download(options.pluginId!!, options.version!!, channel, File(options.destination))
             } else {
-                pluginRepository.downloadCompatiblePlugin(options.pluginId!!, options.ideBuild!!, channel,
-                        File(options.destination))
+                pluginRepository.downloadLatestCompatiblePlugin(options.pluginId!!, options.ideBuild!!, channel,
+                                                                File(options.destination))
             }
 
         }
