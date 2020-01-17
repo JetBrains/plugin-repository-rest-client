@@ -18,20 +18,74 @@ interface PluginRepository {
 }
 
 interface PluginManager {
+  /**
+   * Plugin info by [xmlId] & [ProductFamily].
+   * @param xmlId - id from plugin.xml file. Example: "org.jetbrains.kotlin"
+   */
   fun getPluginByXmlId(xmlId: String, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
+  /**
+   * Plugin info by [id].
+   * Supported for all [ProductFamily].
+   */
   fun getPlugin(id: Int): PluginBean?
+  /**
+   * List of plugin authors.
+   */
   fun getPluginDevelopers(id: Int): List<PluginUserBean>
+  /**
+   * List of plugins channels.
+   * Example: "stable", "", "EAP" and etc.
+   */
   fun getPluginChannels(id: Int): List<String>
+
+  /**
+   * List of plugin supported [ProductEnum].
+   */
   fun getPluginCompatibleProducts(id: Int): List<ProductEnum>
+
+  /**
+   * List of plugin dependencies. Examples: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
+   * @return: list of plugin xml ids. Example: "org.jetbrains.kotlin
+   */
   fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean = true): List<String>
+
+  /**
+   * List of plugins compatible with [ideBuild]
+   */
   fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginXmlBean>
+
+  /**
+   * List of plugins xml ids compatible with [build].
+   * @param max - max result set. Max: 10000 - [offset]
+   * // TODO: add params
+   */
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int): List<String>
+
+  /**
+   * TODO: Fix params & test
+   */
   fun getCompatibleUpdate(xmlId: String, build: String, max: Int, channel: String = ""): List<CompatibleUpdateBean>
 }
 
 interface PluginUpdateManager {
+  /**
+   * Get list of plugin updates by plugin [xmlId].
+   * @param version - version of the plugin.
+   * @return Normally method returns only ONE update, but several very OLD plugins have several update.
+   */
   fun getUpdatesByVersionAndFamily(xmlId: String, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
+
+  /**
+   * Get plugin update by [id]. If needed to get a lot of plugin updates recommended using [getIntellijUpdateMetadata].
+   * Supported for all [ProductFamily].
+   */
   fun getUpdateById(id: Int): PluginUpdateBean?
+
+  /**
+   * Getting plugin update metadata.
+   * Use for getting a big list of plugin updates.
+   * Supported for [ProductFamily.INTELLIJ].
+   */
   fun getIntellijUpdateMetadata(pluginId: Int, updateId: Int): IntellijUpdateMetadata?
 }
 
