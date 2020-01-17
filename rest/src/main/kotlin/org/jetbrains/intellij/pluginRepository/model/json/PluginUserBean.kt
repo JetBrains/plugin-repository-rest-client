@@ -6,6 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 class PluginUserBean(
   val id: String,
   val name: String,
-  val link: String? = null,
-  val hubLogin: String? = null
+  val link: String,
+  val hubLogin: String
 )
