@@ -1,8 +1,8 @@
 package org.jetbrains.intellij.pluginRepository.internal.instances
 
-import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.PluginUploader
 import org.jetbrains.intellij.pluginRepository.internal.Messages
+import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.toRequestBody
@@ -13,10 +13,7 @@ import java.io.File
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
 
-  override fun uploadNewPlugin(file: File,
-                               categoryId: Int,
-                               licenseUrl: String,
-                               family: ProductFamily): PluginBean {
+  override fun uploadNewPlugin(file: File, categoryId: Int, licenseUrl: String, family: ProductFamily): PluginBean {
     LOG.info("Uploading new plugin from ${file.absolutePath}")
     val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
