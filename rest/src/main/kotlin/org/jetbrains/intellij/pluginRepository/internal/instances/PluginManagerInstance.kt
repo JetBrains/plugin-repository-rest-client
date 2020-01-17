@@ -21,8 +21,8 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int): List<String> =
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset)) ?: emptyList()
 
-  override fun getCompatibleUpdate(xmlId: String, build: String, max: Int): List<CompatibleUpdateBean> =
-    executeAndParseBody(service.getLastCompatibleUpdate(xmlId, build, max)) ?: emptyList()
+  override fun getCompatibleUpdate(xmlId: String, build: String, max: Int, channel: String): List<CompatibleUpdateBean> =
+    executeAndParseBody(service.getLastCompatibleUpdate(xmlId, build, channel, max)) ?: emptyList()
 
   override fun getPluginByXmlId(xmlId: String, family: ProductFamily): PluginBean? = executeAndParseBody(
     service.getPluginByXmlId(family.id, xmlId))

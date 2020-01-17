@@ -99,6 +99,7 @@ interface PluginRepositoryService {
   fun getLastCompatibleUpdate(
     @Query("pluginXmlId") xmlId: String,
     @Query("build") build: String,
+    @Query("channel") channel: String,
     @Query("max") max: Int
   ): Call<List<CompatibleUpdateBean>>
 

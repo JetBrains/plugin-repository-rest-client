@@ -26,7 +26,7 @@ interface PluginManager {
   fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean = true): List<String>
   fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginXmlBean>
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int): List<String>
-  fun getCompatibleUpdate(xmlId: String, build: String, max: Int): List<CompatibleUpdateBean>
+  fun getCompatibleUpdate(xmlId: String, build: String, max: Int, channel: String = ""): List<CompatibleUpdateBean>
 }
 
 interface PluginUpdateManager {
