@@ -42,7 +42,7 @@ interface PluginDownloader {
    * @param version - version of the plugin. Example: "1.3.61-release-IJ2019.3-1" for Kotlin plugin.
    * @param channel - plugin channel. Default value is "stable" plugin channel.
    */
-  fun download(xmlId: String, version: String, channel: String? = null, targetPath: File): File?
+  fun download(xmlId: String, version: String, targetPath: File, channel: String? = null): File?
 
   /**
    * Download latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
@@ -50,7 +50,7 @@ interface PluginDownloader {
    * @param ideBuild - IDE version. Example: "IC-145.184"
    * @param channel  - plugin channel. Default value is "stable" plugin channel.
    */
-  fun downloadLatestCompatiblePlugin(xmlId: String, ideBuild: String, channel: String? = null, targetPath: File): File?
+  fun downloadLatestCompatiblePlugin(xmlId: String, ideBuild: String, targetPath: File, channel: String? = null): File?
 }
 
 interface PluginUploader {

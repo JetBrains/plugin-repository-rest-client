@@ -12,14 +12,14 @@ class PluginDownloaderTest : BaseTest() {
   @Test
   fun `download plugin`() {
     val plugin = TestPlugins.GO
-    val file = downloader.download(plugin.xmlId, "193.5233.12.46", "", File("."))
+    val file = downloader.download(plugin.xmlId, "193.5233.12.46", File("."), "")
     validate(file)
   }
 
   @Test
   fun `download compatible plugin`() {
     val plugin = TestPlugins.KOTLIN
-    val file = downloader.downloadLatestCompatiblePlugin(plugin.xmlId, "IC-145.184", "", File("."))
+    val file = downloader.downloadLatestCompatiblePlugin(plugin.xmlId, "IC-145.184", File("."), "")
     validate(file)
   }
 

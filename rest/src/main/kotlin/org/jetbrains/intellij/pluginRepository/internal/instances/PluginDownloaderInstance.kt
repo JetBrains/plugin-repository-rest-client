@@ -11,7 +11,7 @@ import java.io.File
 
 internal class PluginDownloaderInstance(private val service: PluginRepositoryService) : PluginDownloader {
 
-  override fun download(xmlId: String, version: String, channel: String?, targetPath: File): File? {
+  override fun download(xmlId: String, version: String, targetPath: File, channel: String?): File? {
     LOG.info("Downloading $xmlId:$version")
     return doDownloadPlugin(service.download(xmlId, version, channel), targetPath)
   }
@@ -19,8 +19,8 @@ internal class PluginDownloaderInstance(private val service: PluginRepositorySer
   override fun downloadLatestCompatiblePlugin(
     xmlId: String,
     ideBuild: String,
-    channel: String?,
-    targetPath: File
+    targetPath: File,
+    channel: String?
   ): File? {
     LOG.info("Downloading $xmlId for $ideBuild build")
     return doDownloadPlugin(service.downloadCompatiblePlugin(xmlId, ideBuild, channel), targetPath)
