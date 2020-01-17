@@ -54,12 +54,32 @@ interface PluginDownloader {
 }
 
 interface PluginUploader {
+  /**
+   * Upload plugin by ID into specific channel.
+   * IMPORTANT: PLUGIN NOTES WILL BE IGNORED FOR IDES BASED ON INTELLIJ PLATFORM ([ProductFamily.INTELLIJ]).
+   * @param channel   - plugin channel. Default value is "stable" plugin channel.
+   * @param notes     - plugin update notes.
+   */
   fun uploadPlugin(id: Int, file: File, channel: String? = null, notes: String? = null)
+
+  /**
+   * Upload plugin by Xml id into specific channel.
+   * IMPORTANT: PLUGIN NOTES WILL BE IGNORED FOR IDES BASED ON INTELLIJ PLATFORM ([ProductFamily.INTELLIJ]).
+   * @param channel   - plugin channel. Default value is "stable" plugin channel.
+   * @param notes     - plugin update notes.
+   */
   fun uploadPlugin(xmlId: String, file: File, channel: String? = null, notes: String? = null)
+
+  /**
+   * Upload a new plugin into JetBrains Marketplace.
+   * Make sure you accepted all agreements on the Marketplace web-site: https://plugins.jetbrains.com/.
+   * @param categoryId - tag id. Example: https://plugins.jetbrains.com/idea.
+   * @param licenseUrl - link to the license.
+   */
   fun uploadNewPlugin(
     file: File,
-    family: ProductFamily = ProductFamily.INTELLIJ,
     categoryId: Int,
-    licenseUrl: String
+    licenseUrl: String,
+    family: ProductFamily = ProductFamily.INTELLIJ
   ): PluginBean
 }

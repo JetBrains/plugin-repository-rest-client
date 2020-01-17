@@ -13,7 +13,10 @@ import java.io.File
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
 
-  override fun uploadNewPlugin(file: File, family: ProductFamily, categoryId: Int, licenseUrl: String): PluginBean {
+  override fun uploadNewPlugin(file: File,
+                               categoryId: Int,
+                               licenseUrl: String,
+                               family: ProductFamily): PluginBean {
     LOG.info("Uploading new plugin from ${file.absolutePath}")
     val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")

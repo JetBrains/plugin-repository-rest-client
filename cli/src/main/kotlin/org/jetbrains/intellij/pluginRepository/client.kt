@@ -54,7 +54,8 @@ class Client {
             val pluginRepository = PluginRepositoryInstance(options.host, options.token).uploader
             val pluginId = options.pluginId
             when {
-                pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), options.family!!, 104, "https://plugins.jetbrains.com/legal/terms-of-use")
+                pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), 104,
+                                                                     "https://plugins.jetbrains.com/legal/terms-of-use", options.family!!)
                 pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
                 else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
             }
