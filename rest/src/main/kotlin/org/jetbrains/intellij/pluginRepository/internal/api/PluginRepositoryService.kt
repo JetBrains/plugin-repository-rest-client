@@ -3,12 +3,17 @@ package org.jetbrains.intellij.pluginRepository.internal.api
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.model.json.PluginInfoBean
+import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.json.PluginUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.json.PluginUserBean
+import org.jetbrains.intellij.pluginRepository.model.repository.IntellijUpdateMetadata
+import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
 import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginRepositoryBean
 import retrofit2.Call
 import retrofit2.http.*
 
-internal interface PluginRepositoryService {
+interface PluginRepositoryService {
   @Multipart
   @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
@@ -36,8 +41,7 @@ internal interface PluginRepositoryService {
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: RequestBody,
     @Part("cid") category: Int
-  ): Call<PluginInfoBean>
-
+  ): Call<PluginBean>
 
   @Streaming
   @GET("/plugin/download")
@@ -63,5 +67,52 @@ internal interface PluginRepositoryService {
   ): Call<XmlPluginRepositoryBean>
 
   @GET("/api/plugins/{family}/{pluginXmlId}")
-  fun pluginInfo(@Path("family") family: String, @Path("pluginXmlId") pluginXmlId: String): Call<PluginInfoBean>
+  fun getPluginByXmlId(@Path("family") family: String, @Path("pluginXmlId") pluginXmlId: String): Call<PluginBean>
+
+  @GET("/api/plugins/{id}")
+  fun getPluginById(@Path("id") id: Int): Call<PluginBean>
+
+  @GET("/api/plugins/{id}/developers")
+  fun getPluginDevelopers(@Path("id") id: Int): Call<List<PluginUserBean>>
+
+  @GET("/api/plugins/{id}/channels")
+  fun getPluginChannels(@Path("id") id: Int): Call<List<String>>
+
+  @GET("/api/plugins/{id}/compatibleProducts")
+  fun getPluginCompatibleProducts(@Path("id") id: Int): Call<List<ProductEnum>>
+
+  @GET("/api/plugins")
+  fun getPluginXmlIdByDependency(
+    @Query("dependency") dependency: String,
+    @Query("includeOptional") includeOptional: Boolean
+  ): Call<List<String>>
+
+  @GET("/api/search")
+  fun searchPluginsXmlIds(
+    @Query("build") build: String,
+    @Query("max") max: Int,
+    @Query("offset") offset: Int
+  ): Call<List<String>>
+
+
+  @GET("/api/getCompatibleUpdates")
+  fun getLastCompatibleUpdate(
+    @Query("pluginXmlId") xmlId: String,
+    @Query("build") build: String,
+    @Query("max") max: Int
+  ): Call<List<CompatibleUpdateBean>>
+
+  @GET("/api/plugins/{id}/updates")
+  fun getUpdatesByVersionAndFamily(
+    @Path("id") xmlId: String,
+    @Query("version") version: String,
+    @Query("family") family: String
+  ): Call<List<PluginUpdateBean>>
+
+  @GET("/api/updates/{id}")
+  fun getUpdateById(@Path("id") id: Int): Call<PluginUpdateBean>
+
+  @GET("/files/{pluginId}/{updateId}/meta.json")
+  fun getIntelliJUpdateMeta(@Path("pluginId") pluginId: Int, @Path("updateId") updateId: Int): Call<IntellijUpdateMetadata>
+
 }

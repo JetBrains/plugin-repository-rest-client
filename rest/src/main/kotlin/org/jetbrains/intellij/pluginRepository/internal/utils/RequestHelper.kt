@@ -1,10 +1,15 @@
 package org.jetbrains.intellij.pluginRepository.internal.utils
 
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -42,7 +47,8 @@ internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
 
     try {
       Thread.sleep(100)
-    } catch (ie: InterruptedException) {
+    }
+    catch (ie: InterruptedException) {
       callable.cancel()
       throw ie
     }
@@ -58,3 +64,10 @@ internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
   }
   return responseRef.get()!!
 }
+
+internal fun File.toMultipartBody(): MultipartBody.Part {
+  val body = this.asRequestBody("application/octet-stream".toMediaType())
+  return MultipartBody.Part.createFormData("file", this.name, body)
+}
+
+internal fun String.toRequestBody() = this.toRequestBody("text/plain".toMediaType())
