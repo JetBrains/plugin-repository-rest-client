@@ -1,12 +1,12 @@
-package org.jetbrains.intellij.pluginRepository
+package org.jetbrains.intellij.pluginRepository.internal.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.jetbrains.intellij.pluginRepository.*
 import org.jetbrains.intellij.pluginRepository.internal.Messages
-import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.instances.PluginDownloaderInstance
 import org.jetbrains.intellij.pluginRepository.internal.instances.PluginManagerInstance
 import org.jetbrains.intellij.pluginRepository.internal.instances.PluginUpdateManagerInstance
@@ -21,14 +21,10 @@ import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-/**
- * @param siteUrl url of plugins repository instance. For example: https://plugins.jetbrains.com
- * @param token hub [permanent token](https://www.jetbrains.com/help/hub/Manage-Permanent-Tokens.html) to be used for authorization
- */
 
 val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
-class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
+internal class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
 
   private val service = Retrofit.Builder()
     .baseUrl(siteUrl)

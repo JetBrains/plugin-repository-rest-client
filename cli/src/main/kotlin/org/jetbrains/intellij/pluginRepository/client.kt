@@ -37,7 +37,8 @@ class Client {
                 exitProcess(1)
             }
 
-            val pluginRepository = PluginRepositoryInstance(options.host).downloader
+            val pluginRepository = PluginRepositoryFactory.create(
+              options.host).downloader
             val channel = parseChannel(options.channel)
             return if (!options.version.isNullOrBlank()) {
                 pluginRepository.download(options.pluginId!!, options.version!!, channel, File(options.destination))
@@ -51,7 +52,8 @@ class Client {
         private fun upload(args: Array<String>) {
             val options = UploadOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = PluginRepositoryInstance(options.host, options.token).uploader
+            val pluginRepository = PluginRepositoryFactory.create(
+              options.host, options.token).uploader
             val pluginId = options.pluginId
             when {
                 pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), 104,
@@ -64,7 +66,8 @@ class Client {
         private fun list(args: Array<String>) {
             val options = ListOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = PluginRepositoryInstance(options.host).pluginManager
+            val pluginRepository = PluginRepositoryFactory.create(
+              options.host).pluginManager
             val channel = parseChannel(options.channel)
             val plugins = pluginRepository.listPlugins(options.ideBuild!!, channel, options.pluginId)
             for (plugin in plugins) {
@@ -75,7 +78,8 @@ class Client {
         private fun info(args: Array<String>) {
             val options = InfoOptions()
             Args.parseOrExit(options, args)
-            val pluginRepository = PluginRepositoryInstance(options.host).pluginManager
+            val pluginRepository = PluginRepositoryFactory.create(
+              options.host).pluginManager
             val plugin = pluginRepository.getPluginByXmlId(options.pluginId!!, options.family!!)
             if (plugin != null) {
                 println("${plugin.name} ${plugin.id} made by ${plugin.vendor?.name}")

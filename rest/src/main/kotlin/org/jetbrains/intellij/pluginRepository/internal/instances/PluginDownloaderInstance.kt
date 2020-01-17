@@ -1,7 +1,7 @@
 package org.jetbrains.intellij.pluginRepository.internal.instances
 
 import okhttp3.ResponseBody
-import org.jetbrains.intellij.pluginRepository.LOG
+import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.PluginDownloader
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.downloadPlugin

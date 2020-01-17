@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.internal.instances
 
-import org.jetbrains.intellij.pluginRepository.LOG
+import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.PluginUploader
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
