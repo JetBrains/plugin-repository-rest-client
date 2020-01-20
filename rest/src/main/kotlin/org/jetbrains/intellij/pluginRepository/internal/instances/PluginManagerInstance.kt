@@ -18,8 +18,8 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
-  override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int): List<String> =
-    executeAndParseBody(service.searchPluginsXmlIds(build, max, offset)) ?: emptyList()
+  override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String): List<String> =
+    executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 
   override fun getCompatibleUpdate(xmlId: String, build: String, max: Int, channel: String): List<CompatibleUpdateBean> =
     executeAndParseBody(service.getLastCompatibleUpdate(xmlId, build, channel, max)) ?: emptyList()

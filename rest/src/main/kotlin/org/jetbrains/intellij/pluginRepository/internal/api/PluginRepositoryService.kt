@@ -91,7 +91,8 @@ interface PluginRepositoryService {
   fun searchPluginsXmlIds(
     @Query("build") build: String,
     @Query("max") max: Int,
-    @Query("offset") offset: Int
+    @Query("offset") offset: Int,
+    @Query("search") query: String
   ): Call<List<String>>
 
 

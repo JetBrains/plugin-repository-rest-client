@@ -23,15 +23,18 @@ interface PluginManager {
    * @param xmlId - id from plugin.xml file. Example: "org.jetbrains.kotlin"
    */
   fun getPluginByXmlId(xmlId: String, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
+
   /**
    * Plugin info by [id].
    * Supported for all [ProductFamily].
    */
   fun getPlugin(id: Int): PluginBean?
+
   /**
    * List of plugin authors.
    */
   fun getPluginDevelopers(id: Int): List<PluginUserBean>
+
   /**
    * List of plugins channels.
    * Example: "stable", "", "EAP" and etc.
@@ -56,10 +59,10 @@ interface PluginManager {
 
   /**
    * List of plugins xml ids compatible with [build].
-   * @param max - max result set. Max: 10000 - [offset]
-   * // TODO: add params
+   * @param max   - max result set. Max: 10000 - [offset]
+   * @param query - query for search.
    */
-  fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int): List<String>
+  fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
   /**
    * TODO: Fix params & test
