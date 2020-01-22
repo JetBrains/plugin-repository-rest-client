@@ -18,7 +18,12 @@ internal fun <T> executeAndParseBody(callable: Call<T>): T? {
   if (response.isSuccessful) {
     return response.body()
   }
-  val message = response.errorBody()?.string() ?: response.message() ?: Messages.getMessage("failed.request.status.code", response.code())
+  val message = listOf(
+    response.errorBody()?.string(),
+    response.message(),
+    response.raw().message,
+    Messages.getMessage("failed.request.status.code", response.code())
+  ).distinct().filterNot { it.isNullOrEmpty() }.joinToString("\n")
   throw PluginRepositoryException(message)
 }
 
