@@ -20,7 +20,7 @@ interface PluginRepository {
 interface PluginManager {
   /**
    * Plugin info by [xmlId] & [ProductFamily].
-   * @param xmlId - id from plugin.xml file. Example: "org.jetbrains.kotlin"
+   * @param xmlId - id from plugin descriptor file. Example: "org.jetbrains.kotlin"
    */
   fun getPluginByXmlId(xmlId: String, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
 
@@ -37,12 +37,12 @@ interface PluginManager {
 
   /**
    * List of plugins channels.
-   * Example: "stable", "", "EAP" and etc.
+   * Example: "", "EAP" and etc.
    */
   fun getPluginChannels(id: Int): List<String>
 
   /**
-   * List of plugin supported [ProductEnum].
+   * The list of compatible products for a plugin.
    */
   fun getPluginCompatibleProducts(id: Int): List<ProductEnum>
 
@@ -59,6 +59,7 @@ interface PluginManager {
 
   /**
    * List of plugins xml ids compatible with [build].
+   * Supported for [ProductFamily.INTELLIJ].
    * @param max   - max result set. Max: 10000 - [offset]
    * @param query - query for search.
    */
@@ -66,17 +67,18 @@ interface PluginManager {
 
   /**
    * Search last compatible update for each id from [xmlIds]
+   * Supported for [ProductFamily.INTELLIJ].
    * @param channel - plugin channel. Default value is "stable" plugin channel.
-   * @return list [CompatibleUpdateBean] if update exists. Get nothing if plugin is incompatible with [build]
+   * @return the list of last compatible updates [CompatibleUpdateBean] for plugins from [xmlIds].
    */
   fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String = ""): List<CompatibleUpdateBean>
 }
 
 interface PluginUpdateManager {
   /**
-   * Get list of plugin updates by plugin [xmlId].
+   * Get list of plugin updates by plugin [xmlId] and [version] and [family].
    * @param version - version of the plugin.
-   * @return Normally method returns only ONE update, but several very OLD plugins have several update.
+   * @return the list of updates [PluginUpdateBean]. There could be a several updates for some OLD plugins/updates.
    */
   fun getUpdatesByVersionAndFamily(xmlId: String, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
 
@@ -116,6 +118,7 @@ interface PluginUploader {
   /**
    * Upload plugin by ID into specific channel.
    * IMPORTANT: PLUGIN NOTES WILL BE IGNORED FOR IDES BASED ON INTELLIJ PLATFORM ([ProductFamily.INTELLIJ]).
+   * Plugin notes for teamcity plugins and hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel   - plugin channel. Default value is "stable" plugin channel.
    * @param notes     - plugin update notes.
    */
@@ -124,6 +127,7 @@ interface PluginUploader {
   /**
    * Upload plugin by Xml id into specific channel.
    * IMPORTANT: PLUGIN NOTES WILL BE IGNORED FOR IDES BASED ON INTELLIJ PLATFORM ([ProductFamily.INTELLIJ]).
+   * Plugin notes for teamcity plugins and hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel   - plugin channel. Default value is "stable" plugin channel.
    * @param notes     - plugin update notes.
    */
