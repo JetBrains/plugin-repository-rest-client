@@ -49,4 +49,11 @@ class PluginManagerTest : BaseTest() {
     Assert.assertTrue(ids.size == 100)
     Assert.assertTrue(ids.contains("org.jetbrains.plugins.vagrant"))
   }
+
+  @Test
+  fun `search compatible updates ids`() {
+    val updates = service.searchCompatibleUpdates(
+      listOf("org.jetbrains.kotlin"),"IU-193.3")
+    Assert.assertTrue(updates.isNotEmpty())
+  }
 }

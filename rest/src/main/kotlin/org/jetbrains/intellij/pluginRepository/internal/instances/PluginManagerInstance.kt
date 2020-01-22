@@ -2,6 +2,7 @@ package org.jetbrains.intellij.pluginRepository.internal.instances
 
 import org.jetbrains.intellij.pluginRepository.PluginManager
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
+import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
 import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
 import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
 import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
@@ -22,7 +23,7 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 
   override fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String): List<CompatibleUpdateBean> =
-    executeAndParseBody(service.searchLastCompatibleUpdate(xmlIds, build, channel)) ?: emptyList()
+    executeAndParseBody(service.searchLastCompatibleUpdate(CompatibleUpdateRequest(xmlIds, build, channel))) ?: emptyList()
 
   override fun getPluginByXmlId(xmlId: String, family: ProductFamily): PluginBean? = executeAndParseBody(
     service.getPluginByXmlId(family.id, xmlId))

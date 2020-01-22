@@ -3,6 +3,7 @@ package org.jetbrains.intellij.pluginRepository.internal.api
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
 import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
 import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.json.PluginUpdateBean
@@ -97,11 +98,8 @@ interface PluginRepositoryService {
 
 
   @POST("/api/search/compatibleUpdates")
-  fun searchLastCompatibleUpdate(
-    @Part("pluginXmlIds") xmlId: List<String>,
-    @Part("build") build: String,
-    @Part("channel") channel: String
-  ): Call<List<CompatibleUpdateBean>>
+  @Headers("Content-Type: application/json")
+  fun searchLastCompatibleUpdate(@Body body: CompatibleUpdateRequest): Call<List<CompatibleUpdateBean>>
 
   @GET("/api/plugins/{id}/updates")
   fun getUpdatesByVersionAndFamily(
