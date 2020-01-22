@@ -96,12 +96,11 @@ interface PluginRepositoryService {
   ): Call<List<String>>
 
 
-  @GET("/api/getCompatibleUpdates")
-  fun getLastCompatibleUpdate(
-    @Query("pluginXmlId") xmlId: String,
-    @Query("build") build: String,
-    @Query("channel") channel: String,
-    @Query("max") max: Int
+  @POST("/api/search/compatibleUpdates")
+  fun searchLastCompatibleUpdate(
+    @Part("pluginXmlIds") xmlId: List<String>,
+    @Part("build") build: String,
+    @Part("channel") channel: String
   ): Call<List<CompatibleUpdateBean>>
 
   @GET("/api/plugins/{id}/updates")

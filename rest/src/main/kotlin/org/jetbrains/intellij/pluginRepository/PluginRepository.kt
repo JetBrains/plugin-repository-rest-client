@@ -65,9 +65,11 @@ interface PluginManager {
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
   /**
-   * TODO: Fix params & test
+   * Search last compatible update for each id from [xmlIds]
+   * @param channel - plugin channel. Default value is "stable" plugin channel.
+   * @return list [CompatibleUpdateBean] if update exists. Get nothing if plugin is incompatible with [build]
    */
-  fun getCompatibleUpdate(xmlId: String, build: String, max: Int, channel: String = ""): List<CompatibleUpdateBean>
+  fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String = ""): List<CompatibleUpdateBean>
 }
 
 interface PluginUpdateManager {
