@@ -47,7 +47,7 @@ interface PluginManager {
   fun getPluginCompatibleProducts(id: Int): List<ProductEnum>
 
   /**
-   * List of plugin dependencies. Examples: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
+   * Getting plugin XML ids by [dependency]. Examples [dependency]: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
    * @return: list of plugin xml ids. Example: "org.jetbrains.kotlin
    */
   fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean = true): List<String>
