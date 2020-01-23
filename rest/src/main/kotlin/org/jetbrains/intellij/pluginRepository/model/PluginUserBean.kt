@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.model.json
+package org.jetbrains.intellij.pluginRepository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

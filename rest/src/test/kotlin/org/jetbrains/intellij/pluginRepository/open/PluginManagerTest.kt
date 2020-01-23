@@ -2,7 +2,7 @@ package org.jetbrains.intellij.pluginRepository.open
 
 import org.jetbrains.intellij.pluginRepository.base.BaseTest
 import org.jetbrains.intellij.pluginRepository.base.TestPlugins
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
+import org.jetbrains.intellij.pluginRepository.model.ProductEnum
 import org.junit.Assert
 import org.junit.Test
 

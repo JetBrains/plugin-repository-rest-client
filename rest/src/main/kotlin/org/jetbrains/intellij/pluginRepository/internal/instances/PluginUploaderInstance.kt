@@ -7,8 +7,8 @@ import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryServ
 import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.toRequestBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.uploadOrFail
-import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import java.io.File
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {

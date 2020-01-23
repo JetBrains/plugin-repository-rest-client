@@ -1,7 +1,6 @@
-package org.jetbrains.intellij.pluginRepository.model.json
+package org.jetbrains.intellij.pluginRepository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginBean(

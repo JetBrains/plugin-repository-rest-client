@@ -3,9 +3,9 @@ package org.jetbrains.intellij.pluginRepository.internal.instances
 import org.jetbrains.intellij.pluginRepository.PluginUpdateManager
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.repository.IntellijUpdateMetadata
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 
 internal class PluginUpdateManagerInstance(private val service: PluginRepositoryService) : PluginUpdateManager {
 

@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.model.xml
+package org.jetbrains.intellij.pluginRepository.model
 
 data class PluginXmlBean(
   val name: String,

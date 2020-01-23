@@ -4,13 +4,13 @@ import org.jetbrains.intellij.pluginRepository.PluginManager
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
 import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
-import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUserBean
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
-import org.jetbrains.intellij.pluginRepository.model.xml.PluginXmlBean
-import org.jetbrains.intellij.pluginRepository.model.xml.converters.convertCategory
+import org.jetbrains.intellij.pluginRepository.model.CompatibleUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
+import org.jetbrains.intellij.pluginRepository.model.ProductEnum
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.PluginXmlBean
+import org.jetbrains.intellij.pluginRepository.internal.utils.convertCategory
 
 internal class PluginManagerInstance(private val service: PluginRepositoryService) : PluginManager {
 

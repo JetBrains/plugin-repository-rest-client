@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.model.repository
+package org.jetbrains.intellij.pluginRepository.model
 
 enum class ProductEnum(
   val id: String,

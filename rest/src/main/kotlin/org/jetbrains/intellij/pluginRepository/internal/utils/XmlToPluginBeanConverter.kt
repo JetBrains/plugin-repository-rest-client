@@ -1,11 +1,13 @@
-package org.jetbrains.intellij.pluginRepository.model.xml.converters
+package org.jetbrains.intellij.pluginRepository.internal.utils
 
-import org.jetbrains.intellij.pluginRepository.model.xml.PluginXmlBean
-import org.jetbrains.intellij.pluginRepository.model.xml.XmlCategoryBean
-import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginBean
+import org.jetbrains.intellij.pluginRepository.model.PluginXmlBean
+import org.jetbrains.intellij.pluginRepository.model.XmlCategoryBean
+import org.jetbrains.intellij.pluginRepository.model.XmlPluginBean
 
 internal fun convertCategory(response: XmlCategoryBean): List<PluginXmlBean> {
-  return response.plugins?.map { convertPlugin(it, response.name!!) } ?: emptyList()
+  return response.plugins?.map {
+    convertPlugin(it, response.name!!)
+  } ?: emptyList()
 }
 
 private fun convertPlugin(response: XmlPluginBean, category: String) = PluginXmlBean(

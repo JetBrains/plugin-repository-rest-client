@@ -2,7 +2,7 @@ package org.jetbrains.intellij.pluginRepository
 
 import com.sampullara.cli.Args
 import com.sampullara.cli.Argument
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import java.io.File
 import kotlin.system.exitProcess
 

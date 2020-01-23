@@ -4,13 +4,13 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
-import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUserBean
-import org.jetbrains.intellij.pluginRepository.model.repository.IntellijUpdateMetadata
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
-import org.jetbrains.intellij.pluginRepository.model.xml.XmlPluginRepositoryBean
+import org.jetbrains.intellij.pluginRepository.model.CompatibleUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
+import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
+import org.jetbrains.intellij.pluginRepository.model.ProductEnum
+import org.jetbrains.intellij.pluginRepository.model.XmlPluginRepositoryBean
 import retrofit2.Call
 import retrofit2.http.*
 

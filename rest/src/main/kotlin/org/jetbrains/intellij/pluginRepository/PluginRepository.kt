@@ -1,13 +1,13 @@
 package org.jetbrains.intellij.pluginRepository
 
-import org.jetbrains.intellij.pluginRepository.model.json.CompatibleUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.json.PluginUserBean
-import org.jetbrains.intellij.pluginRepository.model.repository.IntellijUpdateMetadata
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
-import org.jetbrains.intellij.pluginRepository.model.repository.ProductFamily
-import org.jetbrains.intellij.pluginRepository.model.xml.PluginXmlBean
+import org.jetbrains.intellij.pluginRepository.model.CompatibleUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
+import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
+import org.jetbrains.intellij.pluginRepository.model.ProductEnum
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.PluginXmlBean
 import java.io.File
 
 interface PluginRepository {
