@@ -1,14 +1,13 @@
 package org.jetbrains.intellij.pluginRepository.model.json
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.jetbrains.intellij.pluginRepository.model.repository.ProductEnum
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginUpdateBean(
   val id: Int,
   val link: String,
   val version: String?,
-  val approve: Boolean?,
-  val listed: Boolean?,
-  val recalculateCompatibilityAllowed: Boolean?,
   val cdate: String?,
   val downloadUrl: String?,
   val file: String?,
@@ -21,7 +20,6 @@ data class PluginUpdateBean(
   val downloads: Int?,
   val pluginId: Int,
   val compatibleVersions: Map<ProductEnum, String>?,
-  val removalRequested: Boolean?,
   val author: PluginUserBean?,
   val modules: Set<String>?
 )
