@@ -36,7 +36,7 @@ interface PluginManager {
   fun getPluginDevelopers(id: Int): List<PluginUserBean>
 
   /**
-   * List of plugins channels.
+   * List of plugin channels.
    * Example: "", "EAP" and etc.
    */
   fun getPluginChannels(id: Int): List<String>
@@ -47,8 +47,8 @@ interface PluginManager {
   fun getPluginCompatibleProducts(id: Int): List<ProductEnum>
 
   /**
-   * Getting plugin XML ids by [dependency]. Examples [dependency]: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
-   * @return: list of plugin xml ids. Example: "org.jetbrains.kotlin
+   * Getting plugin XML IDs by [dependency]. Examples [dependency]: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
+   * @return: list of plugin xml ids. Example: "org.jetbrains.kotlin"
    */
   fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean = true): List<String>
 
@@ -58,7 +58,7 @@ interface PluginManager {
   fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginXmlBean>
 
   /**
-   * List of plugins xml ids compatible with [build].
+   * List of plugins XML IDs compatible with [build].
    * Supported for [ProductFamily.INTELLIJ].
    * @param max max result set. Max: 10000 - [offset]
    * @param query query for search.
@@ -66,7 +66,7 @@ interface PluginManager {
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
   /**
-   * Search last compatible update for each id from [xmlIds]
+   * Search last compatible update for each ID` from [xmlIds]
    * Supported for [ProductFamily.INTELLIJ].
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @return the list of last compatible updates [CompatibleUpdateBean] for plugins from [xmlIds].
@@ -83,7 +83,7 @@ interface PluginUpdateManager {
   fun getUpdatesByVersionAndFamily(xmlId: String, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
 
   /**
-   * Get plugin update by [id]. If needed to get a lot of plugin updates recommended using [getIntellijUpdateMetadata].
+   * Get plugin update by [id]. To get a lot of plugin updates it is recommended to use [getIntellijUpdateMetadata].
    * Supported for all [ProductFamily].
    */
   fun getUpdateById(id: Int): PluginUpdateBean?
@@ -106,7 +106,7 @@ interface PluginDownloader {
   fun download(xmlId: String, version: String, targetPath: File, channel: String? = null): File?
 
   /**
-   * Download latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
+   * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
    * @param xmlId plugin XML id.
    * @param ideBuild IDE version. Example: "IC-145.184"
    * @param channel plugin channel. Default value is "stable" plugin channel.
@@ -117,25 +117,26 @@ interface PluginDownloader {
 interface PluginUploader {
   /**
    * Upload plugin by ID into specific channel.
-   * *Important*: plugin notes will be ignored for ides based on intellij platform ([ProductFamily.INTELLIJ]).
-   * Plugin notes for teamcity plugins and hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
+   * *Important*: plugin notes will be ignored for IDEs based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
+   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
+
   fun uploadPlugin(id: Int, file: File, channel: String? = null, notes: String? = null)
 
   /**
-   * Upload plugin by Xml id into specific channel.
-   * *Important*: plugin notes will be ignored for ides based on intellij platform ([ProductFamily.INTELLIJ]).
-   * Plugin notes for teamcity plugins and hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
+   * Upload plugin by XML id into specific channel.
+   * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
+   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
   fun uploadPlugin(xmlId: String, file: File, channel: String? = null, notes: String? = null)
 
   /**
-   * Upload a new plugin into JetBrains Marketplace.
-   * Make sure you accepted all agreements on the Marketplace web-site: https://plugins.jetbrains.com/.
+   * Upload a new plugin to the JetBrains Marketplace.
+   * Make sure you have accepted all agreements on the Marketplace website: https://plugins.jetbrains.com/.
    * @param categoryId tag id. Example: https://plugins.jetbrains.com/idea.
    * @param licenseUrl link to the license.
    */
