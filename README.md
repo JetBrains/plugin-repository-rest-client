@@ -1,9 +1,9 @@
 # Plugin Repository Rest Client [![JetBrains team project](https://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-Client and command line interface for [JetBrains Plugin Repository](https://plugins.jetbrains.com/).
+The client and command line interface for [JetBrains Plugin Repository](https://plugins.jetbrains.com/).
 
 # Examples
-The code snippet below will init the instance of the JetBrains Marketplace repository.
+The code snippet below will initiate the instance of the JetBrains Marketplace repository.
 
 ```kotlin
 val instance = PluginRepositoryFactory.create("https://plugins.jetbrains.com", "authToken")
@@ -38,11 +38,9 @@ val plugin = instance.pluginManager.getPlugin(pluginId)
 
 ```
 
-and others.
-
 ### Client
 
-`org.jetbrains.intellij.pluginRepository.Client` main class provides command line interface for uploading, downloading and listing plugins on the plugin repository.
+The `org.jetbrains.intellij.pluginRepository.Client` main class provides command line interface for uploading, downloading and listing plugins on the plugin repository.
 
 # Published on bintray
 https://bintray.com/jetbrains/intellij-plugin-service/plugin-repository-rest-client
