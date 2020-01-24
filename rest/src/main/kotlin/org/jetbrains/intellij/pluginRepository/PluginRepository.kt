@@ -1,13 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
-import org.jetbrains.intellij.pluginRepository.model.CompatibleUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
-import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
-import org.jetbrains.intellij.pluginRepository.model.ProductEnum
-import org.jetbrains.intellij.pluginRepository.model.ProductFamily
-import org.jetbrains.intellij.pluginRepository.model.PluginXmlBean
+import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
 
 interface PluginRepository {
@@ -54,7 +47,9 @@ interface PluginManager {
 
   /**
    * List of plugins compatible with [ideBuild]
+   * @deprecated use [searchCompatibleUpdates] for getting compatible update IDs and [PluginUpdateManager.getIntellijUpdateMetadata] for getting information
    */
+  @Deprecated("Will be removed for performance reasons")
   fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginXmlBean>
 
   /**
