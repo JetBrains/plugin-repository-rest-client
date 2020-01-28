@@ -13,6 +13,7 @@ data class IntellijUpdateMetadata(
   val dependencies: Set<String>,
   val since: String,
   val until: String,
-  val productCode: String?
+  val productCode: String?,
+  val sourceCodeUrl: String?
 )
 
