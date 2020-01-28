@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.model
+package org.jetbrains.intellij.pluginRepository.internal.api
 
 import javax.xml.bind.annotation.*
 

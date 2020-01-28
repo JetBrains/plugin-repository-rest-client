@@ -10,7 +10,6 @@ import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
 import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
 import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
 import org.jetbrains.intellij.pluginRepository.model.ProductEnum
-import org.jetbrains.intellij.pluginRepository.model.XmlPluginRepositoryBean
 import retrofit2.Call
 import retrofit2.http.*
 

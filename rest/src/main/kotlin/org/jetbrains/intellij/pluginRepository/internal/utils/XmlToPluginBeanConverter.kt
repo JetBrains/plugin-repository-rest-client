@@ -1,8 +1,8 @@
 package org.jetbrains.intellij.pluginRepository.internal.utils
 
 import org.jetbrains.intellij.pluginRepository.model.PluginXmlBean
-import org.jetbrains.intellij.pluginRepository.model.XmlCategoryBean
-import org.jetbrains.intellij.pluginRepository.model.XmlPluginBean
+import org.jetbrains.intellij.pluginRepository.internal.api.XmlCategoryBean
+import org.jetbrains.intellij.pluginRepository.internal.api.XmlPluginBean
 
 internal fun convertCategory(response: XmlCategoryBean): List<PluginXmlBean> {
   return response.plugins?.map {
