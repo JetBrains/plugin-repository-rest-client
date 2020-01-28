@@ -30,6 +30,8 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
 
   override fun getPlugin(id: Int): PluginBean? = executeAndParseBody(service.getPluginById(id))
 
+  override fun getPluginVersions(id: Int) = executeAndParseBody(service.getPluginVersions(id)).orEmpty().map { it.version }
+
   override fun getPluginDevelopers(id: Int): List<PluginUserBean> = executeAndParseBody(service.getPluginDevelopers(id)) ?: emptyList()
 
   override fun getPluginChannels(id: Int): List<String> = executeAndParseBody(service.getPluginChannels(id)) ?: emptyList()

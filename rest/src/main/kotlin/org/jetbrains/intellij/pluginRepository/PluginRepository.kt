@@ -24,6 +24,11 @@ interface PluginManager {
   fun getPlugin(id: Int): PluginBean?
 
   /**
+   * List of plugin versions.
+   */
+  fun getPluginVersions(id: Int): List<String>
+
+  /**
    * List of plugin authors.
    */
   fun getPluginDevelopers(id: Int): List<PluginUserBean>

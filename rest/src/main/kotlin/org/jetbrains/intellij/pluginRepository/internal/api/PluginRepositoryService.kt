@@ -110,6 +110,9 @@ interface PluginRepositoryService {
   @GET("/api/updates/{id}")
   fun getUpdateById(@Path("id") id: Int): Call<PluginUpdateBean>
 
+  @GET("/api/plugins/{id}/updateVersions")
+  fun getPluginVersions(@Path("id") id: Int): Call<List<PluginUpdateVersion>>
+
   @GET("/files/{pluginId}/{updateId}/meta.json")
   fun getIntelliJUpdateMeta(@Path("pluginId") pluginId: Int, @Path("updateId") updateId: Int): Call<IntellijUpdateMetadata>
 
