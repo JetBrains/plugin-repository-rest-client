@@ -4,7 +4,7 @@ import org.jetbrains.intellij.pluginRepository.PluginManager
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
 import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
-import org.jetbrains.intellij.pluginRepository.model.CompatibleUpdateBean
+import org.jetbrains.intellij.pluginRepository.model.UpdateBean
 import org.jetbrains.intellij.pluginRepository.model.PluginBean
 import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
 import org.jetbrains.intellij.pluginRepository.model.ProductEnum
@@ -22,7 +22,7 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String): List<String> =
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 
-  override fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String): List<CompatibleUpdateBean> =
+  override fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String): List<UpdateBean> =
     executeAndParseBody(service.searchLastCompatibleUpdate(CompatibleUpdateRequest(xmlIds, build, channel))) ?: emptyList()
 
   override fun getPluginByXmlId(xmlId: String, family: ProductFamily): PluginBean? = executeAndParseBody(
@@ -30,7 +30,12 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
 
   override fun getPlugin(id: Int): PluginBean? = executeAndParseBody(service.getPluginById(id))
 
-  override fun getPluginVersions(id: Int) = executeAndParseBody(service.getPluginVersions(id)).orEmpty().map { it.version }
+  override fun getPluginVersions(id: Int): List<UpdateBean> {
+    val pluginBean = executeAndParseBody(service.getPluginById(id)) ?: return emptyList()
+    return executeAndParseBody(service.getPluginVersions(id)).orEmpty().map {
+      UpdateBean(it.id, pluginBean.id, pluginBean.xmlId, it.version)
+    }
+  }
 
   override fun getPluginDevelopers(id: Int): List<PluginUserBean> = executeAndParseBody(service.getPluginDevelopers(id)) ?: emptyList()
 

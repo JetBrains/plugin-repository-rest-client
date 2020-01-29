@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.model
 
-data class CompatibleUpdateBean(
+data class UpdateBean(
   val id: Int,
   val pluginId: Int,
   val pluginXmlId: String,
