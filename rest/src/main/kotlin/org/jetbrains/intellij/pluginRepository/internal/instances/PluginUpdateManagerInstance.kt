@@ -9,12 +9,13 @@ import org.jetbrains.intellij.pluginRepository.model.*
 internal class PluginUpdateManagerInstance(private val service: PluginRepositoryService) : PluginUpdateManager {
 
   override fun getUpdatesByVersionAndFamily(xmlId: PluginXmlId, version: String, family: ProductFamily): List<PluginUpdateBean> =
-    executeAndParseBody(service.getUpdatesByVersionAndFamily(xmlId, version, family.id)) ?: emptyList()
+    executeAndParseBody(service.getUpdatesByVersionAndFamily(xmlId, version, family.id), nullFor404 = true) ?: emptyList()
 
-  override fun getUpdateById(id: UpdateId): PluginUpdateBean? = executeAndParseBody(service.getUpdateById(id))
+  override fun getUpdateById(id: UpdateId): PluginUpdateBean? =
+    executeAndParseBody(service.getUpdateById(id), nullFor404 = true)
 
   override fun getIntellijUpdateMetadata(pluginId: PluginId, updateId: UpdateId): IntellijUpdateMetadata? =
-    executeAndParseBody(service.getIntelliJUpdateMeta(pluginId, updateId))
+    executeAndParseBody(service.getIntelliJUpdateMeta(pluginId, updateId), nullFor404 = true)
 
   override fun getIntellijUpdateMetadataBatch(updateIds: List<Pair<PluginId, UpdateId>>): Map<UpdateId, IntellijUpdateMetadata> {
     val calls = updateIds.map { (pluginId, updateId) -> service.getIntelliJUpdateMeta(pluginId, updateId) }

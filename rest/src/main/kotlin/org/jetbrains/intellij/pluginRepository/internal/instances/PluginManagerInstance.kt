@@ -10,7 +10,7 @@ import org.jetbrains.intellij.pluginRepository.model.*
 internal class PluginManagerInstance(private val service: PluginRepositoryService) : PluginManager {
 
   override fun listPlugins(ideBuild: String, channel: String?, pluginId: PluginXmlId?): List<PluginXmlBean> {
-    val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId))
+    val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId), nullFor404 = true)
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
@@ -20,26 +20,29 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun searchCompatibleUpdates(xmlIds: List<PluginXmlId>, build: String, channel: String): List<UpdateBean> =
     executeAndParseBody(service.searchLastCompatibleUpdate(CompatibleUpdateRequest(xmlIds, build, channel))) ?: emptyList()
 
-  override fun getPluginByXmlId(xmlId: PluginXmlId, family: ProductFamily): PluginBean? = executeAndParseBody(
-    service.getPluginByXmlId(family.id, xmlId))
+  override fun getPluginByXmlId(xmlId: PluginXmlId, family: ProductFamily): PluginBean? =
+    executeAndParseBody(service.getPluginByXmlId(family.id, xmlId), nullFor404 = true)
 
-  override fun getPlugin(id: PluginId): PluginBean? = executeAndParseBody(service.getPluginById(id))
+  override fun getPlugin(id: PluginId): PluginBean? =
+    executeAndParseBody(service.getPluginById(id), nullFor404 = true)
 
   override fun getPluginVersions(id: PluginId): List<UpdateBean> {
-    val pluginBean = executeAndParseBody(service.getPluginById(id)) ?: return emptyList()
-    return executeAndParseBody(service.getPluginVersions(id)).orEmpty().map {
+    val pluginBean = executeAndParseBody(service.getPluginById(id), nullFor404 = true) ?: return emptyList()
+    return executeAndParseBody(service.getPluginVersions(id), nullFor404 = true).orEmpty().map {
       UpdateBean(it.id, pluginBean.id, pluginBean.xmlId, it.version)
     }
   }
 
-  override fun getPluginDevelopers(id: PluginId): List<PluginUserBean> = executeAndParseBody(service.getPluginDevelopers(id)) ?: emptyList()
+  override fun getPluginDevelopers(id: PluginId): List<PluginUserBean> =
+    executeAndParseBody(service.getPluginDevelopers(id), nullFor404 = true) ?: emptyList()
 
-  override fun getPluginChannels(id: PluginId): List<String> = executeAndParseBody(service.getPluginChannels(id)) ?: emptyList()
+  override fun getPluginChannels(id: PluginId): List<String> =
+    executeAndParseBody(service.getPluginChannels(id), nullFor404 = true) ?: emptyList()
 
   override fun getPluginCompatibleProducts(id: PluginId): List<ProductEnum> =
-    executeAndParseBody(service.getPluginCompatibleProducts(id)) ?: emptyList()
+    executeAndParseBody(service.getPluginCompatibleProducts(id), nullFor404 = true) ?: emptyList()
 
   override fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean) =
-    executeAndParseBody(service.getPluginXmlIdByDependency(dependency, includeOptional)) ?: emptyList()
+    executeAndParseBody(service.getPluginXmlIdByDependency(dependency, includeOptional), nullFor404 = true) ?: emptyList()
 
 }

@@ -13,10 +13,13 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
-internal fun <T> executeAndParseBody(callable: Call<T>): T? {
+internal fun <T> executeAndParseBody(callable: Call<T>, nullFor404: Boolean = false): T? {
   val response = executeExceptionally(callable)
   if (response.isSuccessful) {
     return response.body()
+  }
+  if (response.code() == 404 && nullFor404) {
+    return null
   }
   val message = listOf(
     response.errorBody()?.string(),
