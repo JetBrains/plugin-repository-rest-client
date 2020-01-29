@@ -2,8 +2,8 @@ package org.jetbrains.intellij.pluginRepository.model
 
 
 data class IntellijUpdateMetadata(
-  val id: Int,
-  val xmlId: String,
+  val id: UpdateId,
+  val xmlId: PluginXmlId,
   val name: String,
   val description: String,
   val tags: List<String>,

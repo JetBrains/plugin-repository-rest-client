@@ -15,34 +15,34 @@ interface PluginManager {
    * Plugin info by [xmlId] & [ProductFamily].
    * @param xmlId id from plugin descriptor file. Example: "org.jetbrains.kotlin"
    */
-  fun getPluginByXmlId(xmlId: String, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
+  fun getPluginByXmlId(xmlId: PluginXmlId, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
 
   /**
    * Plugin info by [id].
    * Supported for all [ProductFamily].
    */
-  fun getPlugin(id: Int): PluginBean?
+  fun getPlugin(id: PluginId): PluginBean?
 
   /**
    * List of plugin versions.
    */
-  fun getPluginVersions(id: Int): List<UpdateBean>
+  fun getPluginVersions(id: PluginId): List<UpdateBean>
 
   /**
    * List of plugin authors.
    */
-  fun getPluginDevelopers(id: Int): List<PluginUserBean>
+  fun getPluginDevelopers(id: PluginId): List<PluginUserBean>
 
   /**
    * List of plugin channels.
    * Example: "", "EAP" and etc.
    */
-  fun getPluginChannels(id: Int): List<String>
+  fun getPluginChannels(id: PluginId): List<String>
 
   /**
    * The list of compatible products for a plugin.
    */
-  fun getPluginCompatibleProducts(id: Int): List<ProductEnum>
+  fun getPluginCompatibleProducts(id: PluginId): List<ProductEnum>
 
   /**
    * Getting plugin XML IDs by [dependency]. Examples [dependency]: "com.intellij.modules.java", "(optional) org.jetbrains.java.decompiler".
@@ -55,7 +55,7 @@ interface PluginManager {
    * @deprecated use [searchCompatibleUpdates] for getting compatible update IDs and [PluginUpdateManager.getIntellijUpdateMetadata] for getting information
    */
   @Deprecated("Will be removed for performance reasons")
-  fun listPlugins(ideBuild: String, channel: String? = null, pluginId: String? = null): List<PluginXmlBean>
+  fun listPlugins(ideBuild: String, channel: String? = null, pluginId: PluginXmlId? = null): List<PluginXmlBean>
 
   /**
    * List of plugins XML IDs compatible with [build].
@@ -71,7 +71,7 @@ interface PluginManager {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @return the list of last compatible updates [UpdateBean] for plugins from [xmlIds].
    */
-  fun searchCompatibleUpdates(xmlIds: List<String>, build: String, channel: String = ""): List<UpdateBean>
+  fun searchCompatibleUpdates(xmlIds: List<PluginXmlId>, build: String, channel: String = ""): List<UpdateBean>
 }
 
 interface PluginUpdateManager {
@@ -80,20 +80,20 @@ interface PluginUpdateManager {
    * @param version - version of the plugin.
    * @return the list of updates [PluginUpdateBean]. There could be a several updates for some OLD plugins/updates.
    */
-  fun getUpdatesByVersionAndFamily(xmlId: String, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
+  fun getUpdatesByVersionAndFamily(xmlId: PluginXmlId, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
 
   /**
    * Get plugin update by [id]. To get a lot of plugin updates it is recommended to use [getIntellijUpdateMetadata].
    * Supported for all [ProductFamily].
    */
-  fun getUpdateById(id: Int): PluginUpdateBean?
+  fun getUpdateById(id: UpdateId): PluginUpdateBean?
 
   /**
    * Getting plugin update metadata.
    * Use for getting a big list of plugin updates.
    * Supported for [ProductFamily.INTELLIJ].
    */
-  fun getIntellijUpdateMetadata(pluginId: Int, updateId: Int): IntellijUpdateMetadata?
+  fun getIntellijUpdateMetadata(pluginId: PluginId, updateId: UpdateId): IntellijUpdateMetadata?
 }
 
 interface PluginDownloader {
@@ -103,7 +103,7 @@ interface PluginDownloader {
    * @param version version of the plugin. Example: "1.3.61-release-IJ2019.3-1" for Kotlin plugin.
    * @param channel plugin channel. Default value is "stable" plugin channel.
    */
-  fun download(xmlId: String, version: String, targetPath: File, channel: String? = null): File?
+  fun download(xmlId: PluginXmlId, version: String, targetPath: File, channel: String? = null): File?
 
   /**
    * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
@@ -111,7 +111,7 @@ interface PluginDownloader {
    * @param ideBuild IDE version. Example: "IC-145.184"
    * @param channel plugin channel. Default value is "stable" plugin channel.
    */
-  fun downloadLatestCompatiblePlugin(xmlId: String, ideBuild: String, targetPath: File, channel: String? = null): File?
+  fun downloadLatestCompatiblePlugin(xmlId: PluginXmlId, ideBuild: String, targetPath: File, channel: String? = null): File?
 }
 
 interface PluginUploader {
@@ -123,7 +123,7 @@ interface PluginUploader {
    * @param notes plugin update notes.
    */
 
-  fun uploadPlugin(id: Int, file: File, channel: String? = null, notes: String? = null)
+  fun uploadPlugin(id: PluginId, file: File, channel: String? = null, notes: String? = null)
 
   /**
    * Upload plugin by XML id into specific channel.
@@ -132,7 +132,7 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
-  fun uploadPlugin(xmlId: String, file: File, channel: String? = null, notes: String? = null)
+  fun uploadPlugin(xmlId: PluginXmlId, file: File, channel: String? = null, notes: String? = null)
 
   /**
    * Upload a new plugin to the JetBrains Marketplace.

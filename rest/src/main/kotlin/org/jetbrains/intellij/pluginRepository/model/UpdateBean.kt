@@ -1,8 +1,8 @@
 package org.jetbrains.intellij.pluginRepository.model
 
 data class UpdateBean(
-  val id: Int,
-  val pluginId: Int,
-  val pluginXmlId: String,
+  val id: UpdateId,
+  val pluginId: PluginId,
+  val pluginXmlId: PluginXmlId,
   val version: String
 )

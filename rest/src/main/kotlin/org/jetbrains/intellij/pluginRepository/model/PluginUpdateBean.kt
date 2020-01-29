@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginUpdateBean(
-  val id: Int,
+  val id: UpdateId,
   val version: String?,
   val cdate: String?,
   val downloadUrl: String?,
@@ -15,7 +15,7 @@ data class PluginUpdateBean(
   val channel: String?,
   val size: Int?,
   val downloads: Int?,
-  val pluginId: Int,
+  val pluginId: PluginId,
   val compatibleVersions: Map<ProductEnum, String>?,
   val author: PluginUserBean?,
   val modules: Set<String>?

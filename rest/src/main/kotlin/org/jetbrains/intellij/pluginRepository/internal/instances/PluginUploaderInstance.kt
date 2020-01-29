@@ -8,6 +8,8 @@ import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.toRequestBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.uploadOrFail
 import org.jetbrains.intellij.pluginRepository.model.PluginBean
+import org.jetbrains.intellij.pluginRepository.model.PluginId
+import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import java.io.File
 
@@ -20,18 +22,18 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     return plugin
   }
 
-  override fun uploadPlugin(id: Int, file: File, channel: String?, notes: String?) {
+  override fun uploadPlugin(id: PluginId, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginId = id, channel = channel, notes = notes)
   }
 
-  override fun uploadPlugin(xmlId: String, file: File, channel: String?, notes: String?) {
+  override fun uploadPlugin(xmlId: PluginXmlId, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginXmlId = xmlId, channel = channel, notes = notes)
   }
 
   private fun uploadPluginInternal(
     file: File,
-    pluginId: Int? = null,
-    pluginXmlId: String? = null,
+    pluginId: PluginId? = null,
+    pluginXmlId: PluginXmlId? = null,
     channel: String? = null,
     notes: String? = null
   ) {
