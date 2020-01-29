@@ -10,8 +10,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 internal fun <T> executeAndParseBody(callable: Call<T>): T? {
   val response = executeExceptionally(callable)
@@ -27,26 +27,31 @@ internal fun <T> executeAndParseBody(callable: Call<T>): T? {
   throw PluginRepositoryException(message)
 }
 
-internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
-  val responseRef = AtomicReference<Response<T>?>()
-  val errorRef = AtomicReference<Throwable?>()
-  val finished = AtomicBoolean()
+internal fun <T> executeExceptionallyBatch(calls: List<Call<T>>): Map<Call<T>, Response<T>> {
+  val responses = ConcurrentHashMap<Call<T>, Response<T>>()
+  val errors = ConcurrentHashMap<Call<T>, Throwable>()
 
-  callable.enqueue(object : Callback<T> {
-    override fun onResponse(call: Call<T>, response: Response<T>) {
-      responseRef.set(response)
-      finished.set(true)
-    }
+  val finished = AtomicInteger()
 
-    override fun onFailure(call: Call<T>, error: Throwable) {
-      errorRef.set(error)
-      finished.set(true)
-    }
-  })
+  for (call in calls) {
+    call.enqueue(object : Callback<T> {
+      override fun onResponse(call: Call<T>, response: Response<T>) {
+        finished.incrementAndGet()
+        responses[call] = response
+      }
 
-  while (!finished.get()) {
+      override fun onFailure(call: Call<T>, error: Throwable) {
+        finished.incrementAndGet()
+        errors[call] = error
+      }
+    })
+  }
+
+  while (finished.get() != calls.size) {
     if (Thread.interrupted()) {
-      callable.cancel()
+      for (call in calls) {
+        call.cancel()
+      }
       throw InterruptedException()
     }
 
@@ -54,21 +59,29 @@ internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
       Thread.sleep(100)
     }
     catch (ie: InterruptedException) {
-      callable.cancel()
+      for (call in calls) {
+        call.cancel()
+      }
       throw ie
     }
   }
 
-  if (callable.isCanceled || Thread.interrupted()) {
+  if (Thread.interrupted()) {
     throw InterruptedException()
   }
 
-  val error = errorRef.get()
-  if (error != null) {
-    throw error
+  if (errors.isNotEmpty()) {
+    val exception = Exception()
+    for (error in errors.values) {
+      exception.addSuppressed(error)
+    }
+    throw exception
   }
-  return responseRef.get()!!
+  return responses
 }
+
+internal fun <T> executeExceptionally(call: Call<T>): Response<T> =
+  executeExceptionallyBatch(listOf(call)).values.first()
 
 internal fun File.toMultipartBody(): MultipartBody.Part {
   val body = this.asRequestBody("application/octet-stream".toMediaType())

@@ -91,11 +91,19 @@ interface PluginUpdateManager {
   fun getUpdateById(id: UpdateId): PluginUpdateBean?
 
   /**
-   * Getting plugin update metadata.
-   * Use for getting a big list of plugin updates.
-   * Supported for [ProductFamily.INTELLIJ].
+   * Get plugin update metadata.
+   *
+   * Supported for [ProductFamily.INTELLIJ] only.
    */
   fun getIntellijUpdateMetadata(pluginId: PluginId, updateId: UpdateId): IntellijUpdateMetadata?
+
+  /**
+   * Get update metadata for many plugins at once.
+   *
+   * Supported for [ProductFamily.INTELLIJ] only.
+   */
+  fun getIntellijUpdateMetadataBatch(updateIds: List<Pair<PluginId, UpdateId>>): Map<UpdateId, IntellijUpdateMetadata>
+
 }
 
 interface PluginDownloader {
