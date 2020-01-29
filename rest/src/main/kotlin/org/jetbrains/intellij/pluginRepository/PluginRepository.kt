@@ -59,8 +59,10 @@ interface PluginManager {
 
   /**
    * List of plugins XML IDs compatible with [build].
-   * Supported for [ProductFamily.INTELLIJ].
-   * @param max max result set. Max: 10000 - [offset]
+   * Supported for [ProductFamily.INTELLIJ] only.
+   *
+   * @param max max result set size
+   * @param offset offset to return results from
    * @param query query for search.
    */
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
