@@ -27,6 +27,41 @@ class PluginManagerTest : BaseTest() {
   }
 
   @Test
+  fun `get plugin by xml id`() {
+    val testPlugin = TestPlugins.LOMBOK_PLUGIN
+    val plugin = service.getPluginByXmlId(testPlugin.xmlId)
+    Assert.assertNotNull(plugin)
+    Assert.assertTrue(plugin?.id == testPlugin.id)
+  }
+
+  @Test
+  fun `get plugin for unknown xml id`() {
+    val plugin = service.getPluginByXmlId("unknownPluginId")
+    Assert.assertNull(plugin)
+  }
+
+
+  @Test
+  fun `get plugin versions`() {
+    val testPlugin = TestPlugins.KUBERNETES
+    val updates = service.getPluginVersions(testPlugin.id)
+    Assert.assertTrue(updates.isNotEmpty())
+    val versions = updates.map { it.version }
+    Assert.assertTrue(versions.contains("193.6015.53"))
+    Assert.assertTrue(versions.contains("193.5662.31"))
+
+    val plugins = updates.map { it.pluginXmlId }.distinct()
+    Assert.assertTrue(plugins.size == 1)
+    Assert.assertTrue(plugins.first() == testPlugin.xmlId)
+  }
+
+  @Test
+  fun `get plugin versions for unknown id`() {
+    val versions = service.getPluginVersions(unknownPluginId)
+    Assert.assertTrue(versions.isEmpty())
+  }
+
+  @Test
   fun `get plugin developers`() {
     val testPlugin = TestPlugins.DOCKER
     val users = service.getPluginDevelopers(testPlugin.id)
@@ -87,5 +122,26 @@ class PluginManagerTest : BaseTest() {
   fun `search compatible updates ids for wrong xml id`() {
     val updates = service.searchCompatibleUpdates(listOf("org.jetbrains.kotlin1"), "IU-193.3")
     Assert.assertTrue(updates.isEmpty())
+  }
+
+  @Test
+  fun `get plugin by dependency`(){
+    val ids = service.getPluginXmlIdByDependency("com.intellij.modules.java")
+    Assert.assertTrue(ids.isNotEmpty())
+    Assert.assertTrue(ids.contains("org.jetbrains.kotlin"))
+  }
+
+  @Test
+  fun `get plugin by dependency for optional`(){
+    val ids = service.getPluginXmlIdByDependency("(optional) org.jetbrains.java.decompiler")
+    Assert.assertTrue(ids.isNotEmpty())
+    Assert.assertTrue(ids.contains("org.jetbrains.kotlin"))
+    Assert.assertTrue(ids.contains("org.intellij.scala"))
+  }
+
+  @Test
+  fun `get plugin by dependency unknown`(){
+    val ids = service.getPluginXmlIdByDependency("(optional) org.blabal.java.decompiler")
+    Assert.assertTrue(ids.isEmpty())
   }
 }
