@@ -10,12 +10,20 @@ class PluginManagerTest : BaseTest() {
 
   private val service = instance.pluginManager
 
+  private val unknownPluginId = 5
+
   @Test
   fun `get plugin by id`() {
     val testPlugin = TestPlugins.LOMBOK_PLUGIN
     val plugin = service.getPlugin(testPlugin.id)
     Assert.assertNotNull(plugin)
     Assert.assertTrue(plugin?.xmlId == testPlugin.xmlId)
+  }
+
+  @Test
+  fun `get plugin for unknown id`() {
+    val plugin = service.getPlugin(unknownPluginId)
+    Assert.assertNull(plugin)
   }
 
   @Test
@@ -26,11 +34,23 @@ class PluginManagerTest : BaseTest() {
   }
 
   @Test
+  fun `get plugin developers for unknown plugin`() {
+    val users = service.getPluginDevelopers(unknownPluginId)
+    Assert.assertTrue(users.isEmpty())
+  }
+
+  @Test
   fun `get plugin channels`() {
     val testPlugin = TestPlugins.EDUTOOLS
     val channels = service.getPluginChannels(testPlugin.id)
     Assert.assertTrue(channels.contains(""))
     Assert.assertTrue(channels.contains("beta"))
+  }
+
+  @Test
+  fun `get plugin channels for unknown plugin`() {
+    val channels = service.getPluginChannels(unknownPluginId)
+    Assert.assertTrue(channels.isEmpty())
   }
 
   @Test
@@ -44,6 +64,12 @@ class PluginManagerTest : BaseTest() {
   }
 
   @Test
+  fun `get plugin compatible products for unknown plugin`() {
+    val products = service.getPluginCompatibleProducts(unknownPluginId)
+    Assert.assertTrue(products.isEmpty())
+  }
+
+  @Test
   fun `search xml ids`() {
     val ids = service.getCompatiblePluginsXmlIds("IU-193.3", 100, 50)
     Assert.assertTrue(ids.size == 100)
@@ -53,7 +79,13 @@ class PluginManagerTest : BaseTest() {
   @Test
   fun `search compatible updates ids`() {
     val updates = service.searchCompatibleUpdates(
-      listOf("org.jetbrains.kotlin"),"IU-193.3")
+      listOf("org.jetbrains.kotlin"), "IU-193.3")
     Assert.assertTrue(updates.isNotEmpty())
+  }
+
+  @Test
+  fun `search compatible updates ids for wrong xml id`() {
+    val updates = service.searchCompatibleUpdates(listOf("org.jetbrains.kotlin1"), "IU-193.3")
+    Assert.assertTrue(updates.isEmpty())
   }
 }
