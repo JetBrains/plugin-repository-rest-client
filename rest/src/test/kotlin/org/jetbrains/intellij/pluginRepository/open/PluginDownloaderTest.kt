@@ -23,6 +23,14 @@ class PluginDownloaderTest : BaseTest() {
     validate(file)
   }
 
+  @Test
+  fun `download by update id`() {
+    val plugin = TestPlugins.DOCKER
+    val file = downloader.download(plugin.updates.first(),  File("."))
+    validate(file)
+  }
+
+
   private fun validate(file: File?) {
     Assert.assertNotNull(file)
     Assert.assertTrue(file!!.name.contains(".zip"))

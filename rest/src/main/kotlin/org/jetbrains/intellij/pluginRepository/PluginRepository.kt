@@ -116,6 +116,11 @@ interface PluginDownloader {
   fun download(xmlId: PluginXmlId, version: String, targetPath: File, channel: String? = null): File?
 
   /**
+   * Download [ProductFamily.INTELLIJ] plugin by update id.
+   */
+  fun download(id: UpdateId, targetPath: File): File?
+
+  /**
    * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
    * @param xmlId plugin XML id.
    * @param ideBuild IDE version. Example: "IC-145.184"

@@ -52,6 +52,10 @@ interface PluginRepositoryService {
   ): Call<ResponseBody>
 
   @Streaming
+  @GET("/plugin/download")
+  fun download(@Query("updateId") updateId: Int): Call<ResponseBody>
+
+  @Streaming
   @GET("/pluginManager?action=download")
   fun downloadCompatiblePlugin(
     @Query("id") pluginId: String,
