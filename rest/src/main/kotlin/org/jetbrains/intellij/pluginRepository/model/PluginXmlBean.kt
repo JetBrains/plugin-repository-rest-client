@@ -1,8 +1,8 @@
-package org.jetbrains.intellij.pluginRepository.model.xml
+package org.jetbrains.intellij.pluginRepository.model
 
-data class PluginBean(
+data class PluginXmlBean(
   val name: String,
-  val id: String,
+  val id: PluginXmlId,
   val version: String,
   val category: String,
   val sinceBuild: String?,

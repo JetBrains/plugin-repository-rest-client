@@ -1,60 +1,94 @@
 package org.jetbrains.intellij.pluginRepository.internal.utils
 
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
-internal fun <T> executeAndParseBody(callable: Call<T>): T? {
+internal fun <T> executeAndParseBody(callable: Call<T>, nullFor404: Boolean = false): T? {
   val response = executeExceptionally(callable)
   if (response.isSuccessful) {
     return response.body()
   }
-  val message = response.errorBody()?.string() ?: response.message() ?: Messages.getMessage("failed.request.status.code", response.code())
+  if (response.code() == 404 && nullFor404) {
+    return null
+  }
+  val message = listOf(
+    response.errorBody()?.string(),
+    response.message(),
+    response.raw().message,
+    Messages.getMessage("failed.request.status.code", response.code())
+  ).distinct().filterNot { it.isNullOrEmpty() }.joinToString("\n")
   throw PluginRepositoryException(message)
 }
 
-internal fun <T> executeExceptionally(callable: Call<T>): Response<T> {
-  val responseRef = AtomicReference<Response<T>?>()
-  val errorRef = AtomicReference<Throwable?>()
-  val finished = AtomicBoolean()
+internal fun <T> executeExceptionallyBatch(calls: List<Call<T>>): Map<Call<T>, Response<T>> {
+  val responses = ConcurrentHashMap<Call<T>, Response<T>>()
+  val errors = ConcurrentHashMap<Call<T>, Throwable>()
 
-  callable.enqueue(object : Callback<T> {
-    override fun onResponse(call: Call<T>, response: Response<T>) {
-      responseRef.set(response)
-      finished.set(true)
-    }
+  val finished = AtomicInteger()
 
-    override fun onFailure(call: Call<T>, error: Throwable) {
-      errorRef.set(error)
-      finished.set(true)
-    }
-  })
+  for (call in calls) {
+    call.enqueue(object : Callback<T> {
+      override fun onResponse(call: Call<T>, response: Response<T>) {
+        finished.incrementAndGet()
+        responses[call] = response
+      }
 
-  while (!finished.get()) {
+      override fun onFailure(call: Call<T>, error: Throwable) {
+        finished.incrementAndGet()
+        errors[call] = error
+      }
+    })
+  }
+
+  while (finished.get() != calls.size) {
     if (Thread.interrupted()) {
-      callable.cancel()
+      for (call in calls) {
+        call.cancel()
+      }
       throw InterruptedException()
     }
 
     try {
       Thread.sleep(100)
-    } catch (ie: InterruptedException) {
-      callable.cancel()
+    }
+    catch (ie: InterruptedException) {
+      for (call in calls) {
+        call.cancel()
+      }
       throw ie
     }
   }
 
-  if (callable.isCanceled || Thread.interrupted()) {
+  if (Thread.interrupted()) {
     throw InterruptedException()
   }
 
-  val error = errorRef.get()
-  if (error != null) {
-    throw error
+  if (errors.isNotEmpty()) {
+    val exception = Exception()
+    for (error in errors.values) {
+      exception.addSuppressed(error)
+    }
+    throw exception
   }
-  return responseRef.get()!!
+  return responses
 }
+
+internal fun <T> executeExceptionally(call: Call<T>): Response<T> =
+  executeExceptionallyBatch(listOf(call)).values.first()
+
+internal fun File.toMultipartBody(): MultipartBody.Part {
+  val body = this.asRequestBody("application/octet-stream".toMediaType())
+  return MultipartBody.Part.createFormData("file", this.name, body)
+}
+
+internal fun String.toRequestBody() = this.toRequestBody("text/plain".toMediaType())
