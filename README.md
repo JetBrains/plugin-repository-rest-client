@@ -38,6 +38,10 @@ val plugin = instance.pluginManager.getPlugin(pluginId)
 
 ```
 
+### Settings
+
+`MARKETPLACE_MAX_PARALLEL_CONNECTION` system property - The maximum number of requests to execute concurrently. Default: 16.
+
 ### Client
 
 The `org.jetbrains.intellij.pluginRepository.Client` main class provides command line interface for uploading, downloading and listing plugins on the plugin repository.
