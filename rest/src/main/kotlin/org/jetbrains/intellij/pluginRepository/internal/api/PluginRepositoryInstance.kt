@@ -23,7 +23,7 @@ val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 internal class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
 
-  private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTION", "16").toInt()
+  private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTIONS", "16").toInt()
 
   private val dispatcher = Dispatcher().apply {
     this.maxRequestsPerHost = maxParallelConnection

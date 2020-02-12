@@ -40,7 +40,7 @@ val plugin = instance.pluginManager.getPlugin(pluginId)
 
 ### Settings
 
-`MARKETPLACE_MAX_PARALLEL_CONNECTION` system property - The maximum number of requests to execute concurrently. Default: 16.
+`MARKETPLACE_MAX_PARALLEL_CONNECTIONS` system property - The maximum number of requests to execute concurrently. Default: 16.
 
 ### Client
 
