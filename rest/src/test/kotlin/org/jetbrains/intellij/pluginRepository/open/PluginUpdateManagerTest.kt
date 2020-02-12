@@ -124,4 +124,24 @@ class PluginUpdateManagerTest : BaseTest() {
     Assert.assertNull(meta2)
   }
 
+  @Test
+  fun foo() {
+    getLastCompatiblePlugins("IU-193.5656")
+  }
+
+  private fun getLastCompatiblePlugins(ideVersion: String) {
+    val pluginsXmlIds = measureTimeMillisTest { pluginService.getCompatiblePluginsXmlIds(ideVersion, 10000, 0) }
+    val updates = measureTimeMillisTest { pluginService.searchCompatibleUpdates(pluginsXmlIds, ideVersion) }
+    println(updates.size)
+    measureTimeMillisTest {
+      service.getIntellijUpdateMetadataBatch(updates.map { it.pluginId to it.id })
+    }
+  }
+}
+
+inline fun <T> measureTimeMillisTest(block: () -> T): T {
+  val start = System.currentTimeMillis()
+  val b = block()
+  println(System.currentTimeMillis() - start)
+  return b
 }
