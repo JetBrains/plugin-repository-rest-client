@@ -36,9 +36,9 @@ internal class PluginRepositoryInstance(private val siteUrl: String, private val
       OkHttpClient()
         .newBuilder()
         .dispatcher(Dispatcher(Executors.newCachedThreadPool(DaemonThreadFactory("retrofit-thread"))))
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.MINUTES)
+        .readTimeout(5, TimeUnit.MINUTES)
+        .writeTimeout(5, TimeUnit.MINUTES)
         .addInterceptor(object : Interceptor {
           override fun intercept(chain: Interceptor.Chain): Response {
             val request = if (token != null) {
