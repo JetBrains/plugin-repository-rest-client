@@ -1,10 +1,7 @@
 package org.jetbrains.intellij.pluginRepository.internal.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import okhttp3.Dispatcher
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Response
+import okhttp3.*
 import org.jetbrains.intellij.pluginRepository.*
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.instances.PluginDownloaderInstance
@@ -26,6 +23,13 @@ val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
 internal class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
 
+  private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTION", "16").toInt()
+
+  private val dispatcher = Dispatcher().apply {
+    this.maxRequestsPerHost = maxParallelConnection
+    this.maxRequests = maxParallelConnection
+  }
+
   private val service = Retrofit.Builder()
     .baseUrl(siteUrl)
     .client(
@@ -46,6 +50,7 @@ internal class PluginRepositoryInstance(private val siteUrl: String, private val
             return chain.proceed(request)
           }
         })
+        .dispatcher(dispatcher)
         .build())
     .addConverterFactory(JaxbConverterFactory.create())
     .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
