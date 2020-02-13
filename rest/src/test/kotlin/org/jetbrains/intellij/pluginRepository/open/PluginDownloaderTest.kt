@@ -31,6 +31,12 @@ class PluginDownloaderTest : BaseTest() {
   }
 
 
+  @Test
+  fun `download incompatible plugin vaadin for some IDE`() {
+    val file = downloader.downloadLatestCompatiblePlugin("com.intellij.vaadin", "ALL-201.5259.13", File("."), "")
+    Assert.assertNull(file)
+  }
+
   private fun validate(file: File?) {
     Assert.assertNotNull(file)
     Assert.assertTrue(file!!.name.contains(".zip"))

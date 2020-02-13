@@ -18,6 +18,7 @@ internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): Fil
       throw PluginRepositoryException(Messages.getMessage("downloading.failed"), e)
     }
   }
+  if (response.code() == 404) return null
   val message = (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
   throw PluginRepositoryException(Messages.getMessage("downloading.failed") + message)
 }
