@@ -7,5 +7,5 @@ class PluginUserBean(
   val id: PluginXmlId,
   val name: String,
   val link: String,
-  val hubLogin: String
+  val hubLogin: String? = null
 )
