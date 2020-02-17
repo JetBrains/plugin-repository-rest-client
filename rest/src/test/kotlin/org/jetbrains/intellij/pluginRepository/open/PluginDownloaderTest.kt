@@ -33,7 +33,7 @@ class PluginDownloaderTest : BaseTest() {
 
   @Test
   fun `download incompatible plugin vaadin for some IDE`() {
-    val file = downloader.downloadLatestCompatiblePlugin("com.intellij.vaadin", "ALL-201.5259.13", File("."), "")
+    val file = downloader.downloadLatestCompatiblePlugin("IntelliWO", "ALL-201.5259.13", File("."), "")
     Assert.assertNull(file)
   }
 
