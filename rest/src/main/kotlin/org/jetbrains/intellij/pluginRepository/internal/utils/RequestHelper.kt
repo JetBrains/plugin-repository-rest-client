@@ -39,13 +39,19 @@ internal fun <T> executeExceptionallyBatch(calls: List<Call<T>>): Map<Call<T>, R
   for (call in calls) {
     call.enqueue(object : Callback<T> {
       override fun onResponse(call: Call<T>, response: Response<T>) {
-        finished.incrementAndGet()
-        responses[call] = response
+        try {
+          responses[call] = response
+        } finally {
+          finished.incrementAndGet()
+        }
       }
 
       override fun onFailure(call: Call<T>, error: Throwable) {
-        finished.incrementAndGet()
-        errors[call] = error
+        try {
+          errors[call] = error
+        } finally {
+          finished.incrementAndGet()
+        }
       }
     })
   }
