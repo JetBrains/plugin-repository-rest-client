@@ -1,7 +1,10 @@
 package org.jetbrains.intellij.pluginRepository.internal.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import okhttp3.*
+import okhttp3.Dispatcher
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Response
 import org.jetbrains.intellij.pluginRepository.*
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.instances.PluginDownloaderInstance
@@ -21,11 +24,11 @@ import java.util.concurrent.atomic.AtomicLong
 
 val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
-internal class PluginRepositoryInstance(private val siteUrl: String, private val token: String? = null) : PluginRepository {
+internal class PluginRepositoryInstance(siteUrl: String, private val token: String? = null) : PluginRepository {
 
   private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTIONS", "16").toInt()
 
-  private val dispatcher = Dispatcher().apply {
+  private val dispatcher = Dispatcher(Executors.newCachedThreadPool(DaemonThreadFactory("retrofit-thread"))).apply {
     this.maxRequestsPerHost = maxParallelConnection
     this.maxRequests = maxParallelConnection
   }
@@ -35,7 +38,7 @@ internal class PluginRepositoryInstance(private val siteUrl: String, private val
     .client(
       OkHttpClient()
         .newBuilder()
-        .dispatcher(Dispatcher(Executors.newCachedThreadPool(DaemonThreadFactory("retrofit-thread"))))
+        .dispatcher(dispatcher)
         .connectTimeout(5, TimeUnit.MINUTES)
         .readTimeout(5, TimeUnit.MINUTES)
         .writeTimeout(5, TimeUnit.MINUTES)
@@ -50,7 +53,6 @@ internal class PluginRepositoryInstance(private val siteUrl: String, private val
             return chain.proceed(request)
           }
         })
-        .dispatcher(dispatcher)
         .build())
     .addConverterFactory(JaxbConverterFactory.create())
     .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
