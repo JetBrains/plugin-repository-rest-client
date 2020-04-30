@@ -82,7 +82,7 @@ interface PluginRepositoryService {
   @GET("/api/plugins/{id}/channels")
   fun getPluginChannels(@Path("id") id: Int): Call<List<String>>
 
-  @GET("/api/plugins/{id}/compatibleProducts")
+  @GET("/api/plugins/{id}/compatible-products")
   fun getPluginCompatibleProducts(@Path("id") id: Int): Call<List<ProductEnum>>
 
   @GET("/api/plugins")
