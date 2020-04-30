@@ -18,7 +18,6 @@ data class PluginBean(
   val vendor: PluginVendorBean?,
   val urls: PluginURLsBean,
   val tags: List<PluginTagBean>?,
-  val screenshots: List<String>?,
   val themes: Set<IntellijThemeBean>?,
   val icon: String?
 )
