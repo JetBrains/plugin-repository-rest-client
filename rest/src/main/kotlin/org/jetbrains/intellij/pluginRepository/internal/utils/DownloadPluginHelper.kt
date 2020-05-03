@@ -15,12 +15,12 @@ internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): Fil
     return try {
       downloadFile(response, targetPath)
     } catch (e: Exception) {
-      throw PluginRepositoryException(Messages.getMessage("downloading.failed"), e)
+      throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()), e)
     }
   }
   if (response.code() == 404) return null
   val message = (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
-  throw PluginRepositoryException(Messages.getMessage("downloading.failed") + message)
+  throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()) + message)
 }
 
 private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): File? {

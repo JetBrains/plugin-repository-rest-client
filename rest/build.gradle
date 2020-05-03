@@ -10,3 +10,32 @@ dependencies {
   testCompile 'junit:junit:4.12'
   testCompile 'org.assertj:assertj-core:3.12.2'
 }
+
+test {
+  useJUnit()
+  group = "Rest client tests"
+  description = "Runs rest client tests"
+
+  def baseUrl = System.getProperty("jetbrains.plugins.baseUrl", "https://plugins.jetbrains.com")
+  def testToken = System.getProperty("jetbrains.plugins.testToken", null)
+  def parallel = System.getProperty("parallel")?.toBoolean()
+  def downloadPath = "${project.buildDir}/downloads/"
+  mkdir(downloadPath)
+
+  if (parallel) {
+    maxParallelForks = Runtime.runtime.availableProcessors()
+    logger.lifecycle("##teamcity[message text='Tests are running in parallel! (maxParallelForks = $maxParallelForks)' status='WARNING']")
+  }
+
+  systemProperties = [
+    "jetbrains.plugin.download.path" : downloadPath,
+    "jetbrains.plugin.repository.host": baseUrl
+  ]
+  if (testToken != null) systemProperties.put("jetbrains.plugin.repository.token", testToken)
+
+  finalizedBy "clearDownloadsDir"
+}
+
+task clearDownloadsDir(type: Delete) {
+  delete "${project.buildDir}/downloads"
+}

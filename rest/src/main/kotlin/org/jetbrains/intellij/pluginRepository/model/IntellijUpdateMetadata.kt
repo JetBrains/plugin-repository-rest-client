@@ -16,6 +16,8 @@ data class IntellijUpdateMetadata(
   val since: String? = null,
   val until: String? = null,
   val productCode: String? = null,
-  val sourceCodeUrl: String? = null
+  val sourceCodeUrl: String? = null,
+  val url: String? = null,
+  val size: Int = 0
 )
 

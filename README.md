@@ -1,6 +1,7 @@
-# Plugin Repository Rest Client [![JetBrains team project](https://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+# Plugin Repository Rest Client 
+[![JetBrains team project](https://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-The client and command line interface for [JetBrains Plugin Repository](https://plugins.jetbrains.com/).
+The client and command line interface for [JetBrains Marketplace](https://plugins.jetbrains.com/).
 
 # Examples
 The code snippet below will initiate the instance of the JetBrains Marketplace repository.

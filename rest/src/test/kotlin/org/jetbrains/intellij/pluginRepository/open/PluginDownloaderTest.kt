@@ -7,33 +7,26 @@ import org.junit.Test
 import java.io.File
 
 class PluginDownloaderTest : BaseTest() {
-  private val downloader = instance.downloader
+  private val downloader = NON_AUTH_INSTANCE.downloader
+  private val downloadPath = System.getProperty("jetbrains.plugin.download.path")
 
   @Test
-  fun `download plugin`() {
+  fun `download plugin update by version and xml ID`() {
     val plugin = TestPlugins.GO
-    val file = downloader.download(plugin.xmlId, "193.5233.12.46", File("."), "")
-    validate(file)
-  }
-
-  @Test
-  fun `download compatible plugin`() {
-    val plugin = TestPlugins.KOTLIN
-    val file = downloader.downloadLatestCompatiblePlugin(plugin.xmlId, "IC-145.184", File("."), "")
+    val file = downloader.download(plugin.xmlId, "172.3757.46", File(downloadPath), "")
     validate(file)
   }
 
   @Test
   fun `download by update id`() {
     val plugin = TestPlugins.DOCKER
-    val file = downloader.download(plugin.updates.first(),  File("."))
+    val file = downloader.download(plugin.updates.first(),  File(downloadPath))
     validate(file)
   }
 
-
   @Test
   fun `download incompatible plugin vaadin for some IDE`() {
-    val file = downloader.downloadLatestCompatiblePlugin("IntelliWO", "ALL-201.5259.13", File("."), "")
+    val file = downloader.downloadLatestCompatiblePlugin("intellij.indexing.shared", "IU-193.6494.35", File(downloadPath), "")
     Assert.assertNull(file)
   }
 
@@ -43,6 +36,5 @@ class PluginDownloaderTest : BaseTest() {
     Assert.assertTrue(file.isFile)
     Assert.assertTrue(file.exists())
     Assert.assertTrue(file.length() > 0)
-    file.deleteRecursively()
   }
 }

@@ -8,7 +8,7 @@ import org.junit.Test
 
 class PluginManagerTest : BaseTest() {
 
-  private val service = instance.pluginManager
+  private val service = INSTANCE.pluginManager
 
   private val unknownPluginId = 5
 

@@ -7,8 +7,8 @@ import org.junit.Test
 
 class PluginUpdateManagerTest : BaseTest() {
 
-  private val service = instance.pluginUpdateManager
-  private val pluginService = instance.pluginManager
+  private val service = INSTANCE.pluginUpdateManager
+  private val pluginService = INSTANCE.pluginManager
 
   private val unknownUpdateId = 39
 
