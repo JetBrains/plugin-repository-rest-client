@@ -20,7 +20,7 @@ class PluginDownloaderTest : BaseTest() {
   @Test
   fun `download by update id`() {
     val plugin = TestPlugins.DOCKER
-    val file = downloader.download(plugin.updates.first(),  File(downloadPath))
+    val file = downloader.download(plugin.updates.first(), File(downloadPath))
     validate(file)
   }
 
@@ -32,9 +32,9 @@ class PluginDownloaderTest : BaseTest() {
 
   private fun validate(file: File?) {
     Assert.assertNotNull(file)
-    Assert.assertTrue(file!!.name.contains(".zip"))
-    Assert.assertTrue(file.isFile)
-    Assert.assertTrue(file.exists())
-    Assert.assertTrue(file.length() > 0)
+    Assert.assertTrue("File w/o extension: ${file?.name}.", file!!.name.contains(".zip"))
+    Assert.assertTrue("isFile is not true", file.isFile)
+    Assert.assertTrue("File does not exist", file.exists())
+    Assert.assertTrue("File length <= 0", file.length() > 0)
   }
 }
