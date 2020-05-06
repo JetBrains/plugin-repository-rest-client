@@ -8,7 +8,7 @@ import java.io.File
 
 class PluginDownloaderTest : BaseTest() {
   private val downloader = NON_AUTH_INSTANCE.downloader
-  private val downloadPath = System.getProperty("jetbrains.plugin.download.path")
+  private val downloadPath = System.getProperty("jetbrains.plugin.download.path") ?: "."
 
   @Test
   fun `download plugin update by version and xml ID`() {
@@ -36,5 +36,6 @@ class PluginDownloaderTest : BaseTest() {
     Assert.assertTrue("isFile is not true", file.isFile)
     Assert.assertTrue("File does not exist", file.exists())
     Assert.assertTrue("File length <= 0", file.length() > 0)
+    file.deleteRecursively()
   }
 }
