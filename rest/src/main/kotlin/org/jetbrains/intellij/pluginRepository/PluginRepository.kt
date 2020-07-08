@@ -64,7 +64,9 @@ interface PluginManager {
    * @param max max result set size
    * @param offset offset to return results from
    * @param query query for search.
+   * @deprecated use [getAllPluginsIds]
    */
+  @Deprecated("Since IDEA 2020.2 is deprecated")
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
   /**
