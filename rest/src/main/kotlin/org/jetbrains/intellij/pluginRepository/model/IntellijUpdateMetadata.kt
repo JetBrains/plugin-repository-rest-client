@@ -13,6 +13,7 @@ data class IntellijUpdateMetadata(
   val version: String = "",
   val notes: String = "",
   val dependencies: Set<String> = emptySet(),
+  val optionalDependencies: Set<String> = emptySet(),
   val since: String? = null,
   val until: String? = null,
   val productCode: String? = null,
