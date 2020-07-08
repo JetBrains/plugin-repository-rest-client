@@ -68,6 +68,10 @@ interface PluginManager {
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
   /**
+   * Get All [ProductFamily.INTELLIJ] plugins IDs.
+   */
+  fun getAllPluginsIds(): List<String>
+  /**
    * Search last compatible update for each ID` from [xmlIds]
    * Supported for [ProductFamily.INTELLIJ].
    * @param channel plugin channel. Default value is "stable" plugin channel.
