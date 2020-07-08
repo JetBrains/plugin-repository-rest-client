@@ -126,7 +126,7 @@ class PluginUpdateManagerTest : BaseTest() {
   }
 
   @Test
-  fun foo() {
+  fun `get compatible plugin update test`() {
     getLastCompatiblePlugins("IU-193.5656")
   }
 
