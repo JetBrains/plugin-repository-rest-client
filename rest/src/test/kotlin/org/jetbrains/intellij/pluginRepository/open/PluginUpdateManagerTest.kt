@@ -4,6 +4,7 @@ import org.jetbrains.intellij.pluginRepository.base.BaseTest
 import org.jetbrains.intellij.pluginRepository.base.TestPlugins
 import org.junit.Assert
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class PluginUpdateManagerTest : BaseTest() {
 
@@ -125,8 +126,14 @@ class PluginUpdateManagerTest : BaseTest() {
   }
 
   @Test
-  fun foo() {
+  fun `get compatible plugin update test`() {
     getLastCompatiblePlugins("IU-193.5656")
+  }
+
+  @Test
+  fun `get XML ids test`() {
+    val ids = pluginService.getAllPluginsIds()
+    assertTrue(ids.isNotEmpty(), "No IDS for plugins")
   }
 
   private fun getLastCompatiblePlugins(ideVersion: String) {

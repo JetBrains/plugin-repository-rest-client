@@ -99,6 +99,8 @@ interface PluginRepositoryService {
     @Query("search") query: String
   ): Call<List<String>>
 
+  @GET("/files/pluginsXMLIds.json")
+  fun getPluginsXmlIds(): Call<List<String>>
 
   @POST("/api/search/compatibleUpdates")
   @Headers("Content-Type: application/json")
