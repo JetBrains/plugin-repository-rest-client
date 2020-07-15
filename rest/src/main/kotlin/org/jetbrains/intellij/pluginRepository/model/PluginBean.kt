@@ -22,8 +22,10 @@ data class PluginBean(
   val icon: String?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class IntellijThemeBean(val name: String, val dark: Boolean)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginPurchaseInfoBean(val productCode: String, val buyUrl: String?, val purchaseTerms: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
