@@ -20,7 +20,7 @@ data class PluginBean(
   val tags: List<PluginTagBean>?,
   val themes: Set<IntellijThemeBean>?,
   val icon: String?,
-  val education: EducationInfoBean?
+  val educational: EducationInfoBean?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
