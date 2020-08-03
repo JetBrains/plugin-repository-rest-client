@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.internal.utils
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
 import org.jetbrains.intellij.pluginRepository.internal.Messages
@@ -12,6 +13,9 @@ import com.jetbrains.plugin.blockmap.core.ChunkMerger
 import com.jetbrains.plugin.blockmap.core.FileHash
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.*
+import java.util.zip.ZipInputStream
+
+private val objectMapper by lazy { ObjectMapper() }
 
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val response = executeExceptionally(callable)
@@ -65,8 +69,9 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
     .build()
   val service = retrofit.create(BlockMapService::class.java)
 
-  val newBlockMap = executeExceptionally(service.getBlockMap()).body()
+  val blockmapZip = executeExceptionally(service.getBlockMapZip()).body()
     ?: throw IOException(Messages.getMessage("blockmap.file.does.not.exist"))
+  val newBlockMap = getBlockMapFromZip(blockmapZip.byteStream())
   val newPluginHash = executeExceptionally(service.getHash()).body()
     ?: throw IOException(Messages.getMessage("hash.file.does.not.exist"))
 
@@ -83,6 +88,23 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
   }
 
   return targetFile
+}
+
+private fun getBlockMapFromZip(input: InputStream): BlockMap {
+  return input.buffered().use { source ->
+    ZipInputStream(source).use { zip ->
+      var entry = zip.nextEntry
+      while (entry.name != BLOCKMAP_FILENAME && entry.name != null) entry = zip.nextEntry
+      if (entry.name == BLOCKMAP_FILENAME) {
+        // there is must only one entry otherwise we can't properly
+        // read entry because we don't know it size (entry.size returns -1)
+        objectMapper.readValue(zip.readBytes(), BlockMap::class.java)
+      }
+      else {
+        throw IOException(Messages.getMessage("blockmap.file.does.not.exist"))
+      }
+    }
+  }
 }
 
 private fun getTargetFile(targetPath: File, executed: Response<ResponseBody>, url: String): File {
