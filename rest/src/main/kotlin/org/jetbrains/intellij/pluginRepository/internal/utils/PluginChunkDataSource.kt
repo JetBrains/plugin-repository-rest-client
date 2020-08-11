@@ -7,8 +7,8 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
 
-// According to Amazon CloudFront documentation "The maximum length of a request,
-// including the path, the query string (if any), and headers, is 20,480 bytes."
+// According to Amazon CloudFront documentation the maximum length of a request,
+// including the path, the query string (if any), and headers, is 20,480 bytes.
 private const val MAX_HTTP_HEADERS_LENGTH: Int = 19500
 private const val MAX_STRING_LENGTH: Int = 1024
 
