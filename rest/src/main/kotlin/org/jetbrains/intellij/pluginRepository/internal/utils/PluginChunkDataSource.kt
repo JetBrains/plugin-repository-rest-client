@@ -7,7 +7,9 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
 
-private const val MAX_HTTP_HEADERS_LENGTH: Int = 5000
+// According to Amazon CloudFront documentation "The maximum length of a request,
+// including the path, the query string (if any), and headers, is 20,480 bytes."
+private const val MAX_HTTP_HEADERS_LENGTH: Int = 19500
 private const val MAX_STRING_LENGTH: Int = 1024
 
 class PluginChunkDataSource(
@@ -23,9 +25,7 @@ class PluginChunkDataSource(
   private var pointer: Int = 0
 
 
-  override fun hasNext(): Boolean {
-    return curChunkData.size != 0
-  }
+  override fun hasNext() = curChunkData.size != 0
 
   override fun next(): ByteArray {
     return if (curChunkData.size != 0) {
@@ -52,7 +52,7 @@ class PluginChunkDataSource(
     return range.removeSuffix(",").toString()
   }
 
-  private fun getRange(range: String): ArrayList<ByteArray> {
+  private fun getRange(range: String): MutableList<ByteArray> {
     val result = ArrayList<ByteArray>()
     val executed = pluginFileService.getPluginFile(fileName, range).execute()
     val contentType = executed.headers()["Content-Type"]
@@ -85,8 +85,7 @@ class PluginChunkDataSource(
         val byte = input.read()
         baos.write(byte)
         if (baos.size() >= MAX_STRING_LENGTH) {
-          throw IOException(Messages.getMessage("wrong.http.range.response",
-            String(baos.toByteArray(), Charset.defaultCharset())))
+          throw IOException(Messages.getMessage("wrong.http.range.response", String(baos.toByteArray(), Charset.defaultCharset())))
         }
       } while (byte.toChar() != '\n')
       return String(baos.toByteArray(), Charset.defaultCharset())
