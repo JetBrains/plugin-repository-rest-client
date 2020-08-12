@@ -18,8 +18,8 @@ class PluginChunkDataSource(
   private val pluginFileService: BlockMapService,
   private val fileName: String
 ) : Iterator<ByteArray> {
-  private val oldMap = oldBlockMap.chunks.toSet()
-  private val chunksIterator = newBlockMap.chunks.filter { chunk -> !oldMap.contains(chunk) }.iterator()
+  private val oldSet = oldBlockMap.chunks.toSet()
+  private val chunksIterator = newBlockMap.chunks.filter { chunk -> !oldSet.contains(chunk) }.iterator()
   private var curRangeChunkLengths = ArrayList<Int>()
   private var curChunkData = getRange(nextRange())
   private var pointer: Int = 0

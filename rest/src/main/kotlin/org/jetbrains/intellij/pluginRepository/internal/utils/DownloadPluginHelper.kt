@@ -63,7 +63,7 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
   if (!oldFile.exists()) {
     throw IOException(Messages.getMessage("file.not.found", oldFile.toString()))
   }
-  val oldBlockMap = FileInputStream(oldFile).buffered().use { input -> BlockMap(input) }
+  val oldBlockMap = FileInputStream(oldFile).use { input -> BlockMap(input) }
 
   val url = executed.raw().request.url.toUrl().toExternalForm()
   val fileName = url.removePrefix(url.replaceAfterLast("/", "")).removeSuffix(url.replaceBefore("?", ""))
