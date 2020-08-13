@@ -2,6 +2,7 @@ package org.jetbrains.intellij.pluginRepository.internal.utils
 
 import com.jetbrains.plugin.blockmap.core.BlockMap
 import org.jetbrains.intellij.pluginRepository.internal.Messages
+import org.jetbrains.intellij.pluginRepository.internal.api.BlockMapService
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -57,23 +58,21 @@ class PluginChunkDataSource(
     val executed = pluginFileService.getPluginFile(fileName, range).execute()
     val contentType = executed.headers()["Content-Type"]
       ?: throw IOException(Messages.getMessage("http.response.content.type.null"))
+    val boundary = contentType.removePrefix("multipart/byteranges; boundary=")
     val response = executed.body() ?: throw IOException(Messages.getMessage("http.response.body.null"))
-    response.byteStream().buffered().use {
-      val boundary = contentType.removePrefix("multipart/byteranges; boundary=")
-      response.byteStream().buffered().use { input ->
-        for (length in curRangeChunkLengths) {
-          // parsing http get range response
-          do {
-            val str = nextLine(input)
-          } while (!str.contains(boundary))
-          // skip useless lines: Content-Type, Content-Length and empty line
-          nextLine(input)
-          nextLine(input)
-          nextLine(input)
-          val data = ByteArray(length)
-          for (i in 0 until length) data[i] = input.read().toByte()
-          result.add(data)
-        }
+    response.byteStream().buffered().use { input ->
+      for (length in curRangeChunkLengths) {
+        // parsing http get range response
+        do {
+          val str = nextLine(input)
+        } while (!str.contains(boundary))
+        // skip useless lines: Content-Type, Content-Length and empty line
+        nextLine(input)
+        nextLine(input)
+        nextLine(input)
+        val data = ByteArray(length)
+        for (i in 0 until length) data[i] = input.read().toByte()
+        result.add(data)
       }
     }
     return result

@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.internal.utils
+package org.jetbrains.intellij.pluginRepository.internal.api
 
 import com.jetbrains.plugin.blockmap.core.FileHash
 import okhttp3.ResponseBody
