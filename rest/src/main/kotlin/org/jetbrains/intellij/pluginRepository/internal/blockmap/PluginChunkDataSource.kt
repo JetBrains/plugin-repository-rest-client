@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.pluginRepository.internal.utils
+package org.jetbrains.intellij.pluginRepository.internal.blockmap
 
 import com.jetbrains.plugin.blockmap.core.BlockMap
 import org.jetbrains.intellij.pluginRepository.internal.Messages

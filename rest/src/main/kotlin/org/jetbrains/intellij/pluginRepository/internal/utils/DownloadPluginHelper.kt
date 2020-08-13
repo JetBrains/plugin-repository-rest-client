@@ -12,6 +12,7 @@ import com.jetbrains.plugin.blockmap.core.BlockMap
 import com.jetbrains.plugin.blockmap.core.ChunkMerger
 import com.jetbrains.plugin.blockmap.core.FileHash
 import org.jetbrains.intellij.pluginRepository.internal.api.BlockMapService
+import org.jetbrains.intellij.pluginRepository.internal.blockmap.PluginChunkDataSource
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.*
 import java.util.zip.ZipInputStream
