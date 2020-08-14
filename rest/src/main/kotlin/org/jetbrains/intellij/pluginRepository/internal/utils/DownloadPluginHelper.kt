@@ -65,7 +65,6 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
   if (!oldFile.exists()) {
     throw IOException(Messages.getMessage("file.not.found", oldFile.toString()))
   }
-  val oldBlockMap = FileInputStream(oldFile).use { input -> BlockMap(input) }
 
   val url = executed.raw().request.url.toUrl().toExternalForm()
   val fileName = url.removePrefix(url.replaceAfterLast("/", "")).removeSuffix(url.replaceBefore("?", ""))
@@ -77,16 +76,19 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
     .build()
   val service = retrofit.create(BlockMapService::class.java)
 
-  val suffix = if(fileName.endsWith(".zip")) ".zip" else ".jar"
+  val suffix = if (fileName.endsWith(".zip")) ".zip" else ".jar"
   val blockMapFileName = fileName.replace(suffix, BLOCKMAP_ZIP_SUFFIX)
   val hashFileName = fileName.replace(suffix, HASH_FILENAME_SUFFIX)
 
   val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
-    ?: throw IOException(Messages.getMessage("blockmap.file.does.not.exist"))
+    ?: throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
   val newBlockMap = getBlockMapFromZip(blockMapZip.byteStream())
   val newPluginHash = executeExceptionally(service.getHash(hashFileName)).body()
     ?: throw IOException(Messages.getMessage("hash.file.does.not.exist"))
 
+  val oldBlockMap = FileInputStream(oldFile).use { input ->
+    BlockMap(input, newBlockMap.algorithm, newBlockMap.minSize, newBlockMap.maxSize, newBlockMap.normalSize)
+  }
   val merger = ChunkMerger(oldFile, oldBlockMap, newBlockMap)
 
   val targetFile = getTargetFile(targetPath, executed, url)
@@ -111,9 +113,8 @@ private fun getBlockMapFromZip(input: InputStream): BlockMap {
         // there is must only one entry otherwise we can't properly
         // read entry because we don't know it size (entry.size returns -1)
         objectMapper.readValue(zip.readBytes(), BlockMap::class.java)
-      }
-      else {
-        throw IOException(Messages.getMessage("blockmap.file.does.not.exist"))
+      } else {
+        throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
       }
     }
   }

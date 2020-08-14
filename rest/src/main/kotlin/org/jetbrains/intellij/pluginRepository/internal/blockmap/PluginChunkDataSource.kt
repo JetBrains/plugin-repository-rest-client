@@ -3,6 +3,7 @@ package org.jetbrains.intellij.pluginRepository.internal.blockmap
 import com.jetbrains.plugin.blockmap.core.BlockMap
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.api.BlockMapService
+import org.jetbrains.intellij.pluginRepository.internal.utils.executeExceptionally
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -24,7 +25,6 @@ class PluginChunkDataSource(
   private var curRangeChunkLengths = ArrayList<Int>()
   private var curChunkData = getRange(nextRange())
   private var pointer: Int = 0
-
 
   override fun hasNext() = curChunkData.size != 0
 
@@ -55,21 +55,33 @@ class PluginChunkDataSource(
 
   private fun getRange(range: String): MutableList<ByteArray> {
     val result = ArrayList<ByteArray>()
-    val executed = pluginFileService.getPluginFile(fileName, range).execute()
+    val executed = executeExceptionally(pluginFileService.getPluginFile(fileName, range))
     val contentType = executed.headers()["Content-Type"]
       ?: throw IOException(Messages.getMessage("http.response.content.type.null"))
     val boundary = contentType.removePrefix("multipart/byteranges; boundary=")
     val response = executed.body() ?: throw IOException(Messages.getMessage("http.response.body.null"))
     response.byteStream().buffered().use { input ->
       for (length in curRangeChunkLengths) {
-        // parsing http get range response
-        do {
-          val str = nextLine(input)
-        } while (!str.contains(boundary))
-        // skip useless lines: Content-Type, Content-Length and empty line
-        nextLine(input)
-        nextLine(input)
-        nextLine(input)
+        val openingEmptyLine = nextLine(input)
+        if (openingEmptyLine != System.lineSeparator()) {
+          throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+        }
+        val boundaryLine = nextLine(input)
+        if (!boundaryLine.contains(boundary)) {
+          throw IOException(Messages.getMessage("http.multirange.response.doesnt.contain.boundary", boundaryLine, boundary))
+        }
+        val contentTypeLine = nextLine(input)
+        if (!contentTypeLine.startsWith("Content-Type")) {
+          throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentTypeLine, "Content-Type"))
+        }
+        val contentRangeLine = nextLine(input)
+        if (!contentRangeLine.startsWith("Content-Range")) {
+          throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentRangeLine, "Content-Range"))
+        }
+        val closingEmptyLine = nextLine(input)
+        if (closingEmptyLine != System.lineSeparator()) {
+          throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+        }
         val data = ByteArray(length)
         for (i in 0 until length) data[i] = input.read().toByte()
         result.add(data)
