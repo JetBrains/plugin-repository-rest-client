@@ -10,9 +10,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
 
-// According to Amazon CloudFront documentation the maximum length of a request,
-// including the path, the query string (if any), and headers, is 20,480 bytes.
-private const val MAX_HTTP_HEADERS_LENGTH: Int = 19500
+private const val MAX_HTTP_HEADERS_LENGTH: Int = 5000
 private const val MAX_RANGE_BYTES: Int = 10_000_000
 private const val MAX_STRING_LENGTH: Int = 1024
 
@@ -47,7 +45,9 @@ class PluginChunkDataSource(
     val range = StringBuilder("bytes=")
     chunkSequences.clear()
     var bytes = 0
-    while (pos < chunks.size && range.length <= MAX_HTTP_HEADERS_LENGTH) {
+    while (pos < chunks.size
+      && range.length < MAX_HTTP_HEADERS_LENGTH
+      && bytes < MAX_RANGE_BYTES) {
       val chunkSequence = nextChunkSequence(bytes)
       chunkSequences.add(chunkSequence)
       bytes += chunkSequence.last().offset + chunkSequence.last().length - chunkSequence[0].offset
@@ -79,28 +79,36 @@ class PluginChunkDataSource(
     val boundary = contentType.removePrefix("multipart/byteranges; boundary=")
     val response = executed.body() ?: throw IOException(Messages.getMessage("http.response.body.null"))
     response.byteStream().buffered().use { input ->
-      for (sequence in chunkSequences) {
-        val openingEmptyLine = nextLine(input)
-        if (openingEmptyLine.trim().isNotEmpty()) {
-          throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+      if (chunkSequences.size > 1) {
+        for (sequence in chunkSequences) {
+          val openingEmptyLine = nextLine(input)
+          if (openingEmptyLine.trim().isNotEmpty()) {
+            throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+          }
+          val boundaryLine = nextLine(input)
+          if (!boundaryLine.contains(boundary)) {
+            throw IOException(Messages.getMessage("http.multirange.response.doesnt.contain.boundary", boundaryLine, boundary))
+          }
+          val contentTypeLine = nextLine(input)
+          if (!contentTypeLine.startsWith("Content-Type")) {
+            throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentTypeLine, "Content-Type"))
+          }
+          val contentRangeLine = nextLine(input)
+          if (!contentRangeLine.startsWith("Content-Range")) {
+            throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentRangeLine, "Content-Range"))
+          }
+          val closingEmptyLine = nextLine(input)
+          if (closingEmptyLine.trim().isNotEmpty()) {
+            throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+          }
+          for (chunk in sequence) {
+            val data = ByteArray(chunk.length)
+            for (i in 0 until chunk.length) data[i] = input.read().toByte()
+            result.add(data)
+          }
         }
-        val boundaryLine = nextLine(input)
-        if (!boundaryLine.contains(boundary)) {
-          throw IOException(Messages.getMessage("http.multirange.response.doesnt.contain.boundary", boundaryLine, boundary))
-        }
-        val contentTypeLine = nextLine(input)
-        if (!contentTypeLine.startsWith("Content-Type")) {
-          throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentTypeLine, "Content-Type"))
-        }
-        val contentRangeLine = nextLine(input)
-        if (!contentRangeLine.startsWith("Content-Range")) {
-          throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentRangeLine, "Content-Range"))
-        }
-        val closingEmptyLine = nextLine(input)
-        if (closingEmptyLine.trim().isNotEmpty()) {
-          throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
-        }
-        for (chunk in sequence) {
+      } else if (chunkSequences.size == 1) {
+        for (chunk in chunkSequences[0]) {
           val data = ByteArray(chunk.length)
           for (i in 0 until chunk.length) data[i] = input.read().toByte()
           result.add(data)
