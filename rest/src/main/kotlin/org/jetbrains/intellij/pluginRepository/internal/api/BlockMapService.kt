@@ -6,9 +6,11 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
+import retrofit2.http.Streaming
 
 interface BlockMapService {
   @GET("{fileName}")
+  @Streaming
   fun getPluginFile(
     @Path("fileName") fileName: String,
     @Header("Range") range: String

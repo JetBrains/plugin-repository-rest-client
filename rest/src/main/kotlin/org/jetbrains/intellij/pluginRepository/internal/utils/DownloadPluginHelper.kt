@@ -12,6 +12,7 @@ import com.jetbrains.plugin.blockmap.core.BlockMap
 import com.jetbrains.plugin.blockmap.core.ChunkMerger
 import com.jetbrains.plugin.blockmap.core.FileHash
 import org.jetbrains.intellij.pluginRepository.internal.api.BlockMapService
+import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.internal.blockmap.PluginChunkDataSource
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.*
@@ -63,7 +64,8 @@ private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): Fi
 
 private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath: File, oldFile: File): File? {
   if (!oldFile.exists()) {
-    throw IOException(Messages.getMessage("file.not.found", oldFile.toString()))
+    LOG.info(Messages.getMessage("file.not.found", oldFile.toString()))
+    return downloadFile(executed, targetPath)
   }
 
   val url = executed.raw().request.url.toUrl().toExternalForm()
@@ -77,31 +79,36 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
   val service = retrofit.create(BlockMapService::class.java)
 
   val suffix = if (fileName.endsWith(".zip")) ".zip" else ".jar"
-  val blockMapFileName = fileName.replace(suffix, BLOCKMAP_ZIP_SUFFIX)
+  val blockMapFileName = fileName.replace(suffix,BLOCKMAP_ZIP_SUFFIX)
   val hashFileName = fileName.replace(suffix, HASH_FILENAME_SUFFIX)
 
-  val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
-    ?: throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
-  val newBlockMap = getBlockMapFromZip(blockMapZip.byteStream())
-  val newPluginHash = executeExceptionally(service.getHash(hashFileName)).body()
-    ?: throw IOException(Messages.getMessage("hash.file.does.not.exist"))
+  try {
+    val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
+      ?: throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
+    val newBlockMap = getBlockMapFromZip(blockMapZip.byteStream())
+    val newPluginHash = executeExceptionally(service.getHash(hashFileName)).body()
+      ?: throw IOException(Messages.getMessage("hash.file.does.not.exist"))
 
-  val oldBlockMap = FileInputStream(oldFile).use { input ->
-    BlockMap(input, newBlockMap.algorithm, newBlockMap.minSize, newBlockMap.maxSize, newBlockMap.normalSize)
+    val oldBlockMap = FileInputStream(oldFile).use { input ->
+      BlockMap(input, newBlockMap.algorithm, newBlockMap.minSize, newBlockMap.maxSize, newBlockMap.normalSize)
+    }
+    val merger = ChunkMerger(oldFile, oldBlockMap, newBlockMap)
+
+    val targetFile = getTargetFile(targetPath, executed, url)
+    FileOutputStream(targetFile).use { output ->
+      merger.merge(output, PluginChunkDataSource(oldBlockMap, newBlockMap, service, fileName))
+    }
+
+    val curFileHash = FileInputStream(targetFile).use { input -> FileHash(input, newPluginHash.algorithm) }
+    if (curFileHash != newPluginHash) {
+      throw IOException(Messages.getMessage("hashes.doesnt.match"))
+    }
+
+    return targetFile
+  } catch (e: Exception) {
+    LOG.info("Unable to download plugin via blockmap", e)
+    return downloadPlugin(service.getPluginFile("$baseUrl$fileName", ""), targetPath)
   }
-  val merger = ChunkMerger(oldFile, oldBlockMap, newBlockMap)
-
-  val targetFile = getTargetFile(targetPath, executed, url)
-  FileOutputStream(targetFile).use { output ->
-    merger.merge(output, PluginChunkDataSource(oldBlockMap, newBlockMap, service, fileName))
-  }
-
-  val curFileHash = FileInputStream(targetFile).use { input -> FileHash(input, newPluginHash.algorithm) }
-  if (curFileHash != newPluginHash) {
-    throw IOException(Messages.getMessage("hashes.doesnt.match"))
-  }
-
-  return targetFile
 }
 
 private fun getBlockMapFromZip(input: InputStream): BlockMap {
