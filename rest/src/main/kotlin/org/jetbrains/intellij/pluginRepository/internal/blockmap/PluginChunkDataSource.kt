@@ -23,7 +23,7 @@ class PluginChunkDataSource(
   private val oldSet = oldBlockMap.chunks.toSet()
   private val chunks = newBlockMap.chunks.filter { chunk -> !oldSet.contains(chunk) }
   private var pos = 0
-  private var chunkSequences = ArrayList<ArrayList<Chunk>>()
+  private var chunkSequences = ArrayList<MutableList<Chunk>>()
   private var curChunkData = getRange(nextRange())
   private var pointer: Int = 0
 
@@ -56,7 +56,7 @@ class PluginChunkDataSource(
     return range.removeSuffix(",").toString()
   }
 
-  private fun nextChunkSequence(bytes: Int): ArrayList<Chunk> {
+  private fun nextChunkSequence(bytes: Int): MutableList<Chunk> {
     val result = ArrayList<Chunk>()
     result.add(chunks[pos])
     pos++
@@ -81,41 +81,49 @@ class PluginChunkDataSource(
     response.byteStream().buffered().use { input ->
       if (chunkSequences.size > 1) {
         for (sequence in chunkSequences) {
-          val openingEmptyLine = nextLine(input)
-          if (openingEmptyLine.trim().isNotEmpty()) {
-            throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
-          }
-          val boundaryLine = nextLine(input)
-          if (!boundaryLine.contains(boundary)) {
-            throw IOException(Messages.getMessage("http.multirange.response.doesnt.contain.boundary", boundaryLine, boundary))
-          }
-          val contentTypeLine = nextLine(input)
-          if (!contentTypeLine.startsWith("Content-Type")) {
-            throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentTypeLine, "Content-Type"))
-          }
-          val contentRangeLine = nextLine(input)
-          if (!contentRangeLine.startsWith("Content-Range")) {
-            throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentRangeLine, "Content-Range"))
-          }
-          val closingEmptyLine = nextLine(input)
-          if (closingEmptyLine.trim().isNotEmpty()) {
-            throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
-          }
-          for (chunk in sequence) {
-            val data = ByteArray(chunk.length)
-            for (i in 0 until chunk.length) data[i] = input.read().toByte()
-            result.add(data)
-          }
+          parseHttpMultirangeHeaders(input, boundary)
+          parseHttpRangeBody(input, sequence, result)
         }
-      } else if (chunkSequences.size == 1) {
-        for (chunk in chunkSequences[0]) {
-          val data = ByteArray(chunk.length)
-          for (i in 0 until chunk.length) data[i] = input.read().toByte()
-          result.add(data)
-        }
+      } else {
+        parseHttpRangeBody(input, chunkSequences[0], result)
       }
     }
     return result
+  }
+
+  private fun parseHttpMultirangeHeaders(input: BufferedInputStream, boundary: String) {
+    val openingEmptyLine = nextLine(input)
+    if (openingEmptyLine.trim().isNotEmpty()) {
+      throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+    }
+    val boundaryLine = nextLine(input)
+    if (!boundaryLine.contains(boundary)) {
+      throw IOException(Messages.getMessage("http.multirange.response.doesnt.contain.boundary", boundaryLine, boundary))
+    }
+    val contentTypeLine = nextLine(input)
+    if (!contentTypeLine.startsWith("Content-Type")) {
+      throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentTypeLine, "Content-Type"))
+    }
+    val contentRangeLine = nextLine(input)
+    if (!contentRangeLine.startsWith("Content-Range")) {
+      throw IOException(Messages.getMessage("http.multirange.response.includes.incorrect.header", contentRangeLine, "Content-Range"))
+    }
+    val closingEmptyLine = nextLine(input)
+    if (closingEmptyLine.trim().isNotEmpty()) {
+      throw IOException(Messages.getMessage("http.multirange.response.doesnt.include.line.separator"))
+    }
+  }
+
+  private fun parseHttpRangeBody(
+    input: BufferedInputStream,
+    sequence: MutableList<Chunk>,
+    result: MutableList<ByteArray>
+  ) {
+    for (chunk in sequence) {
+      val data = ByteArray(chunk.length)
+      for (i in 0 until chunk.length) data[i] = input.read().toByte()
+      result.add(data)
+    }
   }
 
   private fun nextLine(input: BufferedInputStream): String {
