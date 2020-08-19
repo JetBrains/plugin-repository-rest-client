@@ -122,9 +122,24 @@ interface PluginDownloader {
   fun download(xmlId: PluginXmlId, version: String, targetPath: File, channel: String? = null): File?
 
   /**
+   * Download [ProductFamily.INTELLIJ] plugin by plugin XML id via blockmap.
+   * @param xmlId plugin XML id. Example: "org.jetbrains.kotlin" for Kotlin plugin.
+   * @param version version of the plugin. Example: "1.3.61-release-IJ2019.3-1" for Kotlin plugin.
+   * @param channel plugin channel. Default value is "stable" plugin channel.
+   * @param oldFile prev plugin archive.
+   */
+  fun downloadViaBlockMap(xmlId: PluginXmlId, version: String, targetPath: File, oldFile : File, channel: String? = null): File?
+
+  /**
    * Download [ProductFamily.INTELLIJ] plugin by update id.
    */
   fun download(id: UpdateId, targetPath: File): File?
+
+  /**
+   * Download [ProductFamily.INTELLIJ] plugin by update id via blockmap.
+   * @param oldFile prev plugin archive.
+   */
+  fun downloadViaBlockMap(id: UpdateId, targetPath: File, oldFile: File): File?
 
   /**
    * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
@@ -133,6 +148,15 @@ interface PluginDownloader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    */
   fun downloadLatestCompatiblePlugin(xmlId: PluginXmlId, ideBuild: String, targetPath: File, channel: String? = null): File?
+
+  /**
+   * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version via blockmap.
+   * @param xmlId plugin XML id.
+   * @param ideBuild IDE version. Example: "IC-145.184"
+   * @param channel plugin channel. Default value is "stable" plugin channel.
+   * @param oldFile prev plugin archive.
+   */
+  fun downloadLatestCompatiblePluginViaBlockMap(xmlId: PluginXmlId, ideBuild: String, targetPath: File, oldFile : File, channel: String? = null): File?
 }
 
 interface PluginUploader {

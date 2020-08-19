@@ -41,10 +41,19 @@ class Client {
               options.host).downloader
             val channel = parseChannel(options.channel)
             return if (!options.version.isNullOrBlank()) {
+              if(options.oldFile.isBlank()){
                 pluginRepository.download(options.pluginId!!, options.version!!, File(options.destination), channel)
+              }else{
+                pluginRepository.downloadViaBlockMap(options.pluginId!!, options.version!!, File(options.destination), File(options.oldFile), channel)
+              }
             } else {
+              if(options.oldFile.isBlank()) {
                 pluginRepository.downloadLatestCompatiblePlugin(options.pluginId!!, options.ideBuild!!, File(options.destination),
-                                                                channel)
+                  channel)
+              }else{
+                pluginRepository.downloadLatestCompatiblePluginViaBlockMap(options.pluginId!!, options.ideBuild!!, File(options.destination),
+                  File(options.oldFile), channel)
+              }
             }
 
         }
@@ -117,6 +126,9 @@ class Client {
 
         @set:Argument("ide-build", description = "IDE build number with product code to download plugin compatible with (e.g. IC-145.184)")
         var ideBuild: String? = null
+
+        @set:Argument("prev", description = "Previous plugin's version archive file path")
+        var oldFile: String = ""
 
         @set:Argument("to", description = "Target filepath")
         var destination: String = "."

@@ -1,13 +1,30 @@
 package org.jetbrains.intellij.pluginRepository.internal.utils
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryException
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import retrofit2.Call
 import retrofit2.Response
-import java.io.File
-import java.io.IOException
+import retrofit2.Retrofit
 import java.nio.file.Files
+import com.jetbrains.plugin.blockmap.core.BlockMap
+import com.jetbrains.plugin.blockmap.core.ChunkMerger
+import com.jetbrains.plugin.blockmap.core.FileHash
+import org.jetbrains.intellij.pluginRepository.internal.api.BlockMapService
+import org.jetbrains.intellij.pluginRepository.internal.api.LOG
+import org.jetbrains.intellij.pluginRepository.internal.blockmap.PluginChunkDataSource
+import retrofit2.converter.jackson.JacksonConverterFactory
+import java.io.*
+import java.util.zip.ZipInputStream
+
+private val objectMapper by lazy { ObjectMapper() }
+
+internal const val BLOCKMAP_ZIP_SUFFIX = "-blockmap.zip"
+
+internal const val BLOCKMAP_FILENAME = "blockmap.json"
+
+internal const val HASH_FILENAME_SUFFIX = "-hash.json"
 
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val response = executeExceptionally(callable)
@@ -19,8 +36,20 @@ internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): Fil
     }
   }
   if (response.code() == 404) return null
-  val message = (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
-  throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()) + message)
+  throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()) + getResponseErrorMessage(response))
+}
+
+internal fun downloadPluginViaBlockMap(callable: Call<ResponseBody>, targetPath: File, oldFile: File): File? {
+  val response = executeExceptionally(callable)
+  if (response.isSuccessful) {
+    return try {
+      downloadFileViaBlockMap(response, targetPath, oldFile)
+    } catch (e: Exception) {
+      throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()), e)
+    }
+  }
+  if (response.code() == 404) return null
+  throw PluginRepositoryException(Messages.getMessage("downloading.failed", response.code()) + getResponseErrorMessage(response))
 }
 
 private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): File? {
@@ -28,6 +57,77 @@ private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): Fi
   val response = executed.body() ?: return null
   val mimeType = response.contentType()?.toString()
   if (mimeType != "application/zip" && mimeType != "application/java-archive") return null
+  val targetFile = getTargetFile(targetPath, executed, url)
+  Files.copy(response.byteStream(), targetFile.toPath())
+  return targetFile
+}
+
+private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath: File, oldFile: File): File? {
+  if (!oldFile.exists()) {
+    LOG.info(Messages.getMessage("file.not.found", oldFile.toString()))
+    return downloadFile(executed, targetPath)
+  }
+
+  val url = executed.raw().request.url.toUrl().toExternalForm()
+  val fileName = url.removePrefix(url.replaceAfterLast("/", "")).removeSuffix(url.replaceBefore("?", ""))
+  val baseUrl = url.replaceAfterLast("/", "")
+
+  val retrofit = Retrofit.Builder()
+    .baseUrl(baseUrl)
+    .addConverterFactory(JacksonConverterFactory.create())
+    .build()
+  val service = retrofit.create(BlockMapService::class.java)
+
+  val suffix = if (fileName.endsWith(".zip")) ".zip" else ".jar"
+  val blockMapFileName = fileName.replace(suffix,BLOCKMAP_ZIP_SUFFIX)
+  val hashFileName = fileName.replace(suffix, HASH_FILENAME_SUFFIX)
+
+  try {
+    val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
+      ?: throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
+    val newBlockMap = getBlockMapFromZip(blockMapZip.byteStream())
+    val newPluginHash = executeExceptionally(service.getHash(hashFileName)).body()
+      ?: throw IOException(Messages.getMessage("hash.file.does.not.exist"))
+
+    val oldBlockMap = FileInputStream(oldFile).use { input ->
+      BlockMap(input, newBlockMap.algorithm, newBlockMap.minSize, newBlockMap.maxSize, newBlockMap.normalSize)
+    }
+    val merger = ChunkMerger(oldFile, oldBlockMap, newBlockMap)
+
+    val targetFile = getTargetFile(targetPath, executed, url)
+    FileOutputStream(targetFile).use { output ->
+      merger.merge(output, PluginChunkDataSource(oldBlockMap, newBlockMap, service, fileName))
+    }
+
+    val curFileHash = FileInputStream(targetFile).use { input -> FileHash(input, newPluginHash.algorithm) }
+    if (curFileHash != newPluginHash) {
+      throw IOException(Messages.getMessage("hashes.doesnt.match"))
+    }
+
+    return targetFile
+  } catch (e: Exception) {
+    LOG.info("Unable to download plugin via blockmap", e)
+    return downloadPlugin(service.getPluginFile("$baseUrl$fileName", ""), targetPath)
+  }
+}
+
+private fun getBlockMapFromZip(input: InputStream): BlockMap {
+  return input.buffered().use { source ->
+    ZipInputStream(source).use { zip ->
+      var entry = zip.nextEntry
+      while (entry.name != BLOCKMAP_FILENAME && entry.name != null) entry = zip.nextEntry
+      if (entry.name == BLOCKMAP_FILENAME) {
+        // there is must only one entry otherwise we can't properly
+        // read entry because we don't know it size (entry.size returns -1)
+        objectMapper.readValue(zip.readBytes(), BlockMap::class.java)
+      } else {
+        throw IOException(Messages.getMessage("block.map.file.doesnt.exist"))
+      }
+    }
+  }
+}
+
+private fun getTargetFile(targetPath: File, executed: Response<ResponseBody>, url: String): File {
   var targetFile = targetPath
   if (targetFile.isDirectory) {
     val guessFileName = guessFileName(executed.raw(), url)
@@ -40,8 +140,11 @@ private fun downloadFile(executed: Response<ResponseBody>, targetPath: File): Fi
     }
     targetFile = file
   }
-  Files.copy(response.byteStream(), targetFile.toPath())
   return targetFile
+}
+
+private fun getResponseErrorMessage(response: Response<ResponseBody>): String {
+  return (response.errorBody()?.string() ?: response.message() ?: "").let { if (it.isNotEmpty()) ": $it" else "" }
 }
 
 private fun guessFileName(response: okhttp3.Response, url: String): String {
