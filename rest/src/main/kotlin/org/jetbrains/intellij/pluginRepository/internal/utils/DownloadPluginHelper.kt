@@ -78,9 +78,10 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
     .build()
   val service = retrofit.create(BlockMapService::class.java)
 
-  val suffix = if (fileName.endsWith(".zip")) ".zip" else ".jar"
-  val blockMapFileName = fileName.replace(suffix,BLOCKMAP_ZIP_SUFFIX)
-  val hashFileName = fileName.replace(suffix, HASH_FILENAME_SUFFIX)
+  val lastIndex = fileName.lastIndexOf('.')
+  val path = fileName.substring(0, if(lastIndex != -1) lastIndex else 0)
+  val blockMapFileName = "$path$BLOCKMAP_ZIP_SUFFIX"
+  val hashFileName = "$path$HASH_FILENAME_SUFFIX"
 
   try {
     val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
