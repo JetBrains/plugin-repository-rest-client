@@ -20,11 +20,11 @@ import java.util.zip.ZipInputStream
 
 private val objectMapper by lazy { ObjectMapper() }
 
-internal const val BLOCKMAP_ZIP_SUFFIX = "-blockmap.zip"
+internal const val BLOCKMAP_ZIP_SUFFIX = ".blockmap.zip"
 
 internal const val BLOCKMAP_FILENAME = "blockmap.json"
 
-internal const val HASH_FILENAME_SUFFIX = "-hash.json"
+internal const val HASH_FILENAME_SUFFIX = ".hash.json"
 
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val response = executeExceptionally(callable)
@@ -78,9 +78,8 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
     .build()
   val service = retrofit.create(BlockMapService::class.java)
 
-  val suffix = if (fileName.endsWith(".zip")) ".zip" else ".jar"
-  val blockMapFileName = fileName.replace(suffix,BLOCKMAP_ZIP_SUFFIX)
-  val hashFileName = fileName.replace(suffix, HASH_FILENAME_SUFFIX)
+  val blockMapFileName = "$fileName$BLOCKMAP_ZIP_SUFFIX"
+  val hashFileName = "$fileName$HASH_FILENAME_SUFFIX"
 
   try {
     val blockMapZip = executeExceptionally(service.getBlockMapZip(blockMapFileName)).body()
