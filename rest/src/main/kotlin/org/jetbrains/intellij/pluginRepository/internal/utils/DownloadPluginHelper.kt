@@ -26,6 +26,8 @@ internal const val BLOCKMAP_FILENAME = "blockmap.json"
 
 internal const val HASH_FILENAME_SUFFIX = ".hash.json"
 
+private const val MAXIMUM_DOWNLOAD_PERCENT = 0.65 // 100% = 1.0
+
 internal fun downloadPlugin(callable: Call<ResponseBody>, targetPath: File): File? {
   val response = executeExceptionally(callable)
   if (response.isSuccessful) {
@@ -91,6 +93,13 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
     val oldBlockMap = FileInputStream(oldFile).use { input ->
       BlockMap(input, newBlockMap.algorithm, newBlockMap.minSize, newBlockMap.maxSize, newBlockMap.normalSize)
     }
+
+    val downloadPercent = downloadPercent(oldBlockMap, newBlockMap)
+    LOG.info("Plugin's download percent is = %.2f".format(downloadPercent * 100))
+    if (downloadPercent > MAXIMUM_DOWNLOAD_PERCENT) {
+      throw IOException(Messages.getMessage("too.large.download.size"))
+    }
+
     val merger = ChunkMerger(oldFile, oldBlockMap, newBlockMap)
 
     val targetFile = getTargetFile(targetPath, executed, url)
@@ -105,9 +114,16 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
 
     return targetFile
   } catch (e: Exception) {
-    LOG.info("Unable to download plugin via blockmap", e)
-    return downloadPlugin(service.getPluginFile("$baseUrl$fileName", ""), targetPath)
+    LOG.info("Unable to download plugin via blockmap: ${e.message}")
+    return downloadPlugin(service.getPluginFile(fileName, ""), targetPath)
   }
+}
+
+private fun downloadPercent(oldBlockMap: BlockMap, newBlockMap: BlockMap): Double {
+  val oldSet = oldBlockMap.chunks.toSet()
+  val newChunks = newBlockMap.chunks.filter { chunk -> !oldSet.contains(chunk) }
+  return newChunks.sumBy { chunk -> chunk.length }.toDouble() /
+    newBlockMap.chunks.sumBy { chunk -> chunk.length }.toDouble()
 }
 
 private fun getBlockMapFromZip(input: InputStream): BlockMap {
