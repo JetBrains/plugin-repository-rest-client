@@ -17,6 +17,9 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String): List<String> =
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 
+  override fun getPluginLastCompatibleUpdates(build: String, xmlId: PluginXmlId): List<UpdateBean> =
+    executeAndParseBody(service.searchUpdates(build, xmlId)) ?: emptyList()
+
   override fun getAllPluginsIds(): List<String> = executeAndParseBody(service.getPluginsXmlIds()) ?: emptyList()
 
   override fun searchCompatibleUpdates(xmlIds: List<PluginXmlId>, build: String, channel: String): List<UpdateBean> =
@@ -31,7 +34,7 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getPluginVersions(id: PluginId): List<UpdateBean> {
     val pluginBean = executeAndParseBody(service.getPluginById(id), nullFor404 = true) ?: return emptyList()
     return executeAndParseBody(service.getPluginVersions(id), nullFor404 = true).orEmpty().map {
-      UpdateBean(it.id, pluginBean.id, pluginBean.xmlId, it.version)
+      UpdateBean(it.id, pluginBean.id, pluginBean.xmlId, it.version, it.channel)
     }
   }
 

@@ -4,12 +4,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
-import org.jetbrains.intellij.pluginRepository.model.UpdateBean
-import org.jetbrains.intellij.pluginRepository.model.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.PluginUpdateBean
-import org.jetbrains.intellij.pluginRepository.model.PluginUserBean
-import org.jetbrains.intellij.pluginRepository.model.IntellijUpdateMetadata
-import org.jetbrains.intellij.pluginRepository.model.ProductEnum
+import org.jetbrains.intellij.pluginRepository.model.*
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -98,6 +93,12 @@ interface PluginRepositoryService {
     @Query("offset") offset: Int,
     @Query("search") query: String
   ): Call<List<String>>
+
+  @GET("/api/search/updates")
+  fun searchUpdates(
+    @Query("build") build: String,
+    @Query("pluginXMLId") xmlId: PluginXmlId
+  ): Call<List<UpdateBean>>
 
   @GET("/files/pluginsXMLIds.json")
   fun getPluginsXmlIds(): Call<List<String>>
