@@ -69,6 +69,8 @@ interface PluginManager {
   @Deprecated("Since IDEA 2020.2 is deprecated")
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
+  fun getPluginLastCompatibleUpdates(build: String, xmlId: PluginXmlId): List<UpdateBean>
+
   /**
    * Get All [ProductFamily.INTELLIJ] plugins IDs.
    */
