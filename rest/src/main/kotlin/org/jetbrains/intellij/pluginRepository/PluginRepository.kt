@@ -69,6 +69,12 @@ interface PluginManager {
   @Deprecated("Since IDEA 2020.2 is deprecated")
   fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String = ""): List<String>
 
+  /**
+   * List last updates of [xmlId] compatible with [build] from every channel
+   *
+   * @param build IDE version. Example: "IC-145.184"
+   * @param xmlId plugin XML id. Example: "org.jetbrains.kotlin" for Kotlin plugin.
+   */
   fun getPluginLastCompatibleUpdates(build: String, xmlId: PluginXmlId): List<UpdateBean>
 
   /**
