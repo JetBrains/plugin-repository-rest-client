@@ -119,7 +119,7 @@ class PluginManagerTest : BaseTest() {
   fun `search xml ids`() {
     val ids = service.getCompatiblePluginsXmlIds("IU-193.3", 100, 50)
     Assert.assertTrue(ids.size == 100)
-    Assert.assertTrue(ids.contains("org.jetbrains.plugins.vagrant"))
+    Assert.assertTrue(ids.contains("com.jetbrains.ChooseRuntime"))
   }
 
   @Test
