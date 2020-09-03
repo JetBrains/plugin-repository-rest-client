@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.open
 
+import org.hamcrest.core.IsEqual
 import org.jetbrains.intellij.pluginRepository.base.BaseTest
 import org.jetbrains.intellij.pluginRepository.base.TestPlugins
 import org.jetbrains.intellij.pluginRepository.model.ProductEnum
@@ -18,6 +19,16 @@ class PluginManagerTest : BaseTest() {
     val plugin = service.getPlugin(testPlugin.id)
     Assert.assertNotNull(plugin)
     Assert.assertTrue(plugin?.xmlId == testPlugin.xmlId)
+  }
+
+  @Test
+  fun `get plugin last compatible updates`() {
+    val build = "IU-193.5233"
+    val plugin = TestPlugins.EDUTOOLS
+    val updates = service.getPluginLastCompatibleUpdates(build, plugin.xmlId)
+    Assert.assertNotNull(updates)
+    Assert.assertTrue(updates.all { it.pluginId == plugin.id })
+    Assert.assertThat(updates.map { it.channel }.distinct().size, IsEqual.equalTo(2))
   }
 
   @Test
@@ -108,7 +119,7 @@ class PluginManagerTest : BaseTest() {
   fun `search xml ids`() {
     val ids = service.getCompatiblePluginsXmlIds("IU-193.3", 100, 50)
     Assert.assertTrue(ids.size == 100)
-    Assert.assertTrue(ids.contains("org.jetbrains.plugins.vagrant"))
+    Assert.assertTrue(ids.contains("com.jetbrains.ChooseRuntime"))
   }
 
   @Test
