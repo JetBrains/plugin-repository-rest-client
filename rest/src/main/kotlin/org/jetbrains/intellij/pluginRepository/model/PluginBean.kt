@@ -20,7 +20,6 @@ data class PluginBean(
   val tags: List<PluginTagBean>?,
   val themes: Set<IntellijThemeBean>?,
   val icon: String?,
-  val eduStatistic: EduStatisticBean? = null,
   val programmingLanguage: String? = null,
   val language: String? = null
 )
@@ -30,13 +29,6 @@ data class IntellijThemeBean(val name: String, val dark: Boolean)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginPurchaseInfoBean(val productCode: String, val buyUrl: String?, val purchaseTerms: String?)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class EduStatisticBean(
-  val sections: List<String>?,
-  val lessons: List<String>?,
-  val tasks: Map<String, Int>?
-)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PluginTagBean(
