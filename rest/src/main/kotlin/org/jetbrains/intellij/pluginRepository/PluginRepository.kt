@@ -190,7 +190,7 @@ interface PluginUploader {
   /**
    * Upload a new plugin to the JetBrains Marketplace.
    * Make sure you have accepted all agreements on the Marketplace website: https://plugins.jetbrains.com/.
-   * Supported for [ProductFamily.INTELLIJ] & [ProductFamily.EDU].
+   * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.KTOR].
    * @param categoryId tag id. Example: https://plugins.jetbrains.com/idea.
    * @param licenseUrl link to the license.
    */
