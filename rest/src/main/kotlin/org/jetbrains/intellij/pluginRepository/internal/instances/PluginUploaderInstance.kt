@@ -55,7 +55,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         pluginId.toString()
       )
     }
-    LOG.info("Uploading of plugin is done: ${message.string()}")
+    LOG.info("Uploading of plugin is done")
   }
 
 }
