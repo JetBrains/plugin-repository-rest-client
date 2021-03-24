@@ -14,8 +14,14 @@ import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import java.io.File
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
+  companion object {
+    const val MAX_FILE_SIZE = 419430400L // 400MB
+  }
 
   override fun uploadNewPlugin(file: File, categoryId: Int, licenseUrl: String, family: ProductFamily): PluginBean {
+    if (file.length() > MAX_FILE_SIZE) {
+      throw IllegalArgumentException(Messages.getMessage("max.file.size"))
+    }
     LOG.info("Uploading new plugin from ${file.absolutePath}")
     val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
@@ -40,6 +46,9 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     if (pluginXmlId == null && pluginId == null) {
       throw IllegalArgumentException(Messages.getMessage("missing.plugins.parameters"))
     }
+    if (file.length() > MAX_FILE_SIZE) {
+      throw IllegalArgumentException(Messages.getMessage("max.file.size"))
+    }
     val channelAsRequestBody = channel?.toRequestBody()
     val notesAsRequestBody = notes?.toRequestBody()
     val multipartFile = file.toMultipartBody()
@@ -48,8 +57,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile),
         pluginXmlId
       )
-    }
-    else {
+    } else {
       uploadOrFail(
         service.upload(pluginId!!, channelAsRequestBody, notesAsRequestBody, multipartFile),
         pluginId.toString()
