@@ -5,5 +5,6 @@ import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 class CompatibleUpdateRequest(
   val pluginXMLIds: List<PluginXmlId>,
   val build: String,
-  val channel: String
+  val channel: String,
+  val module: String
 )

@@ -82,12 +82,16 @@ interface PluginManager {
    */
   fun getAllPluginsIds(): List<String>
   /**
-   * Search last compatible update for each ID` from [xmlIds]
+   * Search last compatible update for each ID` from [xmlIds] or by declared [module]
    * Supported for [ProductFamily.INTELLIJ].
-   * @param channel plugin channel. Default value is "stable" plugin channel.
    * @return the list of last compatible updates [UpdateBean] for plugins from [xmlIds].
    */
-  fun searchCompatibleUpdates(xmlIds: List<PluginXmlId>, build: String, channel: String = ""): List<UpdateBean>
+  fun searchCompatibleUpdates(
+    xmlIds: List<PluginXmlId> = emptyList(),
+    build: String = "",
+    channel: String = "",
+    module: String = ""
+  ): List<UpdateBean>
 }
 
 interface PluginUpdateManager {

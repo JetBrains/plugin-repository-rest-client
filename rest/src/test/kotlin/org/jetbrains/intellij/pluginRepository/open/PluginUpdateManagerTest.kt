@@ -136,6 +136,16 @@ class PluginUpdateManagerTest : BaseTest() {
     assertTrue(ids.isNotEmpty(), "No IDS for plugins")
   }
 
+  @Test
+  fun `search compatible updates by module`() {
+    val updates = pluginService.searchCompatibleUpdates(module = "com.intellij.modules.ruby")
+
+    assertTrue(
+      updates.find { it.pluginXmlId == TestPlugins.RUBY.xmlId } != null,
+      "Can't find ruby plugin by it's module `com.intellij.modules.ruby`"
+    )
+  }
+
   private fun getLastCompatiblePlugins(ideVersion: String) {
     val pluginsXmlIds = measureTimeMillisTest { pluginService.getCompatiblePluginsXmlIds(ideVersion, 10000, 0) }
     val updates = measureTimeMillisTest { pluginService.searchCompatibleUpdates(pluginsXmlIds, ideVersion) }
