@@ -170,11 +170,11 @@ publishing {
 
 }
 
-signing {
-  def isRequired = hasProperty("mavenCentralUsername")
+tasks.withType(Sign) {
+  onlyIf { gradle.taskGraph.hasTask("publish") }
+}
 
-  if (isRequired) {
-    useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
-    sign(publishing.publications.mavenJava)
-  }
+signing {
+  useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
+  sign(publishing.publications.mavenJava)
 }
