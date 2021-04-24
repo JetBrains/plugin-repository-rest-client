@@ -6,7 +6,7 @@ enum class TestPlugins(
   val id : Int,
   val updates : List<Int>
 ) {
-  DATAGRIP("Database Tools and SQL", "com.intellij.database", 10925, listOf(75069)),
+  DATAGRIP("Database Tools and SQL for WebStorm", "com.intellij.database", 10925, listOf(75069)),
   DOCKER("Docker", "Docker", 7724, listOf(73789)),
   EDUTOOLS("EduTools", "com.jetbrains.edu", 10081, listOf()),
   RUBY("Ruby", "org.jetbrains.plugins.ruby", 1293, listOf()),
