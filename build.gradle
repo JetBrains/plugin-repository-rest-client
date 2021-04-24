@@ -171,7 +171,7 @@ publishing {
 }
 
 signing {
-  required { hasProperty("mavenCentralUsername") }
+  required { findProperty("mavenCentralUsername") != null }
 
   if( required ) {
     useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
