@@ -170,11 +170,11 @@ publishing {
 
 }
 
-tasks.withType(Sign) {
-  onlyIf { hasProperty("mavenCentralUsername") }
-}
-
 signing {
-  useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
-  sign(publishing.publications.mavenJava)
+  required { hasProperty("mavenCentralUsername") }
+
+  if( required ) {
+    useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
+    sign(publishing.publications.mavenJava)
+  }
 }
