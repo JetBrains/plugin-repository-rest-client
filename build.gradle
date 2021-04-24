@@ -173,6 +173,8 @@ publishing {
 signing {
   def isRequired = hasProperty("mavenCentralUsername")
 
-  useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
-  sign(publishing.publications.mavenJava)
+  if (isRequired) {
+    useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
+    sign(publishing.publications.mavenJava)
+  }
 }
