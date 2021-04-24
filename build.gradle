@@ -1,6 +1,7 @@
 plugins {
   id "org.jetbrains.kotlin.jvm"
-  id "com.jfrog.bintray" version "1.8.5"
+  id "maven-publish"
+  id "signing"
 }
 
 allprojects {
@@ -8,7 +9,6 @@ allprojects {
 
   repositories {
     mavenCentral()
-    maven { url "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
   }
 }
 
@@ -46,11 +46,101 @@ task sourceJar(type: Jar) {
     from it.sourceSets.main.kotlin
   }
 }
-artifacts {
-  archives sourceJar, fatJar
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  subprojects {
+    from javadoc.destinationDir
+  }
 }
+
+artifacts {
+  archives sourceJar, fatJar, javadocJar
+}
+
 publishing {
   publications {
+
+    def configurePublication = { MavenPublication pub, String projectName, String pubName, String pubDesc ->
+      def proj = project(":services:$projectName")
+      pub.groupId proj.group
+      pub.artifactId proj.name
+      pub.version proj.version
+
+      pub.pom {
+        name.set(pubName)
+        description.set(pubDesc)
+        url.set("https://github.com/JetBrains/plugin-repository-rest-client")
+        licenses {
+          license {
+            name.set("The Apache Software License, Version 2.0")
+            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+          }
+        }
+        developers {
+          developer {
+            id.set("AlexanderPrendota")
+            name.set("Alexander Prendota")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("zolotov")
+            name.set("Alexander Zolotov")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("serejke")
+            name.set("Sergey Patrikeev")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("chashnikov")
+            name.set("Nikolay Chashnikov")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("satamas")
+            name.set("Semyon Atamas")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("chrkv")
+            name.set("Ivan Chirkov")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("kesarevs")
+            name.set("Kesarev Sergey")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("yole")
+            name.set("Dmitry Jemerov")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("VladRassokhin")
+            name.set("Vladislav Rassokhin")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("hsz")
+            name.set("Jakub Chrzanowski")
+            organization.set("JetBrains")
+          }
+          developer {
+            id.set("LChernigovskaya")
+            name.set("Lidiya Chernigovskaya")
+            organization.set("JetBrains")
+          }
+        }
+        scm {
+          connection.set("scm:git:git://github.com/JetBrains/plugin-repository-rest-client.git")
+          developerConnection.set("scm:git:ssh://github.com/JetBrains/plugin-repository-rest-client.git")
+          url.set("https://github.com/JetBrains/plugin-repository-rest-client")
+        }
+      }
+    }
+
     mavenJava(MavenPublication) {
       from project(':services:plugin-repository-rest-client:rest').components.java
       artifact sourceJar {
@@ -59,22 +149,30 @@ publishing {
       artifact fatJar {
         classifier "all"
       }
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+
+      configurePublication(it, "plugin-repository-rest-client", "Plugin Repository Rest Client", "The client and command line interface for JetBrains Marketplace.")
     }
   }
-}
-if (hasProperty("bintrayUser")) {
-  bintray {
-    user = bintrayUser
-    key = bintrayApiKey
-    publish = true
-    publications = ['mavenJava']
-    pkg {
-      userOrg = "jetbrains"
-      repo = "intellij-plugin-service"
-      name = "plugin-repository-rest-client"
-      version {
-          name = project.version
+
+  repositories {
+    maven {
+      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+
+      credentials {
+        username = findProperty("mavenCentralUsername").toString()
+        password = findProperty("mavenCentralPassword").toString()
       }
     }
   }
+
+}
+
+signing {
+  def isRequired = hasProperty("mavenCentralUsername")
+
+  useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
+  sign(publishing.publications.mavenJava)
 }
