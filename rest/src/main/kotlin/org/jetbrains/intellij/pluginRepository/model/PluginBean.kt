@@ -14,12 +14,12 @@ data class PluginBean(
   val family: ProductFamily,
   val copyright: String?,
   val downloads: Int,
-  val purchaseInfo: PluginPurchaseInfoBean?,
+  val purchaseInfo: PluginPurchaseInfoBean? = null,
   val vendor: PluginVendorBean?,
   val urls: PluginURLsBean,
   val tags: List<PluginTagBean>?,
-  val themes: Set<IntellijThemeBean>?,
-  val icon: String?,
+  val themes: Set<IntellijThemeBean>? = emptySet(),
+  val icon: String? = null,
   val programmingLanguage: String? = null,
   val language: String? = null
 )

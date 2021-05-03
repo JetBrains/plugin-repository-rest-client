@@ -8,7 +8,7 @@ data class IntellijUpdateMetadata(
   val xmlId: PluginXmlId,
   val name: String,
   val description: String,
-  val tags: List<String>,
+  val tags: List<String> = listOf(),
   val vendor: String = "",
   val version: String = "",
   val notes: String = "",
