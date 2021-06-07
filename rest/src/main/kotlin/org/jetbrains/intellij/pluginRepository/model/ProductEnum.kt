@@ -1,33 +1,40 @@
 package org.jetbrains.intellij.pluginRepository.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 enum class ProductEnum(
   val id: String,
-  val code: String,
   val title: String,
   val logo: String = id,
+  val code: String,
+  val alternativeCodes: List<String> = emptyList(),
   val edition: String? = null,
   val parent: ProductEnum? = null,
   val family: ProductFamily = ProductFamily.INTELLIJ
 ) {
-  IDEA("idea", "IU", "IntelliJ IDEA", "intellij-idea", "Ultimate"),
-  IDEA_COMMUNITY("idea_ce", "IC", "IntelliJ IDEA", "intellij-idea", "Community", IDEA),
-  IDEA_EDUCATIONAL("idea_edu", "IE", "IntelliJ IDEA", "intellij-idea", "Educational", IDEA),
-  PHPSTORM("phpstorm", "PS", "PhpStorm"),
-  WEBSTORM("webstorm", "WS", "WebStorm"),
-  PYCHARM("pycharm", "PY", "PyCharm", "pycharm", "Professional"),
-  PYCHARM_COMMUNITY("pycharm_ce", "PC", "PyCharm", "pycharm", "Community", PYCHARM),
-  PYCHARM_EDUCATIONAL("pycharm_edu", "PE", "PyCharm", "pycharm-edu", "Educational", PYCHARM),
-  RUBYMINE("ruby", "RM", "RubyMine", "rubymine"),
-  APPCODE("objc", "OC", "AppCode", "appcode"),
-  CLION("clion", "CL", "CLion"),
-  GOLAND("go", "GO", "GoLand", "gogland"),
-  DBE("dbe", "DB", "DataGrip", "datagrip"),
-  RIDER("rider", "RD", "Rider"),
-  RESHARPER("resharper", "RS", "ReSharper", "resharper", family = ProductFamily.DOTNET),
-  MPS("mps", "MPS", "MPS"),
-  ANDROID_STUDIO("androidstudio", "AI", "Android Studio"),
-  TEAMCITY("teamcity", "TC", "TeamCity", "teamcity", family = ProductFamily.TEAMCITY),
-  HUB("hub", "HUB", "Hub", "hub", family = ProductFamily.HUB),
-  YOUTRACK("youtrack", "YT", "YouTrack", "youtrack", family = ProductFamily.HUB),
-  UPSOURCE("upsource", "UP", "Upsource", "upsource", family = ProductFamily.HUB);
+  IDEA("idea", "IntelliJ IDEA", "intellij-idea", "IU", edition = "Ultimate"),
+  IDEA_COMMUNITY("idea_ce", "IntelliJ IDEA", "intellij-idea", "IC", edition = "Community", parent = IDEA),
+  IDEA_EDUCATIONAL("idea_edu", "IntelliJ IDEA", "intellij-idea", "IE", edition = "Educational", parent = IDEA),
+  TIDE("t_ide", "T-IDE", code = "TD"),
+  PHPSTORM("phpstorm", "PhpStorm", code = "PS"),
+  WEBSTORM("webstorm", "WebStorm", code = "WS"),
+  PYCHARM("pycharm", "PyCharm", "pycharm", "PY", alternativeCodes = listOf("PYA"), edition = "Professional"),
+  PYCHARM_COMMUNITY("pycharm_ce", "PyCharm", "pycharm", "PC", alternativeCodes = listOf("PCA"), edition = "Community", parent = PYCHARM),
+  PYCHARM_EDUCATIONAL("pycharm_edu", "PyCharm", "pycharm-edu", "PE", edition = "Educational", parent = PYCHARM),
+  RUBYMINE("ruby", "RubyMine", "rubymine", "RM"),
+  APPCODE("objc", "AppCode", "appcode", "OC"),
+  CLION("clion", "CLion", code = "CL"),
+  GOLAND("go", "GoLand", "gogland", "GO"),
+  DBE("dbe", "DataGrip", "datagrip", "DB"),
+  GATEWAY("gateway", "JetBrains Gateway", code = "CWMG"),
+  RIDER("rider", "Rider", code = "RD", alternativeCodes = listOf("RDCPPP")),
+  RESHARPER("resharper", "ReSharper", "resharper", "RS", family = ProductFamily.DOTNET),
+  MPS("mps", "MPS", code = "MPS"),
+  ANDROID_STUDIO("androidstudio", "Android Studio", code = "AI"),
+  TEAMCITY("teamcity", "TeamCity", "teamcity", "TC", family = ProductFamily.TEAMCITY),
+  EDU_PLUGIN("edu_plugin", "Educational plugin", "edu", "EDU", family = ProductFamily.EDU),
+  HUB("hub", "Hub", "hub", "HUB", family = ProductFamily.HUB),
+  YOUTRACK("youtrack", "YouTrack", "youtrack", "YT", family = ProductFamily.HUB),
+  UPSOURCE("upsource", "Upsource", "upsource", "UP", family = ProductFamily.HUB);
 }
