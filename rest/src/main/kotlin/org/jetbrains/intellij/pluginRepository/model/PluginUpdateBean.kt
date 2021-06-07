@@ -16,7 +16,7 @@ data class PluginUpdateBean(
   val size: Int?,
   val downloads: Int?,
   val pluginId: PluginId,
-  val compatibleVersions: Map<ProductEnum, String>? = null,
+  val compatibleVersions: Map<ProductEnum?, String>? = null,
   val author: PluginUserBean?,
   val modules: Set<String>?
 )
