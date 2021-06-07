@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.internal.api
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.Dispatcher
 import okhttp3.Interceptor
@@ -57,7 +58,12 @@ internal class PluginRepositoryInstance(siteUrl: String, private val token: Stri
     .baseUrl(siteUrl)
     .client(okHttpClient)
     .addConverterFactory(JaxbConverterFactory.create())
-    .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
+    .addConverterFactory(JacksonConverterFactory.create(
+      jacksonObjectMapper()
+        .configure(
+          DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true
+        )
+    ))
     .build()
     .create(PluginRepositoryService::class.java)
 

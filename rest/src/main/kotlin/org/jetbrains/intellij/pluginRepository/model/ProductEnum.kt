@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.model
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,5 +37,6 @@ enum class ProductEnum(
   EDU_PLUGIN("edu_plugin", "Educational plugin", "edu", "EDU", family = ProductFamily.EDU),
   HUB("hub", "Hub", "hub", "HUB", family = ProductFamily.HUB),
   YOUTRACK("youtrack", "YouTrack", "youtrack", "YT", family = ProductFamily.HUB),
-  UPSOURCE("upsource", "Upsource", "upsource", "UP", family = ProductFamily.HUB);
+  UPSOURCE("upsource", "Upsource", "upsource", "UP", family = ProductFamily.HUB),
+  @JsonEnumDefaultValue UNKNOWN("UNKNOWN", "UNKNOWN", code = "UNKNOWN");
 }
