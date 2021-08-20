@@ -3,7 +3,13 @@ dependencies {
   implementation "com.squareup.retrofit2:converter-jaxb:2.7.0"
   implementation "com.squareup.retrofit2:converter-jackson:2.7.0"
   implementation "com.squareup.okhttp3:okhttp:4.3.1"
-  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3"
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${rootProject.ext["jacksonVersion"]}") {
+    dependencies {
+      implementation("org.jetbrains.kotlin:kotlin-reflect") {
+        because("otherwise `jackson-module-kotlin` would bring kotlin-reflect:1.4.21")
+      }
+    }
+  }
   implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
   implementation "com.sun.xml.bind:jaxb-core:2.3.0"
   implementation "org.jetbrains.intellij:blockmap:1.0.5"
