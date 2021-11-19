@@ -66,8 +66,7 @@ internal fun <T> executeExceptionallyBatch(calls: List<Call<T>>): Map<Call<T>, R
 
     try {
       Thread.sleep(100)
-    }
-    catch (ie: InterruptedException) {
+    } catch (ie: InterruptedException) {
       for (call in calls) {
         call.cancel()
       }
