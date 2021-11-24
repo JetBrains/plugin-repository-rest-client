@@ -17,8 +17,8 @@ subprojects {
 
   sourceCompatibility = '11'
   dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib"
-    compile 'org.slf4j:slf4j-api:1.7.26'
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.slf4j:slf4j-api:1.7.26")
   }
 }
 
@@ -30,7 +30,7 @@ task fatJar(type: Jar, group: 'build') {
     attributes 'Main-Class': 'org.jetbrains.intellij.PluginRepository.Client'
   }
   subprojects { project ->
-    from { project.configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
   }
 }
