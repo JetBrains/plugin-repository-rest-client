@@ -12,12 +12,12 @@ dependencies {
       }
     }
   }
-  implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
-  implementation "com.sun.xml.bind:jaxb-core:2.3.0"
-  implementation "org.jetbrains.intellij:blockmap:1.0.5"
+  implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
+  implementation("com.sun.xml.bind:jaxb-core:2.3.0")
+  implementation("org.jetbrains.intellij:blockmap:1.0.5")
 
-  testCompile "junit:junit:4.12"
-  testCompile "org.assertj:assertj-core:3.12.2"
+  testCompile("junit:junit:4.12")
+  testCompile("org.assertj:assertj-core:3.12.2")
 }
 
 test {
