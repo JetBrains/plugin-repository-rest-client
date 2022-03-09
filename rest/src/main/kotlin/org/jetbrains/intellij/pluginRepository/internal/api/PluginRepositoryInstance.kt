@@ -25,7 +25,12 @@ import java.util.concurrent.atomic.AtomicLong
 
 val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
-internal class PluginRepositoryInstance(siteUrl: String, private val token: String? = null) : PluginRepository {
+internal class PluginRepositoryInstance(
+  siteUrl: String,
+  private val token: String? = null,
+  private val authScheme: String,
+  serviceClass: Class<PluginRepositoryService>,
+) : PluginRepository {
 
   private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTIONS", "16").toInt()
 
@@ -45,7 +50,7 @@ internal class PluginRepositoryInstance(siteUrl: String, private val token: Stri
     .addInterceptor(object : Interceptor {
       override fun intercept(chain: Interceptor.Chain): Response {
         val request = if (token != null) {
-          chain.request().newBuilder().addHeader("Authorization", "Bearer $token").build()
+          chain.request().newBuilder().addHeader("Authorization", "$authScheme $token").build()
         } else {
           chain.request()
         }
@@ -65,7 +70,7 @@ internal class PluginRepositoryInstance(siteUrl: String, private val token: Stri
         )
     ))
     .build()
-    .create(PluginRepositoryService::class.java)
+    .create(serviceClass)
 
   init {
     Runtime.getRuntime().addShutdownHook(Thread {
