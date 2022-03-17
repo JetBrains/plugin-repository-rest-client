@@ -25,11 +25,11 @@ import java.util.concurrent.atomic.AtomicLong
 
 val LOG: Logger = LoggerFactory.getLogger("plugin-repository-rest-client")
 
-internal class PluginRepositoryInstance(
+internal class PluginRepositoryInstance<T : PluginRepositoryService>(
   siteUrl: String,
   private val token: String? = null,
   private val authScheme: String,
-  serviceClass: Class<PluginRepositoryService>,
+  serviceClass: Class<T>,
 ) : PluginRepository {
 
   private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTIONS", "16").toInt()

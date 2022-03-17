@@ -7,7 +7,6 @@ object PluginRepositoryFactory {
 
   private const val DEFAULT_HOST = "https://plugins.jetbrains.com"
   private const val DEFAULT_AUTH_SCHEME = "Bearer"
-  private val DEFAULT_SERVICE_CLASS = PluginRepositoryService::class.java
 
   /**
    * Factory object to create new object of [PluginRepository] interface
@@ -22,7 +21,7 @@ object PluginRepositoryFactory {
     host: String = DEFAULT_HOST,
     token: String? = null,
     authScheme: String = DEFAULT_AUTH_SCHEME,
-  ): PluginRepository = createWithImplementationClass(host, token, authScheme)
+  ): PluginRepository = createWithImplementationClass(host, token, authScheme, PluginRepositoryService::class.java)
 
   /**
    * Factory object to create new object of [PluginRepository] interface with a custom [PluginRepositoryService]
@@ -36,10 +35,10 @@ object PluginRepositoryFactory {
    */
   @JvmStatic
   @JvmOverloads
-  fun createWithImplementationClass(
+  fun <T : PluginRepositoryService> createWithImplementationClass(
     host: String = DEFAULT_HOST,
     token: String? = null,
     authScheme: String = DEFAULT_AUTH_SCHEME,
-    serviceClass: Class<PluginRepositoryService> = DEFAULT_SERVICE_CLASS
+    serviceClass: Class<T>,
   ): PluginRepository = PluginRepositoryInstance(host, token, authScheme, serviceClass)
 }
