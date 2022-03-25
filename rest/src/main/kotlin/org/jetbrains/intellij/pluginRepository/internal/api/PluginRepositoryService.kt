@@ -42,7 +42,7 @@ interface PluginRepositoryService {
     @Part file: MultipartBody.Part,
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: RequestBody,
-    @Part("tags") tags: List<String>
+    @Part("tags") tags: ArrayList<RequestBody>
   ): Call<PluginBean>
 
   @Streaming

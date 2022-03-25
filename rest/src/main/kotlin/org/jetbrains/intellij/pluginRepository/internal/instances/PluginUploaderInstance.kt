@@ -33,7 +33,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         throw IllegalArgumentException("Tags should not be empty")
       }
       val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
-      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, license, tags))
+      val requestTags = tags.map { it.toRequestBody() }
+      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, license, ArrayList(requestTags)))
     }
   }
 
