@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class UpdateBean(
   val id: UpdateId,
   val pluginId: PluginId,
-  val pluginXmlId: PluginXmlId,
+  val pluginXmlId: StringPluginId,
   val version: String,
   val channel: String?
 )

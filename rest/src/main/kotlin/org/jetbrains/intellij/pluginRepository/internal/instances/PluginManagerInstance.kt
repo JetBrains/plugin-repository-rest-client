@@ -9,7 +9,7 @@ import org.jetbrains.intellij.pluginRepository.model.*
 
 internal class PluginManagerInstance(private val service: PluginRepositoryService) : PluginManager {
 
-  override fun listPlugins(ideBuild: String, channel: String?, pluginId: PluginXmlId?): List<PluginXmlBean> {
+  override fun listPlugins(ideBuild: String, channel: String?, pluginId: StringPluginId?): List<PluginXmlBean> {
     val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId), nullFor404 = true)
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
@@ -17,18 +17,18 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String): List<String> =
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 
-  override fun getPluginLastCompatibleUpdates(build: String, xmlId: PluginXmlId): List<UpdateBean> =
+  override fun getPluginLastCompatibleUpdates(build: String, xmlId: StringPluginId): List<UpdateBean> =
     executeAndParseBody(service.searchUpdates(build, xmlId)) ?: emptyList()
 
   override fun getAllPluginsIds(): List<String> = executeAndParseBody(service.getPluginsXmlIds()) ?: emptyList()
 
   override fun searchCompatibleUpdates(
-    xmlIds: List<PluginXmlId>, build: String, channel: String, module: String)
+          xmlIds: List<StringPluginId>, build: String, channel: String, module: String)
   : List<UpdateBean> = executeAndParseBody(
     service.searchLastCompatibleUpdate(CompatibleUpdateRequest(xmlIds, build, channel, module))
   ) ?: emptyList()
 
-  override fun getPluginByXmlId(xmlId: PluginXmlId, family: ProductFamily): PluginBean? =
+  override fun getPluginByXmlId(xmlId: StringPluginId, family: ProductFamily): PluginBean? =
     executeAndParseBody(service.getPluginByXmlId(family.id, xmlId), nullFor404 = true)
 
   override fun getPlugin(id: PluginId): PluginBean? =

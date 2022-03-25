@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class IntellijUpdateMetadata(
   val id: UpdateId,
-  val xmlId: PluginXmlId,
+  val xmlId: StringPluginId,
   val name: String,
   val description: String,
   val tags: List<String> = listOf(),

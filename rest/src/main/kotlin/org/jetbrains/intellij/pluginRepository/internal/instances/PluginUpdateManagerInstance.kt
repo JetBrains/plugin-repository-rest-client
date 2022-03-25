@@ -8,7 +8,7 @@ import org.jetbrains.intellij.pluginRepository.model.*
 
 internal class PluginUpdateManagerInstance(private val service: PluginRepositoryService) : PluginUpdateManager {
 
-  override fun getUpdatesByVersionAndFamily(xmlId: PluginXmlId, version: String, family: ProductFamily): List<PluginUpdateBean> =
+  override fun getUpdatesByVersionAndFamily(xmlId: StringPluginId, version: String, family: ProductFamily): List<PluginUpdateBean> =
     executeAndParseBody(service.getUpdatesByVersionAndFamily(xmlId, version, family.id), nullFor404 = true) ?: emptyList()
 
   override fun getUpdateById(id: UpdateId): PluginUpdateBean? =

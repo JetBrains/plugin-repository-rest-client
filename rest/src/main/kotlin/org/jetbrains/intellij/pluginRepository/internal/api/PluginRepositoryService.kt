@@ -36,6 +36,15 @@ interface PluginRepositoryService {
     @Part("cid") category: Int
   ): Call<PluginBean>
 
+  @Multipart
+  @POST("/api/plugins/{family}/upload")
+  fun uploadNewPlugin(
+    @Part file: MultipartBody.Part,
+    @Path("family") family: String,
+    @Part("licenseUrl") licenseUrl: RequestBody,
+    @Part("tags") tags: List<String>
+  ): Call<PluginBean>
+
   @Streaming
   @GET("/plugin/download")
   fun download(
@@ -95,7 +104,7 @@ interface PluginRepositoryService {
   @GET("/api/search/updates")
   fun searchUpdates(
     @Query("build") build: String,
-    @Query("pluginXMLId") xmlId: PluginXmlId
+    @Query("pluginXMLId") stringPluginId: StringPluginId
   ): Call<List<UpdateBean>>
 
   @GET("/files/pluginsXMLIds.json")

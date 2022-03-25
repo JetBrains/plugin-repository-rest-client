@@ -7,11 +7,9 @@ import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryServ
 import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.toRequestBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.uploadOrFail
-import org.jetbrains.intellij.pluginRepository.model.PluginBean
-import org.jetbrains.intellij.pluginRepository.model.PluginId
-import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
-import org.jetbrains.intellij.pluginRepository.model.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
+import java.net.URL
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
   companion object {
@@ -19,27 +17,49 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
   }
 
   override fun uploadNewPlugin(file: File, categoryId: Int, licenseUrl: String, family: ProductFamily): PluginBean {
+    return baseUploadPlugin(file) {
+      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
+    }
+  }
+
+  override fun uploadNewPlugin(
+    file: File,
+    tags: List<String>,
+    licenseUrl: LicenseUrl,
+    family: ProductFamily
+  ): PluginBean {
+    return baseUploadPlugin(file) {
+      if (tags.isEmpty()) {
+        throw IllegalArgumentException("Tags should not be empty")
+      }
+      val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
+      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, license, tags))
+    }
+  }
+
+  private fun baseUploadPlugin(file: File, block: () -> PluginBean): PluginBean {
     if (file.length() > MAX_FILE_SIZE) {
       throw IllegalArgumentException(Messages.getMessage("max.file.size"))
     }
     LOG.info("Uploading new plugin from ${file.absolutePath}")
-    val plugin = uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
+    val plugin = block()
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
     return plugin
   }
+
 
   override fun uploadPlugin(id: PluginId, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginId = id, channel = channel, notes = notes)
   }
 
-  override fun uploadPlugin(xmlId: PluginXmlId, file: File, channel: String?, notes: String?) {
+  override fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String?, notes: String?) {
     uploadPluginInternal(file, pluginXmlId = xmlId, channel = channel, notes = notes)
   }
 
   private fun uploadPluginInternal(
     file: File,
     pluginId: PluginId? = null,
-    pluginXmlId: PluginXmlId? = null,
+    pluginXmlId: StringPluginId? = null,
     channel: String? = null,
     notes: String? = null
   ) {

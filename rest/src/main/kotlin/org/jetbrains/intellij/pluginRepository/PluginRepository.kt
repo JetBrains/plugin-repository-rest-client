@@ -15,7 +15,7 @@ interface PluginManager {
    * Plugin info by [xmlId] & [ProductFamily].
    * @param xmlId id from plugin descriptor file. Example: "org.jetbrains.kotlin"
    */
-  fun getPluginByXmlId(xmlId: PluginXmlId, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
+  fun getPluginByXmlId(xmlId: StringPluginId, family: ProductFamily = ProductFamily.INTELLIJ): PluginBean?
 
   /**
    * Plugin info by [id].
@@ -55,7 +55,7 @@ interface PluginManager {
    * @deprecated use [searchCompatibleUpdates] for getting compatible update IDs and [PluginUpdateManager.getIntellijUpdateMetadata] for getting information
    */
   @Deprecated("Will be removed for performance reasons")
-  fun listPlugins(ideBuild: String, channel: String? = null, pluginId: PluginXmlId? = null): List<PluginXmlBean>
+  fun listPlugins(ideBuild: String, channel: String? = null, pluginId: StringPluginId? = null): List<PluginXmlBean>
 
   /**
    * List of plugins XML IDs compatible with [build].
@@ -75,19 +75,20 @@ interface PluginManager {
    * @param build IDE version. Example: "IC-145.184"
    * @param xmlId plugin XML id. Example: "org.jetbrains.kotlin" for Kotlin plugin.
    */
-  fun getPluginLastCompatibleUpdates(build: String, xmlId: PluginXmlId): List<UpdateBean>
+  fun getPluginLastCompatibleUpdates(build: String, xmlId: StringPluginId): List<UpdateBean>
 
   /**
    * Get All [ProductFamily.INTELLIJ] plugins IDs.
    */
   fun getAllPluginsIds(): List<String>
+
   /**
    * Search last compatible update for each ID` from [xmlIds] or by declared [module]
    * Supported for [ProductFamily.INTELLIJ].
    * @return the list of last compatible updates [UpdateBean] for plugins from [xmlIds].
    */
   fun searchCompatibleUpdates(
-    xmlIds: List<PluginXmlId> = emptyList(),
+    xmlIds: List<StringPluginId> = emptyList(),
     build: String = "",
     channel: String = "",
     module: String = ""
@@ -100,7 +101,11 @@ interface PluginUpdateManager {
    * @param version - version of the plugin.
    * @return the list of updates [PluginUpdateBean]. There could be a several updates for some OLD plugins/updates.
    */
-  fun getUpdatesByVersionAndFamily(xmlId: PluginXmlId, version: String, family: ProductFamily = ProductFamily.INTELLIJ): List<PluginUpdateBean>
+  fun getUpdatesByVersionAndFamily(
+    xmlId: StringPluginId,
+    version: String,
+    family: ProductFamily = ProductFamily.INTELLIJ
+  ): List<PluginUpdateBean>
 
   /**
    * Get plugin update by [id]. To get a lot of plugin updates it is recommended to use [getIntellijUpdateMetadata].
@@ -131,7 +136,7 @@ interface PluginDownloader {
    * @param version version of the plugin. Example: "1.3.61-release-IJ2019.3-1" for Kotlin plugin.
    * @param channel plugin channel. Default value is "stable" plugin channel.
    */
-  fun download(xmlId: PluginXmlId, version: String, targetPath: File, channel: String? = null): File?
+  fun download(xmlId: StringPluginId, version: String, targetPath: File, channel: String? = null): File?
 
   /**
    * Download [ProductFamily.INTELLIJ] plugin by plugin XML id via blockmap.
@@ -140,7 +145,13 @@ interface PluginDownloader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param oldFile prev plugin archive.
    */
-  fun downloadViaBlockMap(xmlId: PluginXmlId, version: String, targetPath: File, oldFile : File, channel: String? = null): File?
+  fun downloadViaBlockMap(
+    xmlId: StringPluginId,
+    version: String,
+    targetPath: File,
+    oldFile: File,
+    channel: String? = null
+  ): File?
 
   /**
    * Download [ProductFamily.INTELLIJ] plugin by update id.
@@ -159,7 +170,12 @@ interface PluginDownloader {
    * @param ideBuild IDE version. Example: "IC-145.184"
    * @param channel plugin channel. Default value is "stable" plugin channel.
    */
-  fun downloadLatestCompatiblePlugin(xmlId: PluginXmlId, ideBuild: String, targetPath: File, channel: String? = null): File?
+  fun downloadLatestCompatiblePlugin(
+    xmlId: StringPluginId,
+    ideBuild: String,
+    targetPath: File,
+    channel: String? = null
+  ): File?
 
   /**
    * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version via blockmap.
@@ -168,7 +184,13 @@ interface PluginDownloader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param oldFile prev plugin archive.
    */
-  fun downloadLatestCompatiblePluginViaBlockMap(xmlId: PluginXmlId, ideBuild: String, targetPath: File, oldFile : File, channel: String? = null): File?
+  fun downloadLatestCompatiblePluginViaBlockMap(
+    xmlId: StringPluginId,
+    ideBuild: String,
+    targetPath: File,
+    oldFile: File,
+    channel: String? = null
+  ): File?
 }
 
 interface PluginUploader {
@@ -189,19 +211,34 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
-  fun uploadPlugin(xmlId: PluginXmlId, file: File, channel: String? = null, notes: String? = null)
+  fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String? = null, notes: String? = null)
 
   /**
    * Upload a new plugin to the JetBrains Marketplace.
    * Make sure you have accepted all agreements on the Marketplace website: https://plugins.jetbrains.com/.
-   * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU].
+   * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.FLEET].
    * @param categoryId tag id. Example: https://plugins.jetbrains.com/idea.
    * @param licenseUrl link to the license.
    */
+  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family)")
   fun uploadNewPlugin(
     file: File,
     categoryId: Int,
     licenseUrl: String,
+    family: ProductFamily = ProductFamily.INTELLIJ
+  ): PluginBean
+
+  /**
+   * Upload a new plugin to the JetBrains Marketplace.
+   * Make sure you have accepted all agreements on the Marketplace website: https://plugins.jetbrains.com/.
+   * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.FLEET].
+   * @param tags - string name of the tag.
+   * @param licenseUrl link to the license.
+   */
+  fun uploadNewPlugin(
+    file: File,
+    tags: List<String>,
+    licenseUrl: LicenseUrl,
     family: ProductFamily = ProductFamily.INTELLIJ
   ): PluginBean
 }

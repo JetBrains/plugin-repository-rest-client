@@ -2,7 +2,7 @@ package org.jetbrains.intellij.pluginRepository.model
 
 data class PluginXmlBean(
   val name: String,
-  val id: PluginXmlId,
+  val id: StringPluginId,
   val version: String,
   val category: String,
   val sinceBuild: String?,

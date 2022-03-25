@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class PluginBean(
   val id: PluginId,
   val name: String,
-  val xmlId: PluginXmlId,
+  val xmlId: StringPluginId,
   val description: String?,
   val preview: String?,
   val docText: String?,
