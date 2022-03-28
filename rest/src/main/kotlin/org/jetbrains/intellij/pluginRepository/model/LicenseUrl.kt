@@ -2,7 +2,7 @@ package org.jetbrains.intellij.pluginRepository.model
 
 class LicenseUrl private constructor(val url: String) {
   companion object {
-    val JETBRAINS_TERM_OF_USE = LicenseUrl("https://jb.gg/legal/docs/toolbox/user.html")
+    val JETBRAINS_TERM_OF_USE = LicenseUrl("https://www.jetbrains.com/legal/docs/toolbox/user.html")
     val APACHE_2_0 = LicenseUrl("https://www.apache.org/licenses/LICENSE-2.0")
     val MIT = LicenseUrl("https://opensource.org/licenses/MIT")
     val GPL = LicenseUrl("https://www.gnu.org/licenses/gpl-3.0.en.html")
