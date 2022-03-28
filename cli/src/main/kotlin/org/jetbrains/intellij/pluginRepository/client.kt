@@ -2,6 +2,7 @@ package org.jetbrains.intellij.pluginRepository
 
 import com.sampullara.cli.Args
 import com.sampullara.cli.Argument
+import org.jetbrains.intellij.pluginRepository.model.LicenseUrl
 import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import java.io.File
 import kotlin.system.exitProcess
@@ -64,8 +65,12 @@ class Client {
         options.host, options.token).uploader
       val pluginId = options.pluginId
       when {
-        pluginId == null -> pluginRepository.uploadNewPlugin(File(options.pluginPath!!), 104,
-          "https://plugins.jetbrains.com/legal/terms-of-use", options.family!!)
+        pluginId == null -> pluginRepository.uploadNewPlugin(
+          File(options.pluginPath!!),
+          listOf("104"),
+          LicenseUrl.JETBRAINS_TERM_OF_USE,
+          options.family!!
+        )
         pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
         else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
       }

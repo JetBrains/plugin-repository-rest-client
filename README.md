@@ -45,7 +45,7 @@ val plugin = instance.pluginManager.getPlugin(pluginId)
 
 ### Client
 
-The `org.jetbrains.intellij.pluginRepository.Client` main class provides command line interface for uploading, downloading and listing plugins on the plugin repository.
+The `org.jetbrains.intellij.pluginRepository.Client` main class provides command line interface for uploading, downloading plugins on the plugin repository.
 
 # Published on Maven Central
 https://search.maven.org/artifact/org.jetbrains.intellij/plugin-repository-rest-client
