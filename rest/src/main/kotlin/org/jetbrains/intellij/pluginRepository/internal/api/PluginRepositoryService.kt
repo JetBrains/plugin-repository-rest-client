@@ -11,21 +11,23 @@ import retrofit2.http.*
 interface PluginRepositoryService {
   @Multipart
   @POST("/plugin/uploadPlugin")
+  @Headers("Accept: text/plain")
   fun upload(
     @Part("pluginId") pluginId: Int,
     @Part("channel") channel: RequestBody?,
     @Part("notes") notes: RequestBody?,
     @Part file: MultipartBody.Part
-  ): Call<PluginUpdateBean>
+  ): Call<ResponseBody>
 
   @Multipart
+  @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
   fun uploadByXmlId(
     @Part("xmlId") pluginXmlId: RequestBody,
     @Part("channel") channel: RequestBody?,
     @Part("notes") notes: RequestBody?,
     @Part file: MultipartBody.Part
-  ): Call<PluginUpdateBean>
+  ): Call<ResponseBody>
 
   @Multipart
   @POST("/api/plugins/{family}/upload")
