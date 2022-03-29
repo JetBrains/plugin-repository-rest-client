@@ -12,6 +12,7 @@ interface PluginRepositoryService {
   @Multipart
   @POST("/plugin/uploadPlugin")
   @Headers("Accept: text/plain")
+  @Deprecated("Use JSON API")
   fun upload(
     @Part("pluginId") pluginId: Int,
     @Part("channel") channel: RequestBody?,
@@ -22,12 +23,31 @@ interface PluginRepositoryService {
   @Multipart
   @Headers("Accept: text/plain")
   @POST("/plugin/uploadPlugin")
+  @Deprecated("Use JSON API")
   fun uploadByXmlId(
     @Part("xmlId") pluginXmlId: RequestBody,
     @Part("channel") channel: RequestBody?,
     @Part("notes") notes: RequestBody?,
     @Part file: MultipartBody.Part
   ): Call<ResponseBody>
+
+  @Multipart
+  @POST("/api/updates/upload")
+  fun uploadById(
+    @Part("pluginId") pluginId: Int,
+    @Part("channel") channel: RequestBody?,
+    @Part("notes") notes: RequestBody?,
+    @Part file: MultipartBody.Part
+  ): Call<PluginUpdateBean>
+
+  @Multipart
+  @POST("/api/updates/upload")
+  fun uploadByStringId(
+    @Part("xmlId") pluginXmlId: RequestBody,
+    @Part("channel") channel: RequestBody?,
+    @Part("notes") notes: RequestBody?,
+    @Part file: MultipartBody.Part
+  ): Call<PluginUpdateBean>
 
   @Multipart
   @POST("/api/plugins/{family}/upload")
@@ -130,6 +150,9 @@ interface PluginRepositoryService {
   fun getPluginVersions(@Path("id") id: Int): Call<List<PluginUpdateVersion>>
 
   @GET("/files/{pluginId}/{updateId}/meta.json")
-  fun getIntelliJUpdateMeta(@Path("pluginId") pluginId: Int, @Path("updateId") updateId: Int): Call<IntellijUpdateMetadata>
+  fun getIntelliJUpdateMeta(
+    @Path("pluginId") pluginId: Int,
+    @Path("updateId") updateId: Int
+  ): Call<IntellijUpdateMetadata>
 
 }

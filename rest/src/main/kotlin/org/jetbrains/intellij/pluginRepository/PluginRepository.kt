@@ -201,7 +201,7 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
-
+  @Deprecated("Use upload(id, file, channel, notes)")
   fun uploadPlugin(id: PluginId, file: File, channel: String? = null, notes: String? = null)
 
   /**
@@ -211,7 +211,26 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
+  @Deprecated("Use upload(id, file, channel, notes)")
   fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String? = null, notes: String? = null)
+
+  /**
+   * Upload plugin by ID into specific channel.
+   * *Important*: plugin notes will be ignored for IDEs based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
+   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
+   * @param channel plugin channel. Default value is "stable" plugin channel.
+   * @param notes plugin update notes.
+   */
+  fun upload(id: PluginId, file: File, channel: String? = null, notes: String? = null): PluginUpdateBean
+
+  /**
+   * Upload plugin by String id into specific channel.
+   * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
+   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
+   * @param channel plugin channel. Default value is "stable" plugin channel.
+   * @param notes plugin update notes.
+   */
+  fun upload(id: StringPluginId, file: File, channel: String? = null, notes: String? = null): PluginUpdateBean
 
   /**
    * Upload a new plugin to the JetBrains Marketplace.

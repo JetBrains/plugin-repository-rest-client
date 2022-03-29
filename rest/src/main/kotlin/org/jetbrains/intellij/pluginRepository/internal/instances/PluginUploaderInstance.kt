@@ -50,41 +50,59 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
 
 
   override fun uploadPlugin(id: PluginId, file: File, channel: String?, notes: String?) {
-    uploadPluginInternal(file, pluginId = id, channel = channel, notes = notes)
+    validateSize(file)
+    uploadOrFail(
+      service.upload(
+        id,
+        channel?.toRequestBody(),
+        notes?.toRequestBody(),
+        file.toMultipartBody(),
+      )
+    )
+    LOG.info("Uploading of plugin is done")
   }
 
   override fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String?, notes: String?) {
-    uploadPluginInternal(file, pluginXmlId = xmlId, channel = channel, notes = notes)
+    validateSize(file)
+    uploadOrFail(
+      service.uploadByXmlId(
+        xmlId.toRequestBody(),
+        channel?.toRequestBody(),
+        notes?.toRequestBody(),
+        file.toMultipartBody(),
+      )
+    )
+    LOG.info("Uploading of plugin is done")
   }
 
-  private fun uploadPluginInternal(
-    file: File,
-    pluginId: PluginId? = null,
-    pluginXmlId: StringPluginId? = null,
-    channel: String? = null,
-    notes: String? = null
-  ) {
-    if (pluginXmlId == null && pluginId == null) {
-      throw IllegalArgumentException(Messages.getMessage("missing.plugins.parameters"))
-    }
+  override fun upload(id: PluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+    validateSize(file)
+    return uploadOrFail(
+      service.uploadById(
+        id,
+        channel?.toRequestBody(),
+        notes?.toRequestBody(),
+        file.toMultipartBody(),
+      )
+    )
+  }
+
+  override fun upload(id: StringPluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+    validateSize(file)
+    return uploadOrFail(
+      service.uploadByStringId(
+        id.toRequestBody(),
+        channel?.toRequestBody(),
+        notes?.toRequestBody(),
+        file.toMultipartBody(),
+      )
+    )
+  }
+
+  private fun validateSize(file: File) {
     if (file.length() > MAX_FILE_SIZE) {
       throw IllegalArgumentException(Messages.getMessage("max.file.size"))
     }
-    val channelAsRequestBody = channel?.toRequestBody()
-    val notesAsRequestBody = notes?.toRequestBody()
-    val multipartFile = file.toMultipartBody()
-    val message = if (pluginXmlId != null) {
-      uploadOrFail(
-        service.uploadByXmlId(pluginXmlId.toRequestBody(), channelAsRequestBody, notesAsRequestBody, multipartFile),
-        pluginXmlId
-      )
-    } else {
-      uploadOrFail(
-        service.upload(pluginId!!, channelAsRequestBody, notesAsRequestBody, multipartFile),
-        pluginId.toString()
-      )
-    }
-    LOG.info("Uploading of plugin is done")
   }
 
 }
