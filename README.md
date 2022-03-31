@@ -22,7 +22,8 @@ The code snippet below will init the instance of the JetBrains Marketplace repos
 
 ```kotlin
 // upload update to existing plugin.
-instance.uploader.uploadPlugin("org.jetbrains.kotlin", file, channel, notes)
+instance.uploader.upload("org.jetbrains.kotlin", file, channel, notes)
+
 // upload new plugin into Marketplace repository.
 instance.uploader.uploadNewPlugin(file, listOf("Inspection"), LicenseUrl.APACHE_2_0)
 ```
