@@ -2,7 +2,6 @@ plugins {
   id "org.jetbrains.kotlin.jvm"
   id "maven-publish"
   id "signing"
-  id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
 }
 
 allprojects {
@@ -56,15 +55,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 artifacts {
   archives sourceJar, fatJar, javadocJar
-}
-
-nexusPublishing {
-  repositories {
-    sonatype {
-      username = findProperty("mavenCentralUsername")
-      password = findProperty("mavenCentralPassword")
-    }
-  }
 }
 
 publishing {
@@ -166,6 +156,18 @@ publishing {
       configurePublication(it, "plugin-repository-rest-client", "Plugin Repository Rest Client", "The client and command line interface for JetBrains Marketplace.")
     }
   }
+
+  repositories {
+    maven {
+      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+
+      credentials {
+        username = findProperty("mavenCentralUsername").toString()
+        password = findProperty("mavenCentralPassword").toString()
+      }
+    }
+  }
+
 }
 
 signing {
