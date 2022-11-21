@@ -146,6 +146,9 @@ interface PluginRepositoryService {
   @GET("/api/updates/{id}")
   fun getUpdateById(@Path("id") id: Int): Call<PluginUpdateBean>
 
+  @DELETE("/api/updates/{id}")
+  fun deleteUpdateById(@Path("id") id: Int): Call<String>
+
   @GET("/api/plugins/{id}/updateVersions")
   fun getPluginVersions(@Path("id") id: Int): Call<List<PluginUpdateVersion>>
 

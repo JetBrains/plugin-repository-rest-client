@@ -127,6 +127,8 @@ interface PluginUpdateManager {
    */
   fun getIntellijUpdateMetadataBatch(updateIds: List<Pair<PluginId, UpdateId>>): Map<UpdateId, IntellijUpdateMetadata>
 
+  fun deleteUpdate(updateId: UpdateId): String?
+
 }
 
 interface PluginDownloader {
