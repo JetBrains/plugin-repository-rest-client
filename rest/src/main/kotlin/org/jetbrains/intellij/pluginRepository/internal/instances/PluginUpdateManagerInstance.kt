@@ -32,7 +32,7 @@ internal class PluginUpdateManagerInstance(private val service: PluginRepository
     return result
   }
 
-  override fun deleteUpdate(updateId: UpdateId): String? {
+  override fun deleteUpdate(updateId: UpdateId): UpdateDeleteBean? {
     return executeAndParseBody(
       service.deleteUpdateById(updateId)
     )

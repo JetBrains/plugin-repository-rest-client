@@ -20,3 +20,6 @@ data class PluginUpdateBean(
   val author: PluginUserBean?,
   val modules: Set<String>?
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class UpdateDeleteBean(val message: String)
