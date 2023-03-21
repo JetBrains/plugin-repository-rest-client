@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.pluginRepository.internal.instances
 
 import org.jetbrains.intellij.pluginRepository.PluginUploader
+import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
@@ -11,8 +12,10 @@ import java.io.File
 import java.net.URL
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
+  companion object {
+    const val MAX_FILE_SIZE = 419430400L // 400MB
+  }
 
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family)")
   override fun uploadNewPlugin(file: File, categoryId: Int, licenseUrl: String, family: ProductFamily): PluginBean {
     return baseUploadPlugin(file) {
       uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
@@ -36,6 +39,9 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
   }
 
   private fun baseUploadPlugin(file: File, block: () -> PluginBean): PluginBean {
+    if (file.length() > MAX_FILE_SIZE) {
+      throw IllegalArgumentException(Messages.getMessage("max.file.size"))
+    }
     LOG.info("Uploading new plugin from ${file.absolutePath}")
     val plugin = block()
     LOG.info("${plugin.name} was successfully uploaded with id ${plugin.id}")
@@ -43,8 +49,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
   }
 
 
-  @Deprecated("Use upload(id, file, channel, notes)")
   override fun uploadPlugin(id: PluginId, file: File, channel: String?, notes: String?) {
+    validateSize(file)
     uploadOrFail(
       service.upload(
         id,
@@ -56,8 +62,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     LOG.info("Uploading of plugin is done")
   }
 
-  @Deprecated("Use upload(id, file, channel, notes)")
   override fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String?, notes: String?) {
+    validateSize(file)
     uploadOrFail(
       service.uploadByXmlId(
         xmlId.toRequestBody(),
@@ -70,6 +76,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
   }
 
   override fun upload(id: PluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+    validateSize(file)
     return uploadOrFail(
       service.uploadById(
         id,
@@ -81,6 +88,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
   }
 
   override fun upload(id: StringPluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+    validateSize(file)
     return uploadOrFail(
       service.uploadByStringId(
         id.toRequestBody(),
@@ -90,4 +98,11 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
       )
     )
   }
+
+  private fun validateSize(file: File) {
+    if (file.length() > MAX_FILE_SIZE) {
+      throw IllegalArgumentException(Messages.getMessage("max.file.size"))
+    }
+  }
+
 }
