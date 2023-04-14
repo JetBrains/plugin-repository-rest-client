@@ -25,7 +25,7 @@ private data class PluginUploadRestError(
 )
 
 private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginName: String? = null): String {
-  val error = errorBody ?: return Messages.getMessage("failed.upload")
+  val error = errorBody ?: return Messages.getMessage("failed.upload", code)
   if (code == HttpURLConnection.HTTP_NOT_FOUND) return Messages.getMessage("not.found", pluginName ?: "plugin")
   val contextType = error.contentType()?.toString()
   return when {
@@ -33,8 +33,8 @@ private fun parseUploadErrorMessage(errorBody: ResponseBody?, code: Int, pluginN
     contextType?.startsWith("application/json") == true -> {
       val restError = jacksonObjectMapper().readValue(error.string(), PluginUploadRestError::class.java)
       @Suppress("DEPRECATION")
-      restError.msg ?: (restError.message ?: Messages.getMessage("failed.upload"))
+      restError.msg ?: (restError.message ?: Messages.getMessage("failed.upload", code))
     }
-    else -> "${Messages.getMessage("failed.upload")} ${error.string()}"
+    else -> "${Messages.getMessage("failed.upload", code)} ${error.string()}"
   }
 }
