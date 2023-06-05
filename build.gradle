@@ -143,13 +143,13 @@ publishing {
 
     mavenJava(MavenPublication) {
       from project(':services:plugin-repository-rest-client:rest').components.java
-      artifact sourceJar {
+      artifact(sourceJar) {
         classifier "sources"
       }
-      artifact fatJar {
+      artifact(fatJar) {
         classifier "all"
       }
-      artifact javadocJar {
+      artifact(javadocJar) {
         classifier "javadoc"
       }
 
