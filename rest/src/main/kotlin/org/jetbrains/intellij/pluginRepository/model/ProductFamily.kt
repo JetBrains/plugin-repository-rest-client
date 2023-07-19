@@ -8,5 +8,6 @@ enum class ProductFamily(@JsonValue val id: String) {
   HUB("hub"),
   EDU("edu"),
   FLEET("fleet"),
+  SPACE("space"),
   DOTNET("dotnet");
 }
