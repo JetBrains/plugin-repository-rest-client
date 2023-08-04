@@ -2,7 +2,7 @@ package org.jetbrains.intellij.pluginRepository.internal.api
 
 import javax.xml.bind.annotation.*
 
-@XmlRootElement
+@XmlRootElement(name = "plugin-repository")
 @XmlAccessorType(XmlAccessType.FIELD)
 data class XmlPluginRepositoryBean(
   @field:XmlElement(name = "category") var categories: List<XmlCategoryBean>? = null
