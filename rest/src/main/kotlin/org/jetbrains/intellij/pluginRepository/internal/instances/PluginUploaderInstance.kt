@@ -14,9 +14,21 @@ import java.net.URL
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
 
   @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family)")
-  override fun uploadNewPlugin(file: File, categoryId: Int, licenseUrl: String, family: ProductFamily): PluginBean {
+  override fun uploadNewPlugin(
+    file: File,
+    categoryId: Int,
+    licenseUrl: String,
+    family: ProductFamily,
+    vendor: String?
+  ): PluginBean {
     return baseUploadPlugin(file) {
-      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, licenseUrl.toRequestBody(), categoryId))
+      uploadOrFail(service.uploadNewPlugin(
+        file = file.toMultipartBody(),
+        family = family.id,
+        licenseUrl = licenseUrl.toRequestBody(),
+        category = categoryId,
+        vendor = vendor
+      ))
     }
   }
 
@@ -24,14 +36,21 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     file: File,
     tags: List<String>,
     licenseUrl: LicenseUrl,
-    family: ProductFamily
+    family: ProductFamily,
+    vendor: String?
   ): PluginBean {
     return baseUploadPlugin(file) {
       require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
       require(licenseUrl.url.isNotEmpty()) { Messages.getMessage("empty.license.url") }
       val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
       val requestTags = tags.map { it.toRequestBody() }
-      uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, license, ArrayList(requestTags)))
+      uploadOrFail(service.uploadNewPlugin(
+        file = file.toMultipartBody(),
+        family = family.id,
+        licenseUrl = license,
+        tags = ArrayList(requestTags),
+        vendor = vendor
+      ))
     }
   }
 

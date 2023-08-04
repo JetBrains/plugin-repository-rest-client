@@ -55,7 +55,8 @@ interface PluginRepositoryService {
     @Part file: MultipartBody.Part,
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: RequestBody,
-    @Part("cid") category: Int
+    @Part("cid") category: Int,
+    @Part("vendor") vendor: String?
   ): Call<PluginBean>
 
   @Multipart
@@ -64,7 +65,8 @@ interface PluginRepositoryService {
     @Part file: MultipartBody.Part,
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: RequestBody,
-    @Part("tags") tags: ArrayList<RequestBody>
+    @Part("tags") tags: ArrayList<RequestBody>,
+    @Part("vendor") vendor: String?
   ): Call<PluginBean>
 
   @Streaming

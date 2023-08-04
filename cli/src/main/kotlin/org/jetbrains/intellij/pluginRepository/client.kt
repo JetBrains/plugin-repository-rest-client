@@ -70,7 +70,8 @@ class Client {
             File(options.pluginPath!!),
             options.tags.toList(),
             LicenseUrl.fromString(options.licenseUrl),
-            options.family!!
+            options.family!!,
+            options.vendor
           )
         }
         pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
@@ -115,6 +116,9 @@ class Client {
 
     @set:Argument(description = "Change notes (may include HTML tags). The argument is ignored when uploading updates for IntelliJ-based IDEs")
     var notes: String? = null
+
+    @set:Argument(description = "Id of vendor under which the new plugin should be loaded")
+    var vendor: String? = null
   }
 
   class DownloadOptions : BaseOptions() {
