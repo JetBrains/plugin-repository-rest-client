@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.pluginRepository.internal.instances
 
 import org.jetbrains.intellij.pluginRepository.PluginUploader
+import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.api.LOG
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.toMultipartBody
@@ -26,9 +27,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     family: ProductFamily
   ): PluginBean {
     return baseUploadPlugin(file) {
-      if (tags.isEmpty()) {
-        throw IllegalArgumentException("Tags should not be empty")
-      }
+      require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
+      require(licenseUrl.url.isNotEmpty()) { Messages.getMessage("empty.license.url") }
       val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
       val requestTags = tags.map { it.toRequestBody() }
       uploadOrFail(service.uploadNewPlugin(file.toMultipartBody(), family.id, license, ArrayList(requestTags)))

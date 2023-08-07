@@ -65,14 +65,16 @@ class Client {
         options.host, options.token).uploader
       val pluginId = options.pluginId
       when {
-        pluginId == null -> pluginRepository.uploadNewPlugin(
-          File(options.pluginPath!!),
-          listOf("104"),
-          LicenseUrl.JETBRAINS_TERM_OF_USE,
-          options.family!!
-        )
-        pluginId.matches(Regex("\\d+")) -> pluginRepository.uploadPlugin(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
-        else -> pluginRepository.uploadPlugin(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
+        pluginId == null -> {
+          pluginRepository.uploadNewPlugin(
+            File(options.pluginPath!!),
+            options.tags.toList(),
+            LicenseUrl.fromString(options.licenseUrl),
+            options.family!!
+          )
+        }
+        pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
+        else -> pluginRepository.upload(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
       }
     }
 
@@ -101,6 +103,12 @@ class Client {
 
     @set:Argument("file", required = true, description = "Path to plugin zip/jar file")
     var pluginPath: String? = null
+
+    @set:Argument("license", description = "Url to plugin license")
+    var licenseUrl: String = ""
+
+    @set:Argument("tags", description = "Tags for the plugin")
+    var tags: Array<String> = emptyArray()
 
     @set:Argument("family", description = "Plugin's family")
     var family: ProductFamily? = ProductFamily.INTELLIJ
