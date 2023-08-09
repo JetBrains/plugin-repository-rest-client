@@ -240,15 +240,15 @@ interface PluginUploader {
    * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.FLEET].
    * @param categoryId tag id. Example: https://plugins.jetbrains.com/idea.
    * @param licenseUrl link to the license.
-   * @param vendor under which the new plugin should be loaded
+   * @param vendor id of the vendor under which the plugin is uploading
    */
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family)")
+  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor)")
   fun uploadNewPlugin(
     file: File,
     categoryId: Int,
     licenseUrl: String,
     family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String? = null
+    vendor: String
   ): PluginBean
 
   /**
@@ -257,13 +257,13 @@ interface PluginUploader {
    * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.FLEET].
    * @param tags - string name of the tag.
    * @param licenseUrl link to the license.
-   * @param vendor under which the new plugin should be loaded
+   * @param vendor id of the vendor under which the plugin is uploading
    */
   fun uploadNewPlugin(
     file: File,
     tags: List<String>,
     licenseUrl: LicenseUrl,
     family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String? = null
+    vendor: String
   ): PluginBean
 }

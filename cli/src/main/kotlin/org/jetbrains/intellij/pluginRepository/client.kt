@@ -66,12 +66,17 @@ class Client {
       val pluginId = options.pluginId
       when {
         pluginId == null -> {
+          val vendor = options.vendor
+          if (vendor == null) {
+            System.err.println("`vendor` must be specified")
+            exitProcess(1)
+          }
           pluginRepository.uploadNewPlugin(
             File(options.pluginPath!!),
             options.tags.toList(),
             LicenseUrl.fromString(options.licenseUrl),
             options.family!!,
-            options.vendor
+            vendor
           )
         }
         pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
@@ -117,7 +122,7 @@ class Client {
     @set:Argument(description = "Change notes (may include HTML tags). The argument is ignored when uploading updates for IntelliJ-based IDEs")
     var notes: String? = null
 
-    @set:Argument(description = "Id of vendor under which the new plugin should be loaded")
+    @set:Argument(description = "Id of vendor under which the new plugin should be uploaded")
     var vendor: String? = null
   }
 

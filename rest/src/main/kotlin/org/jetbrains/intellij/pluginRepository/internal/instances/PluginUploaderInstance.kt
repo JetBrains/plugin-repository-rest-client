@@ -13,13 +13,13 @@ import java.net.URL
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
 
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family)")
+  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor)")
   override fun uploadNewPlugin(
     file: File,
     categoryId: Int,
     licenseUrl: String,
     family: ProductFamily,
-    vendor: String?
+    vendor: String
   ): PluginBean {
     return baseUploadPlugin(file) {
       uploadOrFail(service.uploadNewPlugin(
@@ -37,7 +37,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     tags: List<String>,
     licenseUrl: LicenseUrl,
     family: ProductFamily,
-    vendor: String?
+    vendor: String
   ): PluginBean {
     return baseUploadPlugin(file) {
       require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
