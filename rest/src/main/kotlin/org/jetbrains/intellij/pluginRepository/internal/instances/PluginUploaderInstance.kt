@@ -22,12 +22,13 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     vendor: String
   ): PluginBean {
     return baseUploadPlugin(file) {
+      require(vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
       uploadOrFail(service.uploadNewPlugin(
         file = file.toMultipartBody(),
         family = family.id,
         licenseUrl = licenseUrl.toRequestBody(),
         category = categoryId,
-        vendor = vendor
+        vendor = vendor.toRequestBody()
       ))
     }
   }
@@ -42,6 +43,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     return baseUploadPlugin(file) {
       require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
       require(licenseUrl.url.isNotEmpty()) { Messages.getMessage("empty.license.url") }
+      require(vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
       val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
       val requestTags = tags.map { it.toRequestBody() }
       uploadOrFail(service.uploadNewPlugin(
@@ -49,7 +51,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         family = family.id,
         licenseUrl = license,
         tags = ArrayList(requestTags),
-        vendor = vendor
+        vendor = vendor.toRequestBody()
       ))
     }
   }
