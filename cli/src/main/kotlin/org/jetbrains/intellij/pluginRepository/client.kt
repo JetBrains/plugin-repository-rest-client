@@ -71,7 +71,8 @@ class Client {
             options.tags.toList(),
             LicenseUrl.fromString(options.licenseUrl),
             options.family!!,
-            options.vendor
+            options.vendor,
+            parseChannel(options.channel)
           )
         }
         pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)

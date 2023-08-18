@@ -242,7 +242,7 @@ interface PluginUploader {
    * @param licenseUrl link to the license.
    * @param vendor id of the vendor under which the plugin is uploading
    */
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor)")
+  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor, channel)")
   fun uploadNewPlugin(
     file: File,
     categoryId: Int,
@@ -258,12 +258,14 @@ interface PluginUploader {
    * @param tags - string name of the tag.
    * @param licenseUrl link to the license.
    * @param vendor id of the vendor under which the plugin is uploading
+   * @param channel plugin channel. Default value is "stable" plugin channel
    */
   fun uploadNewPlugin(
     file: File,
     tags: List<String>,
     licenseUrl: LicenseUrl,
     family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String? = null
+    vendor: String? = null,
+    channel: String? = null
   ): PluginBean
 }

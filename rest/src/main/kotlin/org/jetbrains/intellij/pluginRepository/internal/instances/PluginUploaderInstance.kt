@@ -38,9 +38,11 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     tags: List<String>,
     licenseUrl: LicenseUrl,
     family: ProductFamily,
-    vendor: String?
+    vendor: String?,
+    channel: String?
   ): PluginBean {
     return baseUploadPlugin(file) {
+      require(vendor == null || vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
       require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
       require(licenseUrl.url.isNotEmpty()) { Messages.getMessage("empty.license.url") }
       val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
@@ -50,7 +52,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         family = family.id,
         licenseUrl = license,
         tags = ArrayList(requestTags),
-        vendor = vendor?.toRequestBody()
+        vendor = vendor?.toRequestBody(),
+        channel = channel?.toRequestBody()
       ))
     }
   }

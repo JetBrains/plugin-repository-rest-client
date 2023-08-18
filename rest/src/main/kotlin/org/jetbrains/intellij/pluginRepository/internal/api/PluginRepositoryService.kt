@@ -66,7 +66,8 @@ interface PluginRepositoryService {
     @Path("family") family: String,
     @Part("licenseUrl") licenseUrl: RequestBody,
     @Part("tags") tags: ArrayList<RequestBody>,
-    @Part("vendor") vendor: RequestBody?
+    @Part("vendor") vendor: RequestBody?,
+    @Part("channel") channel: RequestBody?
   ): Call<PluginBean>
 
   @Streaming
