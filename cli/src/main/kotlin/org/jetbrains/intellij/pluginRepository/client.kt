@@ -66,17 +66,12 @@ class Client {
       val pluginId = options.pluginId
       when {
         pluginId == null -> {
-          val vendor = options.vendor
-          if (vendor == null) {
-            System.err.println("`vendor` must be specified")
-            exitProcess(1)
-          }
           pluginRepository.uploadNewPlugin(
             File(options.pluginPath!!),
             options.tags.toList(),
             LicenseUrl.fromString(options.licenseUrl),
             options.family!!,
-            vendor
+            options.vendor
           )
         }
         pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)

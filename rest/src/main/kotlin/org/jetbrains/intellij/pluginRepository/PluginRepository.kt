@@ -248,7 +248,7 @@ interface PluginUploader {
     categoryId: Int,
     licenseUrl: String,
     family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String
+    vendor: String? = null
   ): PluginBean
 
   /**
@@ -264,6 +264,6 @@ interface PluginUploader {
     tags: List<String>,
     licenseUrl: LicenseUrl,
     family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String
+    vendor: String? = null
   ): PluginBean
 }
