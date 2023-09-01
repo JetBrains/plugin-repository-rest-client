@@ -45,5 +45,14 @@ data class PluginURLsBean(
   val licenseUrl: String?,
   val bugtrackerUrl: String?,
   val docUrl: String?,
-  val sourceCodeUrl: String?
+  val sourceCodeUrl: String?,
+  val privacyPolicyUrl: String?,
+  val webhelpDocumentationUrl: String?,
+  val videoUrl: String?,
+  val donationLinks: List<DonationInfoBean>?,
+  val customContacts: List<CustomContactBean>?
 )
+
+data class DonationInfoBean(val title: String, val link: String)
+
+data class CustomContactBean(val title: String, val link: String)

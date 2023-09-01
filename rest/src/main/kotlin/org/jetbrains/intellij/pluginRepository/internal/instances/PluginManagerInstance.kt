@@ -3,8 +3,8 @@ package org.jetbrains.intellij.pluginRepository.internal.instances
 import org.jetbrains.intellij.pluginRepository.PluginManager
 import org.jetbrains.intellij.pluginRepository.internal.api.PluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.internal.utils.CompatibleUpdateRequest
-import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.convertCategory
+import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBody
 import org.jetbrains.intellij.pluginRepository.model.*
 
 internal class PluginManagerInstance(private val service: PluginRepositoryService) : PluginManager {
@@ -53,4 +53,7 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
   override fun getPluginXmlIdByDependency(dependency: String, includeOptional: Boolean) =
     executeAndParseBody(service.getPluginXmlIdByDependency(dependency, includeOptional), nullFor404 = true) ?: emptyList()
 
+  override fun setUrls(pluginId: PluginId, urls: PluginUrls) = executeAndParseBody(
+    service.setUrls(pluginId, PluginEditForm(urls))
+  )
 }

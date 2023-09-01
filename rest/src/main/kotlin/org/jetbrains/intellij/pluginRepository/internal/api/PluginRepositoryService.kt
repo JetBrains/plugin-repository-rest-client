@@ -152,6 +152,9 @@ interface PluginRepositoryService {
   @DELETE("/api/updates/{id}")
   fun deleteUpdateById(@Path("id") id: Int): Call<UpdateDeleteBean>
 
+  @PUT("/api/plugins/{id}")
+  fun setUrls(@Path("id") id: Int, @Body form: PluginEditForm): Call<ResponseBody>
+
   @GET("/api/plugins/{id}/updateVersions")
   fun getPluginVersions(@Path("id") id: Int): Call<List<PluginUpdateVersion>>
 

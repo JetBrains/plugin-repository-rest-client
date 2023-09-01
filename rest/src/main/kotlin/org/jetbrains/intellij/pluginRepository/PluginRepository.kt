@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.pluginRepository
 
+import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
 
@@ -94,6 +95,8 @@ interface PluginManager {
     channel: String = "",
     module: String = ""
   ): List<UpdateBean>
+
+  fun setUrls(pluginId: PluginId, urls: PluginUrls): ResponseBody?
 }
 
 interface PluginUpdateManager {
