@@ -8,10 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.jetbrains.intellij.pluginRepository.*
 import org.jetbrains.intellij.pluginRepository.internal.Messages
-import org.jetbrains.intellij.pluginRepository.internal.instances.PluginDownloaderInstance
-import org.jetbrains.intellij.pluginRepository.internal.instances.PluginManagerInstance
-import org.jetbrains.intellij.pluginRepository.internal.instances.PluginUpdateManagerInstance
-import org.jetbrains.intellij.pluginRepository.internal.instances.PluginUploaderInstance
+import org.jetbrains.intellij.pluginRepository.internal.instances.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import retrofit2.Retrofit
@@ -90,6 +87,8 @@ internal class PluginRepositoryInstance<T : PluginRepositoryService>(
   override val pluginManager: PluginManager = PluginManagerInstance(service)
 
   override val pluginUpdateManager: PluginUpdateManager = PluginUpdateManagerInstance(service)
+
+  override val vendorManager: VendorManager = VendorManagerInstance(service)
 
   private fun ensureCredentialsAreSet() {
     if (token == null) throw RuntimeException(Messages.getMessage("missing.token"))

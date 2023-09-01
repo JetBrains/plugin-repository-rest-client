@@ -8,6 +8,7 @@ interface PluginRepository {
   val pluginUpdateManager: PluginUpdateManager
   val downloader: PluginDownloader
   val uploader: PluginUploader
+  val vendorManager: VendorManager
 }
 
 interface PluginManager {
@@ -268,4 +269,8 @@ interface PluginUploader {
     vendor: String? = null,
     channel: String? = null
   ): PluginBean
+}
+
+interface VendorManager {
+  fun getVendorById(vendorId: String): PluginVendorBean?
 }

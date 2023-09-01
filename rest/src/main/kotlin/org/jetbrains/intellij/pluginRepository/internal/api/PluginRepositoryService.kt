@@ -161,4 +161,8 @@ interface PluginRepositoryService {
     @Path("updateId") updateId: Int
   ): Call<IntellijUpdateMetadata>
 
+  @GET("/api/vendors/{name}")
+  fun getVendorByName(
+    @Path("name") name: String
+  ): Call<PluginVendorBean>
 }
