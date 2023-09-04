@@ -54,6 +54,6 @@ internal class PluginManagerInstance(private val service: PluginRepositoryServic
     executeAndParseBody(service.getPluginXmlIdByDependency(dependency, includeOptional), nullFor404 = true) ?: emptyList()
 
   override fun setUrls(pluginId: PluginId, urls: PluginUrls) = executeAndParseBody(
-    service.setUrls(pluginId, PluginEditForm(urls))
+    service.setUrls(pluginId, PluginUrlsForm(urls))
   )
 }

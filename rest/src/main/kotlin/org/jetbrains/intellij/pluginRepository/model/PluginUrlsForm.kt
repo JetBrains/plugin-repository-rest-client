@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.pluginRepository.model
 
-data class PluginEditForm(
+data class PluginUrlsForm(
   val urls: PluginUrls?,
 )
 
