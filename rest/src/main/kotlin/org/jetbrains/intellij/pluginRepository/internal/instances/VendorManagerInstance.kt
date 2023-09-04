@@ -6,4 +6,6 @@ import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBod
 
 class VendorManagerInstance(private val service: PluginRepositoryService): VendorManager {
   override fun getVendorById(vendorId: String) = executeAndParseBody(service.getVendorByName(vendorId))
+
+  override fun getVendorOfCurrentUser() = executeAndParseBody(service.getCurrentUserVendor())
 }

@@ -273,4 +273,5 @@ interface PluginUploader {
 
 interface VendorManager {
   fun getVendorById(vendorId: String): PluginVendorBean?
+  fun getVendorOfCurrentUser(): PluginVendorBean?
 }

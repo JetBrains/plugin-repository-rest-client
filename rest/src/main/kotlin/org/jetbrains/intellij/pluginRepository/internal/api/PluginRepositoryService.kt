@@ -165,4 +165,7 @@ interface PluginRepositoryService {
   fun getVendorByName(
     @Path("name") name: String
   ): Call<PluginVendorBean>
+
+  @GET("/api/users/me/vendor")
+  fun getCurrentUserVendor(): Call<PluginVendorBean>
 }
