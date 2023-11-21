@@ -72,11 +72,12 @@ class Client {
             LicenseUrl.fromString(options.licenseUrl),
             options.family!!,
             options.vendor,
-            parseChannel(options.channel)
+            parseChannel(options.channel),
+            options.isHidden
           )
         }
-        pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes)
-        else -> pluginRepository.upload(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes)
+        pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes, options.isHidden)
+        else -> pluginRepository.upload(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes, options.isHidden)
       }
     }
 
@@ -120,6 +121,9 @@ class Client {
 
     @set:Argument(description = "Id of vendor under which the new plugin should be uploaded")
     var vendor: String? = null
+
+    @set:Argument("isHidden", required = false, description = "Should the new uploading plugin or update be hidden")
+    var isHidden: Boolean = false
   }
 
   class DownloadOptions : BaseOptions() {

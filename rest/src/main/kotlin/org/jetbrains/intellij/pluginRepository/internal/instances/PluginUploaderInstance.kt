@@ -39,7 +39,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     licenseUrl: LicenseUrl,
     family: ProductFamily,
     vendor: String?,
-    channel: String?
+    channel: String?,
+    isHidden: Boolean
   ): PluginBean {
     return baseUploadPlugin(file) {
       require(vendor == null || vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
@@ -53,7 +54,8 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         licenseUrl = license,
         tags = ArrayList(requestTags),
         vendor = vendor?.toRequestBody(),
-        channel = channel?.toRequestBody()
+        channel = channel?.toRequestBody(),
+        isHidden = isHidden
       ))
     }
   }
@@ -92,23 +94,31 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     LOG.info("Uploading of plugin is done")
   }
 
-  override fun upload(id: PluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+  override fun upload(id: PluginId, file: File, channel: String?, notes: String?, isHidden: Boolean): PluginUpdateBean {
     return uploadOrFail(
       service.uploadById(
         id,
         channel?.toRequestBody(),
         notes?.toRequestBody(),
+        isHidden,
         file.toMultipartBody(),
       )
     )
   }
 
-  override fun upload(id: StringPluginId, file: File, channel: String?, notes: String?): PluginUpdateBean {
+  override fun upload(
+    id: StringPluginId,
+    file: File,
+    channel: String?,
+    notes: String?,
+    isHidden: Boolean
+  ): PluginUpdateBean {
     return uploadOrFail(
       service.uploadByStringId(
         id.toRequestBody(),
         channel?.toRequestBody(),
         notes?.toRequestBody(),
+        isHidden,
         file.toMultipartBody(),
       )
     )

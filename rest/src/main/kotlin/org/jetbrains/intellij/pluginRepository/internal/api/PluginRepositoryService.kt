@@ -37,6 +37,7 @@ interface PluginRepositoryService {
     @Part("pluginId") pluginId: Int,
     @Part("channel") channel: RequestBody?,
     @Part("notes") notes: RequestBody?,
+    @Part("isHidden") isHidden: Boolean,
     @Part file: MultipartBody.Part
   ): Call<PluginUpdateBean>
 
@@ -46,6 +47,7 @@ interface PluginRepositoryService {
     @Part("xmlId") pluginXmlId: RequestBody,
     @Part("channel") channel: RequestBody?,
     @Part("notes") notes: RequestBody?,
+    @Part("isHidden") isHidden: Boolean,
     @Part file: MultipartBody.Part
   ): Call<PluginUpdateBean>
 
@@ -67,7 +69,8 @@ interface PluginRepositoryService {
     @Part("licenseUrl") licenseUrl: RequestBody,
     @Part("tags") tags: ArrayList<RequestBody>,
     @Part("vendor") vendor: RequestBody?,
-    @Part("channel") channel: RequestBody?
+    @Part("channel") channel: RequestBody?,
+    @Part("isHidden") isHidden: Boolean
   ): Call<PluginBean>
 
   @Streaming

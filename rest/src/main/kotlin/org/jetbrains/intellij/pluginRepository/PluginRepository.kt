@@ -207,7 +207,7 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
-  @Deprecated("Use upload(id, file, channel, notes)")
+  @Deprecated("Use upload(id, file, channel, notes, isHidden)")
   fun uploadPlugin(id: PluginId, file: File, channel: String? = null, notes: String? = null)
 
   /**
@@ -217,7 +217,7 @@ interface PluginUploader {
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    */
-  @Deprecated("Use upload(id, file, channel, notes)")
+  @Deprecated("Use upload(xmlId, file, channel, notes, isHidden)")
   fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String? = null, notes: String? = null)
 
   /**
@@ -226,8 +226,15 @@ interface PluginUploader {
    * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
+   * @param isHidden should update be hidden. Default value is "false"
    */
-  fun upload(id: PluginId, file: File, channel: String? = null, notes: String? = null): PluginUpdateBean
+  fun upload(
+    id: PluginId,
+    file: File,
+    channel: String? = null,
+    notes: String? = null,
+    isHidden: Boolean = false
+  ): PluginUpdateBean
 
   /**
    * Upload plugin by String id into specific channel.
@@ -235,8 +242,15 @@ interface PluginUploader {
    * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
+   * @param isHidden should update be hidden. Default value is "false"
    */
-  fun upload(id: StringPluginId, file: File, channel: String? = null, notes: String? = null): PluginUpdateBean
+  fun upload(
+    id: StringPluginId,
+    file: File,
+    channel: String? = null,
+    notes: String? = null,
+    isHidden: Boolean = false
+  ): PluginUpdateBean
 
   /**
    * Upload a new plugin to the JetBrains Marketplace.
@@ -263,6 +277,7 @@ interface PluginUploader {
    * @param licenseUrl link to the license.
    * @param vendor id of the vendor under which the plugin is uploading
    * @param channel plugin channel. Default value is "stable" plugin channel
+   * @param isHidden should plugin be hidden. Default value is "false"
    */
   fun uploadNewPlugin(
     file: File,
@@ -270,7 +285,8 @@ interface PluginUploader {
     licenseUrl: LicenseUrl,
     family: ProductFamily = ProductFamily.INTELLIJ,
     vendor: String? = null,
-    channel: String? = null
+    channel: String? = null,
+    isHidden: Boolean = false
   ): PluginBean
 }
 

@@ -21,7 +21,8 @@ data class PluginBean(
   val themes: Set<IntellijThemeBean>?,
   val icon: String?,
   val programmingLanguage: String? = null,
-  val language: String? = null
+  val language: String? = null,
+  val isHidden: Boolean
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

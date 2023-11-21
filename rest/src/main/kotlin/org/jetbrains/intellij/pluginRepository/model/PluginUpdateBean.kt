@@ -18,7 +18,8 @@ data class PluginUpdateBean(
   val pluginId: PluginId,
   val compatibleVersions: Map<ProductEnum?, String>? = null,
   val author: PluginUserBean?,
-  val modules: Set<String>?
+  val modules: Set<String>?,
+  val hidden: Boolean
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
