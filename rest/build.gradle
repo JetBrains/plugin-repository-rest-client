@@ -4,14 +4,12 @@ dependencies {
   }
   implementation("com.squareup.retrofit2:converter-jaxb:2.9.0")
   implementation("com.squareup.retrofit2:converter-jackson:2.9.0")
-  implementation("com.fasterxml.jackson.core:jackson-databind:${rootProject.ext["jacksonDatabindVersion"]}")
+  implementation(libs.jackson.databind)
   implementation("com.squareup.okhttp3:okhttp:4.4.1")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${rootProject.ext["jacksonVersion"]}") {
-    dependencies {
-      implementation("org.jetbrains.kotlin:kotlin-reflect") {
-        because("otherwise `jackson-module-kotlin` would bring kotlin-reflect:1.4.21")
-      }
-    }
+  implementation(libs.jackson.kotlin) {
+    // otherwise `jackson-module-kotlin` would bring kotlin-reflect:1.4.21
+    // TODO: check it, we are using a newer `jackson-module-kotlin` with kotlin-reflect:1.5.32
+    exclude group: "org.jetbrains.kotlin", module: "kotlin-reflect"
   }
   implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
   implementation("com.sun.xml.bind:jaxb-core:2.3.0")
