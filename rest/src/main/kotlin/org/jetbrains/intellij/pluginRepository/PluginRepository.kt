@@ -96,7 +96,7 @@ interface PluginManager {
     module: String = ""
   ): List<UpdateBean>
 
-  fun setUrls(pluginId: PluginId, urls: PluginUrls): ResponseBody?
+  fun setUrls(pluginId: PluginId, urls: PluginUrls)
 }
 
 interface PluginUpdateManager {
