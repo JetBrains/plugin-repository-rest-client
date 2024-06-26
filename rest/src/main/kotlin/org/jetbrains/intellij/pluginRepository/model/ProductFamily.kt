@@ -10,5 +10,6 @@ enum class ProductFamily(@JsonValue val id: String) {
   FLEET("fleet"),
   TOOLBOX("toolbox"),
   SPACE("space"),
-  DOTNET("dotnet");
+  DOTNET("dotnet"),
+  YOUTRACK("youtrack");
 }
