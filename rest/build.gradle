@@ -27,8 +27,8 @@ test {
   def baseUrl = System.getProperty("jetbrains.plugins.baseUrl", "https://plugins.jetbrains.com")
   def testToken = System.getProperty("jetbrains.plugins.testToken", null)
   def parallel = System.getProperty("parallel")?.toBoolean()
-  def downloadPath = "${project.buildDir}/downloads/"
-  mkdir(downloadPath)
+  def downloadDir = project.layout.buildDirectory.dir("downloads")
+  mkdir(downloadDir)
 
   if (parallel) {
     maxParallelForks = Runtime.runtime.availableProcessors()
@@ -36,7 +36,7 @@ test {
   }
 
   systemProperties = [
-    "jetbrains.plugin.download.path"  : downloadPath,
+    "jetbrains.plugin.download.path"  : downloadDir.get().asFile.absolutePath,
     "jetbrains.plugin.repository.host": baseUrl
   ]
   if (testToken != null) systemProperties.put("jetbrains.plugin.repository.token", testToken)
@@ -44,6 +44,6 @@ test {
   finalizedBy "clearDownloadsDir"
 }
 
-task clearDownloadsDir(type: Delete) {
-  delete "${project.buildDir}/downloads"
+tasks.register('clearDownloadsDir', Delete) {
+  delete project.layout.buildDirectory.dir("downloads")
 }
