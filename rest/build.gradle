@@ -15,7 +15,7 @@ dependencies {
   implementation("com.sun.xml.bind:jaxb-core:2.3.0")
   implementation("org.jetbrains.intellij:blockmap:1.0.5")
 
-  testImplementation("junit:junit:4.13.2")
+  testImplementation(libs.junit)
   testImplementation("org.assertj:assertj-core:3.12.2")
 }
 
