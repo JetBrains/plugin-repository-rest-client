@@ -17,7 +17,6 @@ subprojects {
 
   sourceCompatibility = '11'
   dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation(libs.slf4j.old.api)
   }
 }

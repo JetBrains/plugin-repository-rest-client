@@ -122,8 +122,8 @@ private fun downloadFileViaBlockMap(executed: Response<ResponseBody>, targetPath
 private fun downloadPercent(oldBlockMap: BlockMap, newBlockMap: BlockMap): Double {
   val oldSet = oldBlockMap.chunks.toSet()
   val newChunks = newBlockMap.chunks.filter { chunk -> !oldSet.contains(chunk) }
-  return newChunks.sumBy { chunk -> chunk.length }.toDouble() /
-    newBlockMap.chunks.sumBy { chunk -> chunk.length }.toDouble()
+  return newChunks.sumOf { chunk -> chunk.length }.toDouble() /
+    newBlockMap.chunks.sumOf { chunk -> chunk.length }.toDouble()
 }
 
 private fun getBlockMapFromZip(input: InputStream): BlockMap {
