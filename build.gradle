@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   alias(builds.plugins.kotlin.jvm)
   id "maven-publish"
@@ -15,13 +17,24 @@ allprojects {
 subprojects {
   apply plugin: 'kotlin'
 
-  sourceCompatibility = '11'
+  def jdkVersion = JavaVersion.VERSION_11
+  java {
+    sourceCompatibility = jdkVersion
+    targetCompatibility = jdkVersion
+  }
+
+  tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = jdkVersion.toString()
+  }
+
   dependencies {
     implementation(libs.slf4j.old.api)
   }
 }
 
-task fatJar(type: Jar, group: 'build') {
+tasks.register('fatJar', Jar) {
+  group('build')
+
   subprojects {
     dependsOn it.classes
   }
@@ -41,13 +54,15 @@ version = "2.0.$buildNumber"
 
 apply plugin: 'maven-publish'
 
-task sourceJar(type: Jar) {
+tasks.register('sourceJar', Jar) {
   subprojects {
     from it.sourceSets.main.kotlin
   }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+tasks.register('javadocJar', Jar) {
+  dependsOn(javadoc)
+
   subprojects {
     from javadoc.destinationDir
   }
