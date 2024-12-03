@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 
 enum class ProductFamily(@JsonValue val id: String) {
   TEAMCITY("teamcity"),
-  TEAMCITY_ACTIONS("teamcity_actions"),
+  TEAMCITY_RECIPES("teamcity_recipes"),
   INTELLIJ("intellij"),
   HUB("hub"),
   EDU("edu"),
