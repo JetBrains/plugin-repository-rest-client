@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(builds.plugins.kotlin.jvm)
@@ -17,14 +17,17 @@ allprojects {
 subprojects {
   apply plugin: 'kotlin'
 
-  def jdkVersion = JavaVersion.VERSION_11
+  def javaVersion = "11"
   java {
+    def jdkVersion = JavaVersion.toVersion(javaVersion)
     sourceCompatibility = jdkVersion
     targetCompatibility = jdkVersion
   }
 
-  tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.jvmTarget = jdkVersion.toString()
+  kotlin {
+    compilerOptions {
+      jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+    }
   }
 
   dependencies {
