@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  alias(builds.plugins.kotlin.jvm)
-  id "maven-publish"
-  id "signing"
+  id("maven-publish")
+  id("signing")
+  alias(builds.plugins.publish.shadow)
 }
 
 allprojects {
-  apply plugin: 'java'
+  apply(plugin = "java")
 
   repositories {
     mavenCentral()
@@ -15,13 +15,15 @@ allprojects {
 }
 
 subprojects {
-  apply plugin: 'kotlin'
+  apply(plugin = "kotlin")
 
-  def javaVersion = "11"
+  val javaVersion = "11"
   java {
-    def jdkVersion = JavaVersion.toVersion(javaVersion)
+    val jdkVersion = JavaVersion.toVersion(javaVersion)
     sourceCompatibility = jdkVersion
     targetCompatibility = jdkVersion
+    withSourcesJar()
+    withJavadocJar()
   }
 
   kotlin {
@@ -29,64 +31,35 @@ subprojects {
       jvmTarget.set(JvmTarget.fromTarget(javaVersion))
     }
   }
-
-  dependencies {
-    implementation(libs.slf4j.old.api)
-  }
 }
 
-tasks.register('fatJar', Jar) {
-  group('build')
-
-  subprojects {
-    dependsOn it.classes
-  }
-  manifest {
-    attributes 'Main-Class': 'org.jetbrains.intellij.pluginRepository.Client'
-  }
-  subprojects { project ->
-    from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-  }
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-group = 'org.jetbrains.intellij'
-def buildNumber = System.getenv('BUILD_NUMBER') ?: "SNAPSHOT"
+group = "org.jetbrains.intellij"
+val buildNumber = System.getenv("BUILD_NUMBER") ?: "SNAPSHOT"
 version = "2.0.$buildNumber"
 
-apply plugin: 'maven-publish'
-
-tasks.register('sourceJar', Jar) {
-  subprojects {
-    from it.sourceSets.main.kotlin
-  }
+dependencies {
+  implementation(project("cli"))
+  implementation(project("rest"))
 }
 
-tasks.register('javadocJar', Jar) {
-  dependsOn(javadoc)
-
-  subprojects {
-    from javadoc.destinationDir
+tasks {
+  jar {
+    manifest {
+      attributes("Main-Class" to "org.jetbrains.intellij.pluginRepository.Client")
+    }
   }
 }
 
 artifacts {
-  archives sourceJar, fatJar, javadocJar
+  archives(tasks.shadowJar)
 }
 
 publishing {
   publications {
-
-    def configurePublication = { MavenPublication pub, String projectName, String pubName, String pubDesc ->
-      def proj = project(":services:$projectName")
-      pub.groupId proj.group
-      pub.artifactId proj.name
-      pub.version proj.version
-
-      pub.pom {
-        name.set(pubName)
-        description.set(pubDesc)
+    fun MavenPublication.configurePom() {
+      pom {
+        name.set("Plugin Repository Rest Client")
+        description.set("The client and command line interface for JetBrains Marketplace.")
         url.set("https://github.com/JetBrains/plugin-repository-rest-client")
         licenses {
           license {
@@ -127,7 +100,7 @@ publishing {
           }
           developer {
             id.set("kesarevs")
-            name.set("Kesarev Sergey")
+            name.set("Sergei Kesarev")
             organization.set("JetBrains")
           }
           developer {
@@ -159,40 +132,29 @@ publishing {
       }
     }
 
-    mavenJava(MavenPublication) {
-      from project(':services:plugin-repository-rest-client:rest').components.java
-      artifact(sourceJar) {
-        classifier "sources"
-      }
-      artifact(fatJar) {
-        classifier "all"
-      }
-      artifact(javadocJar) {
-        classifier "javadoc"
-      }
+    create<MavenPublication>("plugin-repository-rest-client") {
+      groupId = project.group.toString()
+      artifactId = "plugin-repository-rest-client"
+      version = project.version.toString()
 
-      configurePublication(it, "plugin-repository-rest-client", "Plugin Repository Rest Client", "The client and command line interface for JetBrains Marketplace.")
+      from(project(":services:plugin-repository-rest-client:rest").components["java"])
+
+      artifact(tasks.shadowJar) {
+        classifier = "all"
+      }
+      configurePom()
     }
   }
-
-  repositories {
-    maven {
-      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-
-      credentials {
-        username = findProperty("mavenCentralUsername").toString()
-        password = findProperty("mavenCentralPassword").toString()
-      }
-    }
-  }
-
 }
 
 signing {
-  required { findProperty("mavenCentralUsername") != null }
+  isRequired = buildNumber != "SNAPSHOT"
 
-  if( required ) {
-    useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
-    sign(publishing.publications.mavenJava)
+  val signingKey: String? by project
+  val signingPassword: String? by project
+
+  if(isRequired) {
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["plugin-repository-rest-client"])
   }
 }
