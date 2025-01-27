@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.pluginRepository
 
-import okhttp3.ResponseBody
 import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
 
@@ -171,7 +170,7 @@ interface PluginDownloader {
   fun downloadViaBlockMap(id: UpdateId, targetPath: File, oldFile: File): File?
 
   /**
-   * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
+   * Download the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version.
    * @param xmlId plugin XML id.
    * @param ideBuild IDE version. Example: "IC-145.184"
    * @param channel plugin channel. Default value is "stable" plugin channel.
@@ -184,7 +183,7 @@ interface PluginDownloader {
   ): File?
 
   /**
-   * Download  the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version via blockmap.
+   * Download the latest compatible update for plugin [ProductFamily.INTELLIJ] by IDE Version via blockmap.
    * @param xmlId plugin XML id.
    * @param ideBuild IDE version. Example: "IC-145.184"
    * @param channel plugin channel. Default value is "stable" plugin channel.
@@ -201,27 +200,7 @@ interface PluginDownloader {
 
 interface PluginUploader {
   /**
-   * Upload plugin by ID into specific channel.
-   * *Important*: plugin notes will be ignored for IDEs based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
-   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
-   * @param channel plugin channel. Default value is "stable" plugin channel.
-   * @param notes plugin update notes.
-   */
-  @Deprecated("Use upload(id, file, channel, notes, isHidden)")
-  fun uploadPlugin(id: PluginId, file: File, channel: String? = null, notes: String? = null)
-
-  /**
-   * Upload plugin by XML id into specific channel.
-   * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
-   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
-   * @param channel plugin channel. Default value is "stable" plugin channel.
-   * @param notes plugin update notes.
-   */
-  @Deprecated("Use upload(xmlId, file, channel, notes, isHidden)")
-  fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String? = null, notes: String? = null)
-
-  /**
-   * Upload plugin by ID into specific channel.
+   * Upload plugin update by ID into specific channel.
    * *Important*: plugin notes will be ignored for IDEs based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
    * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
@@ -237,13 +216,14 @@ interface PluginUploader {
   ): PluginUpdateBean
 
   /**
-   * Upload plugin by String id into specific channel.
+   * Upload plugin update by String id into specific channel.
    * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
    * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
    * @param channel plugin channel. Default value is "stable" plugin channel.
    * @param notes plugin update notes.
    * @param isHidden should update be hidden. Default value is "false"
    */
+  @Deprecated("Use uploadUpdateByXmlIdAndFamily(id, file, channel, notes, isHidden, family)")
   fun upload(
     id: StringPluginId,
     file: File,
@@ -253,21 +233,22 @@ interface PluginUploader {
   ): PluginUpdateBean
 
   /**
-   * Upload a new plugin to the JetBrains Marketplace.
-   * Make sure you have accepted all agreements on the Marketplace website: https://plugins.jetbrains.com/.
-   * Supported for [ProductFamily.INTELLIJ], [ProductFamily.EDU], [ProductFamily.FLEET].
-   * @param categoryId tag id. Example: https://plugins.jetbrains.com/idea.
-   * @param licenseUrl link to the license.
-   * @param vendor id of the vendor under which the plugin is uploading
+   * Upload the plugin update using String ID and Family to a specific channel.
+   * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
+   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
+   * @param family plugin family.
+   * @param channel plugin channel. Default value is "stable" plugin channel.
+   * @param notes plugin update notes.
+   * @param isHidden should update be hidden. Default value is "false"
    */
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor, channel)")
-  fun uploadNewPlugin(
+  fun uploadUpdateByXmlIdAndFamily(
+    id: StringPluginId,
+    family: ProductFamily,
     file: File,
-    categoryId: Int,
-    licenseUrl: String,
-    family: ProductFamily = ProductFamily.INTELLIJ,
-    vendor: String? = null
-  ): PluginBean
+    channel: String? = null,
+    notes: String? = null,
+    isHidden: Boolean = false
+  ): PluginUpdateBean
 
   /**
    * Upload a new plugin to the JetBrains Marketplace.

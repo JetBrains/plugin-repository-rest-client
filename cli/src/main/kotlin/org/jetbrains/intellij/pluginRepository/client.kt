@@ -2,8 +2,7 @@ package org.jetbrains.intellij.pluginRepository
 
 import com.sampullara.cli.Args
 import com.sampullara.cli.Argument
-import org.jetbrains.intellij.pluginRepository.model.LicenseUrl
-import org.jetbrains.intellij.pluginRepository.model.ProductFamily
+import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -65,20 +64,74 @@ class Client {
         options.host, options.token).uploader
       val pluginId = options.pluginId
       when {
-        pluginId == null -> {
-          pluginRepository.uploadNewPlugin(
-            File(options.pluginPath!!),
-            options.tags.toList(),
-            LicenseUrl.fromString(options.licenseUrl),
-            options.family!!,
-            options.vendor,
-            parseChannel(options.channel),
-            options.isHidden
+        pluginId == null -> uploadNewPlugin(pluginRepository, options)
+        else -> uploadPluginUpdate(pluginRepository, options)
+      }
+    }
+
+    private fun uploadNewPlugin(uploader: PluginUploader, options: UploadOptions): PluginBean {
+      println("New plugin upload has started.")
+      val family = options.family
+
+      if (family == null) {
+        System.err.print("`family` must be specified for new plugin upload")
+        exitProcess(1)
+      }
+
+      return uploader.uploadNewPlugin(
+        file = File(options.pluginPath!!),
+        tags = options.tags.toList(),
+        licenseUrl = LicenseUrl.fromString(options.licenseUrl),
+        family = family,
+        vendor = options.vendor,
+        channel = parseChannel(options.channel),
+        isHidden = options.isHidden
+      )
+    }
+
+    private fun uploadPluginUpdate(uploader: PluginUploader, options: UploadOptions): PluginUpdateBean {
+      val pluginId = options.pluginId!!
+      val intPluginId = pluginId.toIntOrNull()
+      val family = options.family
+
+      val result = when {
+        intPluginId != null -> {
+          println("Plugin #$intPluginId update upload has started.")
+          uploader.upload(
+            id = intPluginId,
+            file = File(options.pluginPath!!),
+            channel = parseChannel(options.channel),
+            notes = options.notes,
+            isHidden = options.isHidden
           )
         }
-        pluginId.matches(Regex("\\d+")) -> pluginRepository.upload(pluginId.toInt(), File(options.pluginPath!!), parseChannel(options.channel), options.notes, options.isHidden)
-        else -> pluginRepository.upload(pluginId, File(options.pluginPath!!), parseChannel(options.channel), options.notes, options.isHidden)
+        family != null -> {
+          println("$family plugin \"$pluginId\" update upload has started.")
+
+          uploader.uploadUpdateByXmlIdAndFamily(
+            id = pluginId,
+            family = family,
+            file = File(options.pluginPath!!),
+            channel = parseChannel(options.channel),
+            notes = options.notes,
+            isHidden = options.isHidden
+          )
+        }
+        else -> {
+          println("WARN: Uploading updates by string plugin-id without specifying the `family` is deprecated. Please update your configuration.")
+
+          uploader.upload(
+            id = pluginId,
+            file = File(options.pluginPath!!),
+            channel = parseChannel(options.channel),
+            notes = options.notes,
+            isHidden = options.isHidden
+          )
+        }
       }
+
+      println("Plugin update #${result.id} has been successfully uploaded.")
+      return result
     }
 
     private fun info(args: Array<String>) {
@@ -114,7 +167,7 @@ class Client {
     var tags: Array<String> = emptyArray()
 
     @set:Argument("family", description = "Plugin's family")
-    var family: ProductFamily? = ProductFamily.INTELLIJ
+    var family: ProductFamily? = null
 
     @set:Argument(description = "Change notes (may include HTML tags). The argument is ignored when uploading updates for IntelliJ-based IDEs")
     var notes: String? = null

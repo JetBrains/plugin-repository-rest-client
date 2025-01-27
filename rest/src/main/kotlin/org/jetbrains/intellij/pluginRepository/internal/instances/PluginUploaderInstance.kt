@@ -12,27 +12,6 @@ import java.io.File
 import java.net.URL
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
-
-  @Deprecated("Use uploadNewPlugin(file, tags, licenseUrl, family, vendor)")
-  override fun uploadNewPlugin(
-    file: File,
-    categoryId: Int,
-    licenseUrl: String,
-    family: ProductFamily,
-    vendor: String?
-  ): PluginBean {
-    return baseUploadPlugin(file) {
-      require(vendor == null || vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
-      uploadOrFail(service.uploadNewPlugin(
-        file = file.toMultipartBody(),
-        family = family.id,
-        licenseUrl = licenseUrl.toRequestBody(),
-        category = categoryId,
-        vendor = vendor?.toRequestBody()
-      ))
-    }
-  }
-
   override fun uploadNewPlugin(
     file: File,
     tags: List<String>,
@@ -67,33 +46,6 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     return plugin
   }
 
-
-  @Deprecated("Use upload(id, file, channel, notes)")
-  override fun uploadPlugin(id: PluginId, file: File, channel: String?, notes: String?) {
-    uploadOrFail(
-      service.upload(
-        id,
-        channel?.toRequestBody(),
-        notes?.toRequestBody(),
-        file.toMultipartBody(),
-      )
-    )
-    LOG.info("Uploading of plugin is done")
-  }
-
-  @Deprecated("Use upload(id, file, channel, notes)")
-  override fun uploadPlugin(xmlId: StringPluginId, file: File, channel: String?, notes: String?) {
-    uploadOrFail(
-      service.uploadByXmlId(
-        xmlId.toRequestBody(),
-        channel?.toRequestBody(),
-        notes?.toRequestBody(),
-        file.toMultipartBody(),
-      )
-    )
-    LOG.info("Uploading of plugin is done")
-  }
-
   override fun upload(id: PluginId, file: File, channel: String?, notes: String?, isHidden: Boolean): PluginUpdateBean {
     return uploadOrFail(
       service.uploadById(
@@ -106,6 +58,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
     )
   }
 
+  @Deprecated("Use uploadUpdateByXmlIdAndFamily(id, file, channel, notes, isHidden, family)")
   override fun upload(
     id: StringPluginId,
     file: File,
@@ -119,7 +72,27 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         channel?.toRequestBody(),
         notes?.toRequestBody(),
         isHidden,
-        file.toMultipartBody(),
+        file.toMultipartBody()
+      )
+    )
+  }
+
+  override fun uploadUpdateByXmlIdAndFamily(
+    id: StringPluginId,
+    family: ProductFamily,
+    file: File,
+    channel: String?,
+    notes: String?,
+    isHidden: Boolean
+  ): PluginUpdateBean {
+    return uploadOrFail(
+      service.uploadByStringIdAndFamily(
+        id.toRequestBody(),
+        family = family.id.toRequestBody(),
+        channel?.toRequestBody(),
+        notes?.toRequestBody(),
+        isHidden,
+        file.toMultipartBody()
       )
     )
   }
