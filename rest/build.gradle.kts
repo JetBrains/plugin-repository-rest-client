@@ -14,3 +14,13 @@ dependencies {
   testImplementation("org.assertj:assertj-core:3.12.2")
   implementation(libs.slf4j.old.api)
 }
+
+tasks {
+  jar {
+    manifest {
+      attributes("Implementation-Version" to project.version)
+      attributes("Implementation-Vendor" to "JetBrains s.r.o.")
+      attributes("Implementation-Title" to "JetBrains Marketplace Rest Client")
+    }
+  }
+}

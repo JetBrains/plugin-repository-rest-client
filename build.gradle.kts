@@ -6,8 +6,13 @@ plugins {
   alias(builds.plugins.publish.shadow)
 }
 
+val buildNumber = System.getenv("BUILD_NUMBER") ?: "SNAPSHOT"
+
 allprojects {
   apply(plugin = "java")
+
+  group = "org.jetbrains.intellij"
+  version = "2.0.$buildNumber"
 
   repositories {
     mavenCentral()
@@ -33,10 +38,6 @@ subprojects {
   }
 }
 
-group = "org.jetbrains.intellij"
-val buildNumber = System.getenv("BUILD_NUMBER") ?: "SNAPSHOT"
-version = "2.0.$buildNumber"
-
 dependencies {
   implementation(project("cli"))
   implementation(project("rest"))
@@ -46,6 +47,9 @@ tasks {
   jar {
     manifest {
       attributes("Main-Class" to "org.jetbrains.intellij.pluginRepository.Client")
+      attributes("Implementation-Version" to project.version)
+      attributes("Implementation-Vendor" to "JetBrains s.r.o.")
+      attributes("Implementation-Title" to "Plugin Repository Rest Client")
     }
   }
 }

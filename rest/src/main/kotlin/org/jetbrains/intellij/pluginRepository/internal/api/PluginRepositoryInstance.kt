@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import org.jetbrains.intellij.pluginRepository.*
 import org.jetbrains.intellij.pluginRepository.internal.Messages
 import org.jetbrains.intellij.pluginRepository.internal.instances.*
@@ -28,6 +27,9 @@ internal class PluginRepositoryInstance<T : PluginRepositoryService>(
   private val authScheme: String,
   serviceClass: Class<T>,
 ) : PluginRepository {
+  companion object {
+    private val version = PluginRepository::class.java.`package`.implementationVersion ?: "SNAPSHOT"
+  }
 
   private val maxParallelConnection = System.getProperty("MARKETPLACE_MAX_PARALLEL_CONNECTIONS", "16").toInt()
 
@@ -44,15 +46,15 @@ internal class PluginRepositoryInstance<T : PluginRepositoryService>(
     .connectTimeout(5, TimeUnit.MINUTES)
     .readTimeout(5, TimeUnit.MINUTES)
     .writeTimeout(5, TimeUnit.MINUTES)
-    .addInterceptor(object : Interceptor {
-      override fun intercept(chain: Interceptor.Chain): Response {
-        val request = if (token != null) {
-          chain.request().newBuilder().addHeader("Authorization", "$authScheme $token").build()
-        } else {
-          chain.request()
-        }
-        return chain.proceed(request)
+    .addInterceptor(Interceptor { chain ->
+      val requestBuilder = chain
+        .request()
+        .newBuilder()
+        .addHeader("User-Agent", "marketplace-rest-client/$version")
+      if (token != null) {
+        requestBuilder.addHeader("Authorization", "$authScheme $token")
       }
+      chain.proceed(requestBuilder.build())
     })
     .build()
 
