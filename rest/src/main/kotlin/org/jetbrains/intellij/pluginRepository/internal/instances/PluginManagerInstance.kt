@@ -8,12 +8,13 @@ import org.jetbrains.intellij.pluginRepository.internal.utils.executeAndParseBod
 import org.jetbrains.intellij.pluginRepository.model.*
 
 internal class PluginManagerInstance(private val service: PluginRepositoryService) : PluginManager {
-
+  @Deprecated("Will be removed for performance reasons")
   override fun listPlugins(ideBuild: String, channel: String?, pluginId: StringPluginId?): List<PluginXmlBean> {
     val response = executeAndParseBody(service.listPlugins(ideBuild, channel, pluginId), nullFor404 = true)
     return response?.categories?.flatMap { convertCategory(it) } ?: emptyList()
   }
 
+  @Deprecated("Since IDEA 2020.2 is deprecated")
   override fun getCompatiblePluginsXmlIds(build: String, max: Int, offset: Int, query: String): List<String> =
     executeAndParseBody(service.searchPluginsXmlIds(build, max, offset, query)) ?: emptyList()
 

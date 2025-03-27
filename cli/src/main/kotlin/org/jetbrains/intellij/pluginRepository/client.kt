@@ -118,15 +118,7 @@ class Client {
           )
         }
         else -> {
-          println("WARN: Uploading updates by string plugin-id without specifying the `family` is deprecated. Please update your configuration.")
-
-          uploader.upload(
-            id = pluginId,
-            file = File(options.pluginPath!!),
-            channel = parseChannel(options.channel),
-            notes = options.notes,
-            isHidden = options.isHidden
-          )
+          error("Uploading updates by string plugin-id without specifying the `family` is not supported. Please update your configuration.")
         }
       }
 

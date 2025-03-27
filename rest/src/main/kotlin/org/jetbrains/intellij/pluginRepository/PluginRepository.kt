@@ -216,23 +216,6 @@ interface PluginUploader {
   ): PluginUpdateBean
 
   /**
-   * Upload plugin update by String id into specific channel.
-   * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
-   * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml
-   * @param channel plugin channel. Default value is "stable" plugin channel.
-   * @param notes plugin update notes.
-   * @param isHidden should update be hidden. Default value is "false"
-   */
-  @Deprecated("Use uploadUpdateByXmlIdAndFamily(id, file, channel, notes, isHidden, family)")
-  fun upload(
-    id: StringPluginId,
-    file: File,
-    channel: String? = null,
-    notes: String? = null,
-    isHidden: Boolean = false
-  ): PluginUpdateBean
-
-  /**
    * Upload the plugin update using String ID and Family to a specific channel.
    * *Important*: plugin notes will be ignored for ides based on IntelliJ Platform ([ProductFamily.INTELLIJ]).
    * Plugin notes for TeamCity plugins and Hub widgets only. For IDE plugins use <changed-notes> element in plugin.xml

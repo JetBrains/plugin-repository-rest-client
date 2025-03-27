@@ -43,18 +43,6 @@ interface PluginRepositoryService {
 
   @Multipart
   @POST("/api/updates/upload")
-  @Deprecated("Use uploadByStringIdAndFamily(pluginXmlId, family, channel, notes, isHidden, file)")
-  fun uploadByStringId(
-    @Part("xmlId") pluginXmlId: RequestBody,
-    @Part("channel") channel: RequestBody?,
-    @Part("notes") notes: RequestBody?,
-    @Part("isHidden") isHidden: Boolean,
-    @Part file: MultipartBody.Part
-  ): Call<PluginUpdateBean>
-
-
-  @Multipart
-  @POST("/api/updates/upload")
   fun uploadByStringIdAndFamily(
     @Part("xmlId") pluginXmlId: RequestBody,
     @Part("family") family: RequestBody,

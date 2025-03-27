@@ -9,7 +9,7 @@ import org.jetbrains.intellij.pluginRepository.internal.utils.toRequestBody
 import org.jetbrains.intellij.pluginRepository.internal.utils.uploadOrFail
 import org.jetbrains.intellij.pluginRepository.model.*
 import java.io.File
-import java.net.URL
+import java.net.URI
 
 internal class PluginUploaderInstance(private val service: PluginRepositoryService) : PluginUploader {
   override fun uploadNewPlugin(
@@ -25,7 +25,7 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
       require(vendor == null || vendor.isNotBlank()) { Messages.getMessage("empty.vendor") }
       require(tags.isNotEmpty()) { Messages.getMessage("empty.tags") }
       require(licenseUrl.url.isNotEmpty()) { Messages.getMessage("empty.license.url") }
-      val license = URL(licenseUrl.url).toExternalForm().toRequestBody()
+      val license = URI.create(licenseUrl.url).toURL().toExternalForm().toRequestBody()
       val requestTags = tags.map { it.toRequestBody() }
       uploadOrFail(service.uploadNewPlugin(
         file = file.toMultipartBody(),
@@ -54,25 +54,6 @@ internal class PluginUploaderInstance(private val service: PluginRepositoryServi
         notes?.toRequestBody(),
         isHidden,
         file.toMultipartBody(),
-      )
-    )
-  }
-
-  @Deprecated("Use uploadUpdateByXmlIdAndFamily(id, file, channel, notes, isHidden, family)")
-  override fun upload(
-    id: StringPluginId,
-    file: File,
-    channel: String?,
-    notes: String?,
-    isHidden: Boolean
-  ): PluginUpdateBean {
-    return uploadOrFail(
-      service.uploadByStringId(
-        id.toRequestBody(),
-        channel?.toRequestBody(),
-        notes?.toRequestBody(),
-        isHidden,
-        file.toMultipartBody()
       )
     )
   }
