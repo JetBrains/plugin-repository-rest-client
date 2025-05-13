@@ -40,7 +40,15 @@ data class XmlPluginBean(
 
   @param:XmlElement(name = "depends", required = false)
   @field:XmlElement(name = "depends", required = false)
-  val depends: List<String>? = null
+  val depends: List<String>? = null,
+
+  @param:XmlElement(name = "productCode")
+  @field:XmlElement
+  val productCode: String? = null,
+
+  @param:XmlElement(name = "tags")
+  @field:XmlElement
+  val tags: List<String>? = null,
 )
 
 @XmlRootElement

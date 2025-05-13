@@ -18,5 +18,7 @@ private fun convertPlugin(response: XmlPluginBean, category: String) = PluginXml
   sinceBuild = response.ideaVersion?.sinceBuild,
   untilBuild = response.ideaVersion?.untilBuild,
   vendor = response.vendor,
-  depends = response.depends ?: emptyList()
+  depends = response.depends ?: emptyList(),
+  productCode = response.productCode,
+  tags = response.tags
 )

@@ -8,5 +8,7 @@ data class PluginXmlBean(
   val sinceBuild: String?,
   val untilBuild: String?,
   val vendor: String?,
-  val depends: List<String>
+  val depends: List<String>,
+  val productCode: String?,
+  val tags: List<String>?
 )
